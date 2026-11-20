@@ -1,0 +1,33 @@
+# Segredos — nunca versionar
+.env
+.env.*
+!.env.example
+
+# Node / Vite
+node_modules/
+dist/
+dist-ssr/
+coverage/
+*.tsbuildinfo
+*.local
+npm-debug.*
+
+# Supabase local (fase 5)
+supabase/.branches/
+supabase/.temp/
+
+# Cloudflare (wrangler)
+.wrangler/
+
+# Sistema / editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Claude Code e Maestri — configuração local
+.claude/settings.local.json
+.maestri/
+
+# Documento de origem do dono (o conteúdo está em docs/SPEC.md e docs/EQUIPE.md)
+glifora-prompt-maestri.md
