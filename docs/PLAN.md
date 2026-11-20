@@ -12,6 +12,8 @@ IDs: `W<fase>-<nº>` (W de web), para não confundir com as tarefas `F…` da ve
 
 Portão da fase: no celular do dono (Android + Chrome), o site publicado pelo GitHub Actions abre, instala na tela inicial e funciona em modo avião depois da primeira visita. O DevTools mostra a CSP do `public/_headers`. O dono troca o idioma, cria o perfil, vê a vila com a padaria, e exporta e importa o perfil.
 
+**Estado do portão (2026-11-20):** W1-01 a W1-14 aprovadas e no ar. Falta só o teste do dono no celular, com o roteiro [docs/roteiros/fase-1-celular.md](roteiros/fase-1-celular.md). O que ficou aceito para depois está na D-46.
+
 Ordem: W1-01 → (W1-02, W1-03, W1-05 em paralelo) → (W1-04, W1-06) → W1-07 → (W1-08, W1-09) → W1-13 → (W1-10, W1-11) → W1-12 → W1-14. Detalhes de cada tarefa: [W0-03 §8] e as seções citadas.
 
 O deploy (W1-13) foi adiantado em 2026-11-20. O Cloudflare e o ambiente `production` do GitHub já estão prontos. Assim, os cabeçalhos são conferidos no Cloudflare de verdade, e o dono testa no celular mais cedo.
@@ -31,7 +33,7 @@ O deploy (W1-13) foi adiantado em 2026-11-20. O Cloudflare e o ambiente `product
 | W1-11 | App | **Mapa da vila com 1 local.** DOM + CSS, arte CC0 provisória com `public/assets/CREDITS.md`, `image-rendering: pixelated`; a padaria é um botão com rótulo; barra de XP (nível 1) de enfeite; `/place/bakery` mostra a Tilda e "missões em breve" | Bonito e legível no celular do dono; o leitor de tela anuncia o local; nenhuma imagem de fora | e2e: tocar no local abre a tela | aprovada |
 | W1-12 | App | **PWA.** Manifesto, ícones, `vite-plugin-pwa` (`generateSW`, `injectRegister: false`), `sw-register.ts` com a política `glifora-sw`, aviso de versão nova, `Cache-Control` no `_headers` | Instala na tela inicial do Android; abre em modo avião depois da primeira visita; nenhuma violação de CSP ao registrar | e2e: recarregar offline; registro sem violação (resolve o "provar no teste" do Trusted Types) | aprovada |
 | W1-13 | App | **Deploy.** Job `deploy` (wrangler, ambiente `production`), `version.json` com o commit, conferência dos cabeçalhos na URL real. **Depende do dono:** repositório público no GitHub, conta no Cloudflare, projeto Direct Upload e token (D-39) | Push na `main` publica sozinho; a URL abre no celular; o DevTools mostra a CSP do arquivo | A conferência pós-deploy | aprovada |
-| W1-14 | Revisor | **Revisão da fase.** Acessibilidade em todas as rotas (axe), segurança contra [W0-03 §1.2 C], princípios da SPEC, README "como rodar", roteiro de teste no celular para o dono | Lista de problemas zerada ou aceita pelo Arquiteto | `tests/a11y/` e o roteiro manual | a fazer |
+| W1-14 | Revisor | **Revisão da fase.** Acessibilidade em todas as rotas (axe), segurança contra [W0-03 §1.2 C], princípios da SPEC, README "como rodar", roteiro de teste no celular para o dono | Lista de problemas zerada ou aceita pelo Arquiteto | `tests/a11y/` e o roteiro manual | aprovada |
 
 ### Notas de passagem
 
@@ -117,6 +119,10 @@ O deploy (W1-13) foi adiantado em 2026-11-20. O Cloudflare e o ambiente `product
 - A saída sugerida (`vite-plugin-pwa` 1.1.0 com `--force`) é um rebaixamento que quebra o Vite 8.
 - O Dependabot traz a correção quando o Workbox atualizar.
 - **Também aceito:** o recarregar pelo `controllerchange` (observação do Revisor). Hoje só acontece ao abrir ou pelo botão. O teste automático do fluxo de atualização com 2 builds fica para a fase 2.
+
+**Licença no app (D-45, App):** `package.json` com `AGPL-3.0-only`; `CREDITS.md` diz que a arte própria e os ícones ficam sob a AGPL-3.0 do repositório. `/about` ganhou a seção "Licenças" (código AGPL-3.0, conteúdo CC BY-SA 4.0, "Glifora" não licenciado) e o link "Código-fonte no GitHub" (`<a href rel="noopener noreferrer">` para https://github.com/BSY-Development/glifora, constante em `About.tsx`), nos dois idiomas. O teste de build do Revisor precisa listar essa URL exata em `KNOWN_URLS`.
+
+**Correções da W1-14 (App):** Home e Welcome mostram o título (h1) mesmo carregando, então o foco vai para ele ao voltar para a vila (TalkBack anuncia a tela). `ci.yml` roda `REQUIRE_DIST=1 npx vitest run tests/security` (pasta inteira). Observações para o Arquiteto: o manifesto tem `description`/`lang` fixos em pt-BR (vite.config.ts); o Cloudflare acrescenta `Access-Control-Allow-Origin: *`, `Report-To` e `NEL` fora do `_headers`.
 
 **Nada de IA, key, Supabase ou voz na fase 1.** O `connect-src` fica só `'self'`, e isso é testado.
 

@@ -21,6 +21,7 @@ Status: `aceita` · `provisória` · `proposta` · `ajustada por D-xx` · `subst
 | D-43 | Missão v1, comparação tolerante, fecho por palavras-alvo e níveis de domínio na fase 2 | aceita (dono) |
 | D-44 | Aparelho-alvo: Android + Chrome | aceita (dono) |
 | D-45 | Licenças: código AGPL-3.0, conteúdo CC BY-SA 4.0 (substitui a MIT) | aceita (dono) |
+| D-46 | Fechamento da fase 1: cabeçalhos que o Cloudflare acrescenta, manifesto em pt-BR e pendências aceitas | aceita (Arquiteto) |
 
 ---
 
@@ -137,3 +138,17 @@ Status: `aceita` · `provisória` · `proposta` · `ajustada por D-xx` · `subst
   - **GPL-3.0:** não alcança quem só hospeda o site;
   - **PolyForm Noncommercial e similares:** deixariam de ser open source;
   - **MIT:** não atende ao objetivo.
+
+### D-46 — Fechamento da fase 1: o que fica aceito (2026-11-20) · aceita (Arquiteto)
+- **Cabeçalhos do Cloudflare** que não estão no `_headers`: `Report-To`/`NEL` e `Access-Control-Allow-Origin: *`. Achado da W1-14.
+  - **`Report-To`/`NEL`:** o navegador manda ao Cloudflare só relatórios de **falha** de rede (`success_fraction` 0). Não é analytics do jogo e não leva dado do jogo. O Cloudflare já vê IP e pedidos por ser a hospedagem.
+  - **`Access-Control-Allow-Origin: *`:** só deixa outro site ler arquivos que já são públicos, sem cookie nem credencial.
+  - **Decisão:** aceitar e explicar no `SECURITY.md` ("Privacidade e hospedagem").
+  - **Na fase 2:** tentar tirar os dois com a sintaxe `! Cabeçalho` do `_headers` e conferir no `verify-deploy`. Se o Cloudflare não deixar, o caminho é um domínio próprio, com o NEL desligado na zona.
+- **Manifesto:** `lang` e `description` ficam fixos em pt-BR. O manifesto é um só para os dois idiomas. Rever quando houver público em inglês.
+- **`npm audit`:** os 4 alertas moderados (`glob`/`minimatch` via `workbox-build`) ficam aceitos. Só rodam no build, e `--omit=dev` dá 0. O README avisa para não usar `audit fix --force`.
+- **Para a fase 2:**
+  - o teste automático da atualização do service worker com 2 builds;
+  - o aviso de iPhone da D-44 (instalar e exportar);
+  - `navigator.storage.persist()` depois da primeira missão.
+- **Configurações da fase 1 que não dá para testar no código:** token só de Pages, ambiente `production` só para a `main`, sem integração Git no Cloudflare. O dono configurou em 2026-11-20, e o Arquiteto conferiu o ambiente pela API do GitHub.

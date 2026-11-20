@@ -22,7 +22,14 @@ export function Welcome() {
   const [failed, setFailed] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  if (profile === undefined) return <Loading />;
+  if (profile === undefined) {
+    return (
+      <>
+        <PageTitle>{t("welcome.title")}</PageTitle>
+        <Loading />
+      </>
+    );
+  }
   if (profile !== null) return <Navigate to="/" replace />; // já concluiu: nunca mais
 
   async function onSubmit(event: FormEvent) {

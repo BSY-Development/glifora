@@ -22,6 +22,8 @@ const KNOWN_URLS = [
   /^http:\/\/bit\.ly\/2kdckMn$/, // dexie: texto de erro
   /^https:\/\/bit\.ly\/wb-precache$/, // workbox (embutido no sw.js): texto de aviso
   /^http:\/\/localhost$/, // react-router: base para new URL() ao resolver caminhos
+  // W1-14 (D-45): link "Código-fonte" de /about (AGPL-3.0 §13). <a href> que a pessoa toca (navegação, não fetch); constante no código.
+  /^https:\/\/github\.com\/BSY-Development\/glifora$/,
 ];
 
 function walk(dir: string): string[] {

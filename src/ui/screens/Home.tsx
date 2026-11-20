@@ -17,7 +17,15 @@ export function Home() {
   const profile = useLiveQuery(() => loadProfile());
   const avatar = useLiveQuery(() => loadAvatar()) ?? DEFAULT_AVATAR;
 
-  if (profile === undefined) return <Loading />;
+  // Mesmo enquanto o perfil carrega, o título já existe: o Layout põe o foco nele ao trocar de rota.
+  if (profile === undefined) {
+    return (
+      <>
+        <PageTitle>{t("home.title")}</PageTitle>
+        <Loading />
+      </>
+    );
+  }
   if (profile === null) return <Navigate to="/welcome" replace />;
 
   const greeting = profile.nickname === "" ? t("home.greeting_anon") : t("home.greeting", { name: profile.nickname });

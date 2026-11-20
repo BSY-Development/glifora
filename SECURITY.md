@@ -1,6 +1,12 @@
 # Segurança do Glifora
 
-> **Estado: em construção (fase 1).** Este arquivo descreve o desenho aprovado (D-41), não o que já está no ar. A CSP e os outros cabeçalhos entram na W1-03; o CI, o Dependabot e as Actions fixadas por SHA na W1-02; o service worker e o `version.json` na W1-12 e na W1-13; a key só existe a partir da fase 6. Esta nota sai quando a fase 1 fechar, e cada item passa a valer quando a tarefa dele for aprovada.
+> **Estado (fase 1 concluída):** já estão no ar:
+> - a CSP e os outros cabeçalhos (conferidos na URL real a cada deploy);
+> - o CI com Actions fixadas por SHA e o Dependabot;
+> - o service worker sem acesso a outra origem;
+> - o `version.json` com o commit publicado.
+>
+> A key **ainda não existe**: a seção sobre ela descreve o desenho aprovado (D-41) para a fase 6.
 
 ## Como reportar uma vulnerabilidade
 
@@ -16,6 +22,15 @@ O modo completo (fase 6) usa a sua própria key (BYOK). O desenho é este:
 - O site publica uma Content-Security-Policy restritiva (sem scripts de terceiros, sem `eval`, conexões só para os provedores suportados e para o Supabase). Confira no DevTools → Network → cabeçalhos da página.
 
 **Use uma key só para o Glifora, com limite de gasto.** É a proteção que funciona mesmo quando o resto falha.
+
+## Privacidade e hospedagem
+
+- **O jogo não manda nada para fora.** Perfil, progresso e preferências ficam no seu navegador (IndexedDB e `localStorage`). Só saem quando você exporta o arquivo. Não há analytics, anúncio nem rastreador. Os testes conferem que o app não faz pedido para outro site.
+- **O Cloudflare hospeda o site.** Como qualquer hospedagem, ele recebe o seu IP e os pedidos dos arquivos do site.
+- **Cabeçalhos que o Cloudflare acrescenta:**
+  - `Report-To` e `NEL`: o navegador pode avisar o Cloudflare quando **falha** ao carregar um arquivo do site (`success_fraction` 0, ou seja, só falhas);
+  - `Access-Control-Allow-Origin: *`: os arquivos do site, que já são públicos, podem ser lidos por outros sites.
+  - Nenhum dos dois leva dado do jogo (D-46).
 
 ## O que a CSP protege e o que não protege
 

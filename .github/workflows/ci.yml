@@ -35,7 +35,7 @@ jobs:
       - run: npm test
       - run: npm run build
       # Com dist/ pronto, a varredura do build é obrigatória (sem dist/ ela falharia em vez de pular).
-      - run: REQUIRE_DIST=1 npx vitest run tests/security/csp-build.test.ts
+      - run: REQUIRE_DIST=1 npx vitest run tests/security
       # O deploy publica exatamente este dist/ (já testado acima). Só na main; PR não precisa.
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}

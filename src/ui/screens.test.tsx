@@ -45,13 +45,13 @@ describe("primeira visita", () => {
     await screen.findByRole("heading", { level: 1, name: t("welcome.title") });
     expect(router.state.location.pathname).toBe("/welcome");
 
-    fireEvent.change(screen.getByLabelText(t("welcome.nickname")), { target: { value: "  Bia  " } });
+    fireEvent.change(await screen.findByLabelText(t("welcome.nickname")), { target: { value: "  Bia  " } });
     fireEvent.click(screen.getByRole("button", { name: t("welcome.start") }));
 
     await screen.findByRole("heading", { level: 1, name: t("home.title") });
     expect(router.state.location.pathname).toBe("/");
     expect((await profileRepo.get(db))?.nickname).toBe("Bia");
-    expect(screen.getByText(t("home.greeting", { name: "Bia" }))).toBeTruthy();
+    expect(await screen.findByText(t("home.greeting", { name: "Bia" }))).toBeTruthy();
 
     await router.navigate("/welcome");
     await waitFor(() => expect(router.state.location.pathname).toBe("/"));
@@ -63,7 +63,7 @@ describe("primeira visita", () => {
     fireEvent.click(await screen.findByRole("button", { name: t("welcome.start") }));
     await screen.findByRole("heading", { level: 1, name: t("home.title") });
     expect((await profileRepo.get(db))?.nickname).toBe("");
-    expect(screen.getByText(t("home.greeting_anon"))).toBeTruthy();
+    expect(await screen.findByText(t("home.greeting_anon"))).toBeTruthy();
   });
 
   it("apelido com HTML ou grande demais é recusado e nada é gravado", async () => {
@@ -82,7 +82,7 @@ describe("primeira visita", () => {
   it("trocar o idioma na primeira tela muda o texto na hora", async () => {
     renderAt("/welcome");
     await screen.findByRole("heading", { level: 1, name: "Welcome to Glifora" });
-    fireEvent.click(screen.getByRole("radio", { name: "Português (Brasil)" }));
+    fireEvent.click(await screen.findByRole("radio", { name: "Português (Brasil)" }));
     expect(await screen.findByRole("heading", { level: 1, name: "Boas-vindas ao Glifora" })).toBeTruthy();
   });
 });

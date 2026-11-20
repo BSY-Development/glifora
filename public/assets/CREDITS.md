@@ -1,9 +1,9 @@
 # Créditos da arte
 
-Todas as imagens do Glifora (avatares, Tilda, padaria, cena da vila) são **originais do projeto**, desenhadas em código (`src/ui/art/`) como SVG pixel art, sob a licença MIT do repositório.
+Todas as imagens do Glifora (avatares, Tilda, padaria, cena da vila) são **originais do projeto**, desenhadas em código (`src/ui/art/`) como SVG pixel art, sob a GNU AGPL-3.0 do repositório (D-45).
 
 Nenhum recurso de terceiros foi usado. Se algum entrar, registre aqui: URL, autor e licença (somente CC0 ou equivalente).
 
 ## Ícones do app (`public/icons/`)
 
-O "G" pixel art dos ícones 192, 512, maskable e apple-touch é original do projeto, gerado por `scripts/assets/make-icons.ts` (só Node, sem biblioteca de imagem). Para refazer: `node scripts/assets/make-icons.ts`.
+O "G" pixel art dos ícones 192, 512, maskable e apple-touch é original do projeto, também sob a GNU AGPL-3.0 do repositório, gerado por `scripts/assets/make-icons.ts` (só Node, sem biblioteca de imagem). Para refazer: `node scripts/assets/make-icons.ts`.
