@@ -1,0 +1,58 @@
+# CI do Glifora (W1-02; W0-03 §7). Job `check`: instalar, tipos, lint, testes, build.
+# Job `e2e`: testes do Revisor (W1-04) no Chromium, contra o `vite preview`. O `deploy` entra com a W1-13.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Mínimo possível. Nunca `pull_request_target`: PR de fork roda sem segredo.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      # Com dist/ pronto, a varredura do build é obrigatória (sem dist/ ela falharia em vez de pular).
+      - run: REQUIRE_DIST=1 npx vitest run tests/security/csp-build.test.ts
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      # O webServer do playwright.config.ts faz o build e sobe o `vite preview` (com a CSP do _headers) na porta 4173.
+      - run: npx playwright test
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

@@ -1,5 +1,8 @@
 {
   "app.name": "Glifora",
   "app.tagline": "Learn languages by talking with the villagers.",
-  "app.under_construction": "Under construction: phase 1."
+  "app.under_construction": "Under construction: phase 1.",
+  "lang.label": "Interface language",
+  "lang.name.pt-BR": "Português (Brasil)",
+  "lang.name.en": "English"
 }

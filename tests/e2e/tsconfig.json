@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.tests.json",
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "types": ["node"]
+  },
+  "include": ["./**/*.ts", "../a11y/**/*.ts", "../../playwright.config.ts", "../../config/headers.ts"],
+  "exclude": []
+}

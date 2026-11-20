@@ -1,5 +1,8 @@
 {
   "app.name": "Glifora",
   "app.tagline": "Aprenda idiomas conversando com os moradores da vila.",
-  "app.under_construction": "Em construção: fase 1."
+  "app.under_construction": "Em construção: fase 1.",
+  "lang.label": "Idioma da interface",
+  "lang.name.pt-BR": "Português (Brasil)",
+  "lang.name.en": "English"
 }

@@ -34,3 +34,8 @@ glifora-prompt-maestri.md
 
 # Índice de conteúdo gerado no build (fase 2)
 src/catalog/generated/
+
+# Playwright (relatórios locais)
+test-results/
+playwright-report/
+blob-report/

@@ -1,12 +1,19 @@
-// Tela provisória do esqueleto (W1-01). O i18n de verdade (t(), detecção, seletor) é a W1-05 do App.
-import strings from "../../i18n/pt-BR.json";
+// Tela provisória do esqueleto (W1-01), já com i18n (W1-05). As telas de verdade chegam nas próximas tarefas.
+import { LanguageSelector } from "./LanguageSelector";
+import { useT } from "./useT";
 
 export function App() {
+  const t = useT();
   return (
-    <main>
-      <h1>{strings["app.name"]}</h1>
-      <p>{strings["app.tagline"]}</p>
-      <p>{strings["app.under_construction"]}</p>
-    </main>
+    <>
+      <main>
+        <h1>{t("app.name")}</h1>
+        <p>{t("app.tagline")}</p>
+        <p>{t("app.under_construction")}</p>
+      </main>
+      <footer>
+        <LanguageSelector />
+      </footer>
+    </>
   );
 }

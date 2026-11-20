@@ -36,6 +36,7 @@ Status: `aceita` · `provisória` · `proposta` · `ajustada por D-xx` · `subst
 - **Repositório público:** histórico novo, começando no primeiro commit da versão web. Os documentos da versão comercial não entram.
 - **glifora-dev (feito em 2026-11-20):** o secret `ANTHROPIC_API_KEY` foi removido e as 6 Edge Functions foram apagadas (`health`, `account-delete`, `age-submit` e as 3 de conversa). O banco (migrations 0001–0005 e o job do pg_cron) fica parado até a fase 5, quando é recriado do zero com o modelo novo.
 - **EAS:** o projeto no expo.dev fica sem uso. O dono pode apagá-lo quando quiser.
+- **Publicado em 2026-11-20:** <https://github.com/BSY-Development/glifora>. Os commits usam o e-mail noreply do GitHub (configurado só neste repositório), a pedido do dono, para não expor o e-mail pessoal. O push de cada tarefa aprovada é do Arquiteto.
 
 ### D-39 — Hospedagem no Cloudflare Pages (2026-11-20) · aceita (dono)
 - **Como:** site estático no Cloudflare Pages, com deploy só por GitHub Actions a partir do repositório público. A CSP e os outros cabeçalhos de segurança vão num arquivo `_headers`, como cabeçalho HTTP de verdade, verificável no DevTools.

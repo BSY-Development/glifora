@@ -182,7 +182,7 @@ export default defineConfig(
   },
   // Testes, configs e scripts rodam no Node.
   {
-    files: [...TESTS, "tests/**/*.ts", "scripts/**/*.ts", "*.config.{js,ts}"],
+    files: [...TESTS, "tests/**/*.ts", "scripts/**/*.ts", "config/**/*.ts", "*.config.{js,ts}"],
     languageOptions: { globals: globals.node },
   },
 );
