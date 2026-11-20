@@ -20,12 +20,13 @@ Status: `aceita` · `provisória` · `proposta` · `ajustada por D-xx` · `subst
 | D-42 | Pontos que ficam para depois: licenças, modelos recomendados, OAuth do OpenRouter, tabelas do Supabase | aberta (decidir nas fases indicadas) |
 | D-43 | Missão v1, comparação tolerante, fecho por palavras-alvo e níveis de domínio na fase 2 | aceita (dono) |
 | D-44 | Aparelho-alvo: Android + Chrome | aceita (dono) |
+| D-45 | Licenças: código AGPL-3.0, conteúdo CC BY-SA 4.0 (substitui a MIT) | aceita (dono) |
 
 ---
 
 ### D-37 — Pivô: Glifora vira jogo web open source, sem monetização, com IA pela key do usuário (2026-11-20) · aceita (pedido do dono)
 - **Pedido do dono (2026-11-20):** mudar todo o projeto conforme o documento `glifora-prompt-maestri.md`, salvo como `docs/SPEC.md` (a especificação) e `docs/EQUIPE.md` (a organização dos terminais e os prompts).
-- **Como fica:** jogo **web**, PWA instalável e mobile-first (Vite + React + TypeScript), **open source** (MIT), **sem anúncios, sem assinatura, sem RevenueCat/AdMob, sem Expo**. Custo fixo zero ou perto disso: a IA é paga pelo próprio usuário (**BYOK**, chamada direto do navegador ao provedor) ou não é usada (modo demo e fábrica de cenários por copiar e colar). O Supabase (plano gratuito) serve só para conta opcional, sincronização e cenários públicos; **a key do usuário nunca vai para o Supabase**, nem criptografada.
+- **Como fica:** jogo **web**, PWA instalável e mobile-first (Vite + React + TypeScript), **open source** (MIT; trocada pela AGPL-3.0 na D-45), **sem anúncios, sem assinatura, sem RevenueCat/AdMob, sem Expo**. Custo fixo zero ou perto disso: a IA é paga pelo próprio usuário (**BYOK**, chamada direto do navegador ao provedor) ou não é usada (modo demo e fábrica de cenários por copiar e colar). O Supabase (plano gratuito) serve só para conta opcional, sincronização e cenários públicos; **a key do usuário nunca vai para o Supabase**, nem criptografada.
 - **Motivação:** ferramenta de estudo do próprio autor, bem personalizada, e projeto de portfólio no GitHub.
 - **D-01 a D-36:** ficam como histórico, no arquivo privado do autor (D-38). Ideias da versão comercial que podem voltar, se a arquitetura nova (W0-03) as aproveitar, sempre como decisão nova: recast destacado pelo trecho corrigido, catálogo de padrões de erro do aluno brasileiro, conjunto-ouro de 207 falas, teste do STT com erros de propósito (D-09, D-36), fecho falado conferido no aparelho (D-31), cartão de ajuda e cuidado com fala sensível (D-33), injeção neutralizada entre marcadores.
 - **O que da versão comercial ainda existia fora do git:** o projeto `glifora-dev` no Supabase e o projeto no EAS. O destino está na D-38.
@@ -80,8 +81,8 @@ Status: `aceita` · `provisória` · `proposta` · `ajustada por D-xx` · `subst
 - **Ajuste do Arquiteto na W1-04:** o Revisor entrega os testes e2e e o `playwright.config.ts`; quem liga o job `e2e` no `ci.yml` (pasta do App) é o App.
 
 ### D-42 — Pontos que ficam para depois (2026-11-20) · aberta
-- **Licença de `content/`:** proposta CC BY-SA 4.0 [W0-03 §9]. Decidir na fase 2, antes da primeira missão publicada.
-- **Licença dos cenários públicos:** proposta CC BY 4.0, aceita por quem marca "Tornar público". Decidir antes da fase 7.
+- **Licença de `content/`:** decidida na D-45 (CC BY-SA 4.0).
+- **Licença dos cenários públicos:** proposta CC BY 4.0 (com a D-45, a CC BY-SA 4.0 deixa tudo coerente), aceita por quem marca "Tornar público". Decidir antes da fase 7.
 - **Modo completo:** lista curta de modelos recomendados, testados no conjunto-ouro, com aviso nos demais; e "Entrar com OpenRouter" (OAuth com limite de gasto) além de colar a key. Decidir na fase 6.
 - **Supabase:** a direção (tabelas genéricas `sync_docs`/`sync_events`, gatilhos de último a escrever, tamanho e cota por usuário, apagar conta sem Edge Function) está aceita. O Backend detalha na fase 5, junto com o login por e-mail (código ou link, sem senha).
 
@@ -118,3 +119,21 @@ Status: `aceita` · `provisória` · `proposta` · `ajustada por D-xx` · `subst
 ### D-44 — Aparelho-alvo: Android + Chrome (2026-11-20) · aceita (dono)
 - Os testes de fim de fase do dono são no Android com o Chrome. O e2e usa o Chromium com viewport de celular (Pixel 7). O WebKit roda só localmente, antes de fechar a fase.
 - **No iPhone:** o jogo funciona com texto. O microfone some se o reconhecimento falhar. O jogo convida a instalar e lembra de exportar, porque o Safari apaga os dados de site não instalado depois de 7 dias sem uso.
+
+### D-45 — Licenças: código AGPL-3.0, conteúdo CC BY-SA 4.0 (2026-11-20) · aceita (dono)
+- **Decisão:**
+  - **Código:** GNU AGPL-3.0, somente a versão 3 (`AGPL-3.0-only`). Substitui a MIT da D-37. O texto oficial está em `LICENSE` (SHA-256 `0d96a4ff…abcb0`, de gnu.org).
+  - **Conteúdo de `content/`:** CC BY-SA 4.0, em `content/LICENSE`, com o texto legal.
+  - **Arte desenhada em código** (`src/ui/art/`) e ícones gerados por script: fazem parte do código, sob AGPL-3.0.
+  - **Nome e logo "Glifora":** não são licenciados.
+- **Por quê:** o dono não quer ver o jogo virar produto fechado com anúncio ou assinatura. Com a MIT, qualquer pessoa pode fazer isso sem devolver nada. A AGPL continua open source e permite vender, mas quem distribui ou **põe no ar** uma versão modificada tem de abrir o código dela (seção 13). Para um app web, só a AGPL cobre o caso de hospedar. A CC BY-SA leva a mesma ideia para o conteúdo.
+- **Na prática:**
+  - `/about` mostra as licenças e o link do código-fonte (atende à seção 13 e ajuda quem fizer uma versão própria);
+  - `package.json` com `"license": "AGPL-3.0-only"`;
+  - as dependências de runtime são MIT ou Apache-2.0, ambas compatíveis.
+- **Commits anteriores:** do `86642fb` ao `ef65016` foram publicados com a MIT. O dono informou que ainda não houve download, e daqui em diante vale a AGPL. O histórico não foi reescrito.
+- **Contribuições:** de fora, entram sob as mesmas licenças. Se um dia o dono quiser relicenciar, vai precisar do aceite de quem contribuiu. Avaliar um DCO quando o primeiro PR externo chegar.
+- **Descartadas:**
+  - **GPL-3.0:** não alcança quem só hospeda o site;
+  - **PolyForm Noncommercial e similares:** deixariam de ser open source;
+  - **MIT:** não atende ao objetivo.

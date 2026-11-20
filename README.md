@@ -28,4 +28,10 @@ npm run dev
 - Plano: [docs/PLAN.md](docs/PLAN.md) · Decisões: [docs/DECISIONS.md](docs/DECISIONS.md)
 - Arquitetura: [docs/propostas/W0-03-arquitetura.md](docs/propostas/W0-03-arquitetura.md)
 
-Licença: [MIT](LICENSE).
+## Licença
+
+- **Código:** [GNU AGPL-3.0](LICENSE) (somente a versão 3). Você pode usar, estudar, modificar, redistribuir e até vender. Quem distribuir uma versão modificada, ou colocá-la no ar para outras pessoas usarem pela rede, precisa oferecer o código-fonte dela sob a mesma licença.
+- **Conteúdo** (`content/`: missões, NPCs, textos do jogo): [CC BY-SA 4.0](content/LICENSE). Dê crédito e compartilhe pela mesma licença.
+- **Nome e logo "Glifora":** não estão licenciados. Uma versão modificada precisa de outro nome.
+
+Copyright (C) 2026 BSY-Development e colaboradores.

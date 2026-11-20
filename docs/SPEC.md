@@ -201,7 +201,7 @@ Formato completo, limites e conferências: `docs/propostas/W0-03-arquitetura.md`
 - **Aparelho-alvo** dos testes de fim de fase: Android + Chrome. No iPhone o jogo funciona com texto, convida a instalar e lembra de exportar (D-44).
 - Acessibilidade: texto escalável, bom contraste, sem animações piscantes, opção de reduzir movimento e de desligar sons.
 - Testes para schemas, parser do JSON colado, cálculo de XP/nível e algoritmo de repetição espaçada.
-- Licença MIT. README caprichado: o que é, os três modos, como rodar local, segurança da key, como contribuir com missões.
+- Licenças (D-45): **código AGPL-3.0** (somente a versão 3) e **conteúdo de `content/` CC BY-SA 4.0**; nome e logo não são licenciados. README caprichado: o que é, os três modos, como rodar local, segurança da key, como contribuir com missões.
 
 ## Fases (parar ao fim de cada uma para eu testar no celular)
 1. **Fundação:** estrutura, CSP, deploy automático, i18n, mapa da vila com 1 local, perfil local, exportar/importar (D-41).
