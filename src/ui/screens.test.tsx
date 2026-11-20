@@ -96,7 +96,12 @@ describe("perfil", () => {
 
     fireEvent.change(input, { target: { value: "Ana Clara" } });
     fireEvent.click(screen.getByRole("button", { name: t("profile.save") }));
-    expect(await screen.findByText(t("profile.saved"))).toBeTruthy();
+    const saved = await screen.findByText(t("profile.saved"));
+    // o aviso fica no formulário do apelido, depois do botão (e não no fim da tela)
+    const form = input.closest("form") as HTMLFormElement;
+    expect(form.contains(saved)).toBe(true);
+    const button = screen.getByRole("button", { name: t("profile.save") });
+    expect(button.compareDocumentPosition(saved) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(await profileRepo.get(db)).toEqual({ nickname: "Ana Clara", createdAt: 1 });
 
     fireEvent.change(input, { target: { value: "Ana C." } });

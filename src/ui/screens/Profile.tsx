@@ -40,16 +40,17 @@ export function Profile() {
   const avatar = useLiveQuery(() => loadAvatar()) ?? DEFAULT_AVATAR;
   const [draft, setDraft] = useState<string | null>(null); // null = ainda não editou: vale o apelido guardado
   const [problem, setProblem] = useState<Extract<NicknameCheck, { ok: false }>["reason"] | null>(null);
-  const [status, setStatus] = useState<"saved" | "failed" | null>(null);
+  const [status, setStatus] = useState<"saved" | "failed" | null>(null); // do formulário do apelido
+  const [groupFailed, setGroupFailed] = useState<"avatar" | "base" | null>(null); // das escolhas
 
   const nickname = draft ?? profile?.nickname ?? "";
 
-  async function guarded(action: () => Promise<void>) {
+  async function guarded(group: "avatar" | "base", action: () => Promise<void>) {
+    setGroupFailed(null);
     try {
       await action();
-      setStatus(null);
     } catch {
-      setStatus("failed");
+      setGroupFailed(group);
     }
   }
 
@@ -88,6 +89,12 @@ export function Profile() {
             {t("profile.save")}
           </button>
         </p>
+        <div aria-live="polite">
+          {status === "saved" && <p className="notice">{t("profile.saved")}</p>}
+          {status === "failed" && (
+            <p className="notice notice-error">{t("common.save_failed")}</p>
+          )}
+        </div>
       </form>
 
       <ChoiceGroup
@@ -100,7 +107,8 @@ export function Profile() {
           label: t(FIGURE_KEY[figure]),
           visual: <Avatar figure={figure} className="avatar-art" />,
         }))}
-        onChange={(figure) => void guarded(() => updateAvatar({ figure }))}
+        error={groupFailed === "avatar" ? t("common.save_failed") : null}
+        onChange={(figure) => void guarded("avatar", () => updateAvatar({ figure }))}
       />
 
       <ChoiceGroup
@@ -121,18 +129,10 @@ export function Profile() {
           { value: "same", label: t("profile.base.same") },
           ...LOCALES.map((code) => ({ value: code, label: t(NAME_KEY[code]) })),
         ]}
-        onChange={(value) => void guarded(() => updatePrefs({ baseLang: value === "same" ? null : value }))}
+        error={groupFailed === "base" ? t("common.save_failed") : null}
+        onChange={(value) => void guarded("base", () => updatePrefs({ baseLang: value === "same" ? null : value }))}
       />
       <p className="hint">{t("profile.base.hint")}</p>
-
-      <div aria-live="polite">
-        {status === "saved" && <p className="notice">{t("profile.saved")}</p>}
-        {status === "failed" && (
-          <p className="notice notice-error" role="alert">
-            {t("common.save_failed")}
-          </p>
-        )}
-      </div>
     </>
   );
 }

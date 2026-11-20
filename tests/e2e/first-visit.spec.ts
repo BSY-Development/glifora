@@ -94,3 +94,24 @@ test("local inexistente é 404, sem erro no console", async ({ page }) => {
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   await expect(page.getByRole("link", { name: "Padaria" })).toHaveCount(0);
 });
+
+// Achado do dono (W1-15): "Apelido salvo." ficava abaixo da dobra no celular. O aviso tem de aparecer dentro da área visível,
+// ser anunciado (região aria-live) e sumir ao editar de novo.
+test("perfil: 'Apelido salvo.' fica visível na tela, logo após o botão, e some ao editar", async ({ page }) => {
+  await page.goto("/welcome");
+  await page.getByRole("button", { name: "Começar" }).click();
+  await page.goto("/profile");
+  const field = page.getByLabel("Apelido");
+  await field.fill("Marina");
+  await page.getByRole("button", { name: "Salvar" }).click();
+  const saved = page.getByText("Apelido salvo.");
+  await expect(saved).toBeVisible();
+  await expect(saved).toBeInViewport({ ratio: 1 });
+  const live = page.locator("form [aria-live]").filter({ has: saved });
+  await expect(live).toHaveAttribute("aria-live", /polite|assertive/);
+  const [btn, msg] = await Promise.all([page.getByRole("button", { name: "Salvar" }).boundingBox(), saved.boundingBox()]);
+  expect(msg!.y).toBeGreaterThan(btn!.y);
+  expect(msg!.y - (btn!.y + btn!.height)).toBeLessThan(120); // perto do botão, não no fim da tela
+  await field.fill("Marina2");
+  await expect(saved).toHaveCount(0);
+});

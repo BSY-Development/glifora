@@ -19,9 +19,11 @@ interface Props<V extends string> {
   /** "row" põe os cartões lado a lado (avatares); o padrão empilha. */
   layout?: "stack" | "row";
   disabled?: boolean;
+  /** Erro ao guardar a escolha deste grupo; aparece logo abaixo dos cartões. */
+  error?: string | null;
 }
 
-export function ChoiceGroup<V extends string>({ legend, name, value, options, onChange, layout = "stack", disabled = false }: Props<V>) {
+export function ChoiceGroup<V extends string>({ legend, name, value, options, onChange, layout = "stack", disabled = false, error = null }: Props<V>) {
   const groupId = useId();
   return (
     <fieldset className="field" disabled={disabled}>
@@ -54,6 +56,11 @@ export function ChoiceGroup<V extends string>({ legend, name, value, options, on
           </label>
         ))}
       </div>
+      {error && (
+        <p className="notice notice-error" role="alert">
+          {error}
+        </p>
+      )}
     </fieldset>
   );
 }

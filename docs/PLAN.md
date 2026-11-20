@@ -12,7 +12,12 @@ IDs: `W<fase>-<nº>` (W de web), para não confundir com as tarefas `F…` da ve
 
 Portão da fase: no celular do dono (Android + Chrome), o site publicado pelo GitHub Actions abre, instala na tela inicial e funciona em modo avião depois da primeira visita. O DevTools mostra a CSP do `public/_headers`. O dono troca o idioma, cria o perfil, vê a vila com a padaria, e exporta e importa o perfil.
 
-**Estado do portão (2026-11-20):** W1-01 a W1-14 aprovadas e no ar. Falta só o teste do dono no celular, com o roteiro [docs/roteiros/fase-1-celular.md](roteiros/fase-1-celular.md). O que ficou aceito para depois está na D-46.
+**Estado do portão (2026-11-20):** W1-01 a W1-14 aprovadas e no ar. O que ficou aceito para depois está na D-46.
+
+O dono testou no celular com o roteiro [docs/roteiros/fase-1-celular.md](roteiros/fase-1-celular.md). Resultado:
+- **Passou:** primeira visita, apelido com `<b>` recusado, vila e padaria, ajustes no site e no app instalado, instalar, exportar, importar arquivo errado e JSON quebrado (mensagem de erro, nada alterado), idioma, Sobre e licenças.
+- **Achado:** o aviso de apelido salvo não aparecia, porque ficava fora da área visível. A correção é a W1-15.
+- **Falta:** o passo 26 (atualização), que precisa de um deploy novo.
 
 Ordem: W1-01 → (W1-02, W1-03, W1-05 em paralelo) → (W1-04, W1-06) → W1-07 → (W1-08, W1-09) → W1-13 → (W1-10, W1-11) → W1-12 → W1-14. Detalhes de cada tarefa: [W0-03 §8] e as seções citadas.
 
@@ -34,6 +39,7 @@ O deploy (W1-13) foi adiantado em 2026-11-20. O Cloudflare e o ambiente `product
 | W1-12 | App | **PWA.** Manifesto, ícones, `vite-plugin-pwa` (`generateSW`, `injectRegister: false`), `sw-register.ts` com a política `glifora-sw`, aviso de versão nova, `Cache-Control` no `_headers` | Instala na tela inicial do Android; abre em modo avião depois da primeira visita; nenhuma violação de CSP ao registrar | e2e: recarregar offline; registro sem violação (resolve o "provar no teste" do Trusted Types) | aprovada |
 | W1-13 | App | **Deploy.** Job `deploy` (wrangler, ambiente `production`), `version.json` com o commit, conferência dos cabeçalhos na URL real. **Depende do dono:** repositório público no GitHub, conta no Cloudflare, projeto Direct Upload e token (D-39) | Push na `main` publica sozinho; a URL abre no celular; o DevTools mostra a CSP do arquivo | A conferência pós-deploy | aprovada |
 | W1-14 | Revisor | **Revisão da fase.** Acessibilidade em todas as rotas (axe), segurança contra [W0-03 §1.2 C], princípios da SPEC, README "como rodar", roteiro de teste no celular para o dono | Lista de problemas zerada ou aceita pelo Arquiteto | `tests/a11y/` e o roteiro manual | aprovada |
+| W1-15 | App | **Ajuste do teste do dono.** O aviso "Apelido salvo." aparece perto do botão; antes ficava no fim da tela, fora da área visível. Erros de salvar ficam junto do grupo que falhou | O dono vê o aviso no celular sem rolar | Componente e e2e do aviso visível no Pixel 7 | aprovada |
 
 ### Notas de passagem
 
@@ -123,6 +129,8 @@ O deploy (W1-13) foi adiantado em 2026-11-20. O Cloudflare e o ambiente `product
 **Licença no app (D-45, App):** `package.json` com `AGPL-3.0-only`; `CREDITS.md` diz que a arte própria e os ícones ficam sob a AGPL-3.0 do repositório. `/about` ganhou a seção "Licenças" (código AGPL-3.0, conteúdo CC BY-SA 4.0, "Glifora" não licenciado) e o link "Código-fonte no GitHub" (`<a href rel="noopener noreferrer">` para https://github.com/BSY-Development/glifora, constante em `About.tsx`), nos dois idiomas. O teste de build do Revisor precisa listar essa URL exata em `KNOWN_URLS`.
 
 **Correções da W1-14 (App):** Home e Welcome mostram o título (h1) mesmo carregando, então o foco vai para ele ao voltar para a vila (TalkBack anuncia a tela). `ci.yml` roda `REQUIRE_DIST=1 npx vitest run tests/security` (pasta inteira). Observações para o Arquiteto: o manifesto tem `description`/`lang` fixos em pt-BR (vite.config.ts); o Cloudflare acrescenta `Access-Control-Allow-Origin: *`, `Report-To` e `NEL` fora do `_headers`.
+
+**W1-15 (App, achado do dono no passo 5):** em `/profile`, "Apelido salvo." e o erro de salvar agora ficam dentro do formulário do apelido, logo após o botão (`aria-live`). Erros de avatar, idioma-base e (em Ajustes) tamanho do texto, movimento e sons aparecem no próprio grupo: `ChoiceGroup` ganhou a prop `error`. Boas-vindas e Seus dados já eram perto da ação. Teste de componente confere a ordem no DOM.
 
 **Nada de IA, key, Supabase ou voz na fase 1.** O `connect-src` fica só `'self'`, e isso é testado.
 

@@ -11,11 +11,11 @@ import { DataSection } from "./DataSection";
 export function Settings() {
   const t = useT();
   const prefs = useLiveQuery(() => loadPrefs()) ?? DEFAULT_PREFS;
-  const [failed, setFailed] = useState(false);
+  const [failed, setFailed] = useState<"textSize" | "reduceMotion" | "sounds" | null>(null);
 
-  function change(patch: Partial<Prefs>) {
-    setFailed(false);
-    updatePrefs(patch).catch(() => setFailed(true));
+  function change(group: "textSize" | "reduceMotion" | "sounds", patch: Partial<Prefs>) {
+    setFailed(null);
+    updatePrefs(patch).catch(() => setFailed(group));
   }
 
   return (
@@ -32,7 +32,8 @@ export function Settings() {
           { value: "large", label: t("settings.textsize.large") },
           { value: "xlarge", label: t("settings.textsize.xlarge") },
         ]}
-        onChange={(textSize) => change({ textSize })}
+        error={failed === "textSize" ? t("common.save_failed") : null}
+        onChange={(textSize) => change("textSize", { textSize })}
       />
 
       <ChoiceGroup
@@ -44,7 +45,8 @@ export function Settings() {
           { value: "on", label: t("settings.motion.on") },
           { value: "off", label: t("settings.motion.off") },
         ]}
-        onChange={(reduceMotion) => change({ reduceMotion })}
+        error={failed === "reduceMotion" ? t("common.save_failed") : null}
+        onChange={(reduceMotion) => change("reduceMotion", { reduceMotion })}
       />
 
       <div className="field">
@@ -54,7 +56,7 @@ export function Settings() {
             checked={prefs.sounds}
             aria-labelledby="sounds-label"
             aria-describedby="sounds-hint"
-            onChange={(event) => change({ sounds: event.target.checked })}
+            onChange={(event) => change("sounds", { sounds: event.target.checked })}
           />
           <span className="choice-card">
             <span className="choice-text">
@@ -67,13 +69,12 @@ export function Settings() {
             </span>
           </span>
         </label>
+        {failed === "sounds" && (
+          <p className="notice notice-error" role="alert">
+            {t("common.save_failed")}
+          </p>
+        )}
       </div>
-
-      {failed && (
-        <p className="notice notice-error" role="alert">
-          {t("common.save_failed")}
-        </p>
-      )}
 
       <DataSection />
     </>
