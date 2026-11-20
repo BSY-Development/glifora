@@ -24,8 +24,8 @@
       "id": "day",
       "speaker": "tilda",
       "emotion": "curious",
-      "text": "So, how was your day in the village?",
-      "translation": "E aí, como foi o seu dia na vila?",
+      "text": "So, {player}, how was your day in the village?",
+      "translation": "E aí, {player}, como foi o seu dia na vila?",
       "replies": [
         {
           "text": "It was great, thanks!",
@@ -224,7 +224,7 @@
     "target_words": ["roll", "bread", "honey", "cheese", "soup", "juice", "chocolate", "tea", "milk", "pancakes", "room", "bakery", "tavern", "village", "friend", "friends", "ate", "had", "was", "liked", "loved", "met", "from", "great", "fun"],
     "hint": "Conte o que você comeu, do que gostou ou quem conheceu, por exemplo com \"I had...\", \"I liked...\" ou \"It was...\".",
     "model_answer": { "text": "I had a honey roll, and I liked the village.", "translation": "Comi um pãozinho de mel e gostei da vila." },
-    "success": { "text": "What a lovely day! Welcome to the village, friend.", "translation": "Que dia lindo! Boas-vindas à vila." }
+    "success": { "text": "What a lovely day! Welcome to the village, {player}.", "translation": "Que dia lindo! Boas-vindas à vila, {player}." }
   },
   "vocabulary": [
     { "term": "It was...", "translation": "Foi...", "example": "It was a great day!" },

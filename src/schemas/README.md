@@ -16,8 +16,9 @@ Dono: **Conteúdo**. Schemas Zod, tipos e funções puras que dizem o que o cont
 | `pattern.ts` | `PatternId`, `Pattern`, `PatternCatalog` (`content/patterns/<par>.json`) |
 | `npc.ts` | `Npc` (`content/npcs/<id>.json`), `NpcLines` (`retry`, `contingency`), `NpcVoice` |
 | `mission.ts` | Missão v1 (D-43): `Mission`, `MissionNode`, `Reply`, `Closing`... e `MISSION_LIMITS` |
-| `mission.check.ts` | As 6 conferências (`checkMission`) e **`parseMission`, a única entrada de missão** |
+| `mission.check.ts` | As 8 conferências (`checkMission`) e **`parseMission`, a única entrada de missão** |
 | `match.ts` | `normalize`, `matchReply`, `checkClosingAnswer`, `closingTargets` (comparação tolerante da D-43) |
+| `player.ts` | Apelido nas falas (D-53): `spokenName(nickname)` (o nome falado: até 10 letras, só letras, senão a 1ª palavra, senão `null`), `fillPlayer(text, nickname)`, `PLAYER_MARKER`, `PLAYER_VOCATIVE` e as conferências do marcador |
 
 ## Como usar
 
@@ -30,6 +31,10 @@ const hit = matchReply(node.replies, sttAlternatives /* ou o texto digitado */, 
 // null → a NPC diz lines.<alvo>.retry; senão hit.reply (hit.reply.flawed → recast), hit.pass, hit.alternative
 
 checkClosingAnswer(closingTargets(mission), said, mission.target).accepted;
+
+// Toda fala de NPC que vai para a tela, o relatório ou a voz (D-53): texto e tradução.
+fillPlayer(node.text, profile.nickname || null);  // "Good morning, {player}!" → "Good morning, Maria!" ou "Good morning!"
+spokenName(profile.nickname);  // "Maria Clara" → "Maria"; "xX_Pro_Xx" → null (o perfil mostra o nome que as NPCs vão usar)
 ```
 
 ## Comparação tolerante (D-43)

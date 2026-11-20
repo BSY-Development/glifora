@@ -23,8 +23,8 @@ import {
   type TodayLevels,
 } from "../engine";
 import { getLocale } from "../i18n";
-import type { ContentLang, Mission, Npc, Pattern, VocabItem } from "../schemas";
-import { loadPrefs } from "./player";
+import { fillPlayer, type ContentLang, type Mission, type Npc, type Pattern, type VocabItem } from "../schemas";
+import { loadPrefs, loadProfile } from "./player";
 import { getDb, getDeps } from "./storage";
 import { tts } from "./voice";
 
@@ -95,10 +95,27 @@ export interface Prepared {
 
 export type PrepareResult = { ok: true; prepared: Prepared } | { ok: false; reason: "unknown" | "missing" | "invalid" };
 
+/**
+ * D-53: troca `{player}` pelo apelido nas falas das NPCs (texto e tradução), num lugar só. Quem lê a missão depois
+ * (balões, destaque do recast, voz) já recebe o texto trocado; sem apelido o vocativo some e a frase fica natural.
+ */
+export function fillMission(mission: Mission, nickname: string | null | undefined): Mission {
+  const fill = <T extends { text: string; translation: string }>(line: T): T => ({ ...line, text: fillPlayer(line.text, nickname), translation: fillPlayer(line.translation, nickname) });
+  return {
+    ...mission,
+    nodes: mission.nodes.map((node) => ({
+      ...fill(node),
+      replies: node.replies.map((reply) => (reply.reaction ? { ...reply, reaction: fill(reply.reaction) } : reply)),
+    })),
+    closing: { ...mission.closing, question: fill(mission.closing.question), success: fill(mission.closing.success) },
+  };
+}
+
 export async function prepare(missionId: string): Promise<PrepareResult> {
   const loaded = await loadCatalog(missionId);
   if (!loaded.ok) return { ok: false, reason: loaded.reason };
-  const mission = loaded.mission;
+  const profile = await loadProfile();
+  const mission = fillMission(loaded.mission, profile?.nickname || null);
   const db = getDb();
   const day = localDay(getDeps().now());
   const [runs, row] = await Promise.all([listRuns(db), loadSession(db)]);

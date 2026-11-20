@@ -98,8 +98,8 @@
       "id": "questions",
       "speaker": "bram",
       "emotion": "neutral",
-      "text": "Anything you want to know?",
-      "translation": "Quer saber mais alguma coisa?",
+      "text": "Anything you want to know, {player}?",
+      "translation": "Quer saber mais alguma coisa, {player}?",
       "replies": [
         {
           "text": "How much is it?",
@@ -190,7 +190,7 @@
     "target_words": ["pancakes", "pancake", "honey", "cheese", "roll", "bread", "pie", "eggs", "egg", "juice", "tea", "milk", "chocolate", "soup"],
     "hint": "Diga o que você quer comer ou beber, por exemplo com \"Can I have...?\" ou \"I'd like...\".",
     "model_answer": { "text": "Can I have two pancakes and an orange juice, please?", "translation": "Pode me dar duas panquecas e um suco de laranja, por favor?" },
-    "success": { "text": "Done. I'll get it ready. Sleep well, friend!", "translation": "Combinado. Vou deixar pronto. Durma bem!" }
+    "success": { "text": "Done. I'll get it ready. Sleep well, {player}!", "translation": "Combinado. Vou deixar pronto. Durma bem, {player}!" }
   },
   "vocabulary": [
     { "term": "a room", "translation": "um quarto", "example": "Can I have a room, please?" },

@@ -1,7 +1,7 @@
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { checkClosingAnswer, closingTargets, matchReply, parseMission, type Mission } from "../../src/schemas/index.ts";
+import { checkClosingAnswer, closingTargets, countPlayerVocatives, fillPlayer, matchReply, parseMission, type Mission } from "../../src/schemas/index.ts";
 import { buildContent, readContentDir, type ContentFile } from "./lib.ts";
 
 const contentDir = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "content");
@@ -28,6 +28,15 @@ describe("conteúdo real (content/)", () => {
   it("todo JSON lê, passa nos schemas, nas conferências e nas regras de qualidade", () => {
     expect(real.issues).toEqual([]);
     expect(messages(real.files)).toEqual([]);
+  });
+
+  it("apelido (D-53): no máximo 2 vocativos por missão, e toda fala fica sem chave sem apelido", () => {
+    for (const entry of buildContent(real.files).index.missions) {
+      const m = mission(entry.id);
+      const lines = [m.closing.question, m.closing.success, ...m.nodes, ...m.nodes.flatMap((n) => n.replies.flatMap((r) => (r.reaction ? [r.reaction] : [])))];
+      expect(lines.reduce((n, l) => n + countPlayerVocatives(l.text), 0), entry.id).toBeLessThanOrEqual(2);
+      for (const l of lines) expect(fillPlayer(l.text, null)).not.toMatch(/[{}]/);
+    }
   });
 
   it("o índice tem as missões em ordem de par, nível e id, com o caminho do arquivo", () => {
@@ -117,6 +126,18 @@ describe("build-index pega cada tipo de problema", () => {
     expect(all).toContain("o teto do A1 é 80");
     expect(all).toContain("por extenso");
     expect(all).toContain("termine a fala");
+  });
+
+  it("qualidade: o vocativo ', {player}' (D-53) sai antes das regras da fala", () => {
+    const f = files();
+    const m = f.get(BAKERY);
+    // 78 caracteres sem o marcador (teto do A1: 80); com ele passaria do teto e teria chaves.
+    m.nodes[1].text = "What can I get you, {player}? The rolls are still warm, and the bread is too.";
+    m.nodes[1].translation = "O que vai ser, {player}? Os pãezinhos ainda estão quentinhos, e o pão também.";
+    expect(fillPlayer(m.nodes[1].text, null).length).toBeLessThanOrEqual(80);
+    expect(messages(f.list)).toEqual([]);
+    m.nodes[1].text = "What can I get you {player}? The rolls are still warm.";
+    expect(messages(f.list).join(" | ")).toContain('o apelido entra só como ", {player}"');
   });
 
   it("qualidade: bebida alcoólica em qualquer texto, em inglês ou português", () => {

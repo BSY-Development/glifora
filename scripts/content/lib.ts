@@ -8,6 +8,7 @@ import {
   PatternCatalog,
   VoiceEvalSet,
   World,
+  fillPlayer,
   formatPath,
   matchReply,
   pairId,
@@ -96,14 +97,17 @@ export function alcoholIssues(file: string, json: unknown): ContentIssue[] {
  * - teto de caracteres da fala por nível;
  * - fala amigável à voz do navegador: sem dígito, símbolo ou emoji, e com pontuação no fim;
  * - a resposta-modelo também sem dígito (a pessoa repete em voz alta).
+ * O vocativo ", {player}" (D-53) sai antes: a conferência 8 do parseMission já cuida dele, e a fala tem
+ * de ficar boa também sem apelido.
  */
 export function qualityIssues(file: string, m: Mission): ContentIssue[] {
   const issues: ContentIssue[] = [];
   const max = LINE_MAX[m.level];
-  for (const { path, text } of spokenLines(m)) {
+  const lines = spokenLines(m).map(({ path, text }) => ({ path, text: fillPlayer(text, null) }));
+  for (const { path, text } of lines) {
     if (text.length > max) issues.push({ file, path, message: `fala com ${text.length} caracteres; o teto do ${m.level} é ${max}` });
   }
-  for (const { path, text } of [...spokenLines(m), { path: "closing.model_answer.text", text: m.closing.model_answer.text }]) {
+  for (const { path, text } of [...lines, { path: "closing.model_answer.text", text: m.closing.model_answer.text }]) {
     if (/\d/.test(text)) issues.push({ file, path, message: "escreva os números por extenso (a voz e o casamento ficam iguais)" });
     if (/[&/%*#@~<>[\]{}_|^$]|\p{Extended_Pictographic}/u.test(text)) issues.push({ file, path, message: "tire símbolos e emoji da fala" });
     if (!/[.!?]$/.test(text)) issues.push({ file, path, message: "termine a fala com . ! ou ?" });

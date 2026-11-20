@@ -225,7 +225,7 @@ describe("Mission (Zod)", () => {
   });
 });
 
-describe("checkMission: as 6 conferências (W0-03 §5.1, D-43)", () => {
+describe("checkMission: as 8 conferências (W0-03 §5.1, D-43)", () => {
   it("1. fala repetida; next inexistente; next para trás ou para a mesma fala", () => {
     const dup = loose(valid());
     dup.nodes[1].id = "order";
@@ -331,6 +331,85 @@ describe("checkMission: as 6 conferências (W0-03 §5.1, D-43)", () => {
     const other = loose(valid());
     other.nodes[1].replies[0].free = "anything";
     expect(issuesOf(other).map((i) => i.path)).toContain("nodes[1].replies[0].free");
+  });
+
+  describe("8. apelido (D-53): onde o marcador {player} pode aparecer", () => {
+    type Put = (m: Loose, v: string) => void;
+    // [caminho no JSON, como pôr o texto de teste nesse campo]
+    const allowed: [string, Put][] = [
+      ["nodes[0].text", (m, v) => (m.nodes[0].text = v)],
+      ["nodes[0].replies[0].reaction.text", (m, v) => (m.nodes[0].replies[0].reaction.text = v)],
+      ["closing.question.text", (m, v) => (m.closing.question.text = v)],
+      ["closing.success.text", (m, v) => (m.closing.success.text = v)],
+    ];
+    const forbidden: [string, Put][] = [
+      ["nodes[0].replies[0].text", (m, v) => (m.nodes[0].replies[0].text = v)],
+      ["nodes[0].replies[0].translation", (m, v) => (m.nodes[0].replies[0].translation = v)],
+      ["nodes[0].replies[0].keywords[0][0]", (m, v) => (m.nodes[0].replies[0].keywords[0][0] = v)],
+      ["nodes[0].replies[1].recast.original", (m, v) => (m.nodes[0].replies[1].recast.original = v)],
+      ["nodes[0].replies[1].recast.corrected", (m, v) => (m.nodes[0].replies[1].recast.corrected = v)],
+      ["closing.model_answer.text", (m, v) => (m.closing.model_answer.text = v)],
+      ["closing.model_answer.translation", (m, v) => (m.closing.model_answer.translation = v)],
+      ["closing.hint", (m, v) => (m.closing.hint = v)],
+      ["closing.target_words[0]", (m, v) => (m.closing.target_words[0] = v)],
+      ["listen[0].text", (m, v) => (m.listen[0].text = v)],
+      ["listen[0].translation", (m, v) => (m.listen[0].translation = v)],
+      ["title", (m, v) => (m.title = v)],
+      ["characters[0].name", (m, v) => (m.characters[0].name = v)],
+      ["vocabulary[0].example", (m, v) => (m.vocabulary[0].example = v)],
+    ];
+
+    it.each(allowed)("pode em %s (com a tradução também)", (path, put) => {
+      const m = loose(valid());
+      put(m, "Good morning, {player}!");
+      // Põe o mesmo vocativo na tradução da mesma fala.
+      const obj = path.startsWith("nodes[0].replies")
+        ? m.nodes[0].replies[0].reaction
+        : path.startsWith("nodes[0]")
+          ? m.nodes[0]
+          : m.closing[path.split(".")[1]!];
+      obj.translation = "Bom dia, {player}!";
+      expect(issuesOf(m)).toEqual([]);
+    });
+
+    it.each(allowed)("em %s, a tradução precisa ter o mesmo número de vocativos", (path, put) => {
+      const m = loose(valid());
+      put(m, "Good morning, {player}!");
+      expect(hasIssue(issuesOf(m), path.replace(/text$/, "translation"), "mesmo número")).toBe(true);
+    });
+
+    it.each(forbidden)("não pode em %s", (path, put) => {
+      const m = loose(valid());
+      put(m, "Hi, {player}!");
+      expect(hasIssue(issuesOf(m), path, "só pode aparecer nas falas das NPCs")).toBe(true);
+    });
+
+    it.each(["Good morning {player}!", "Good morning,{player}!", "Good morning, {Player}!", "Good morning, { player }!", "Good morning, {name}!"])(
+      "forma errada é recusada: %j",
+      (v) => {
+        const m = loose(valid());
+        m.nodes[0].text = v;
+        expect(hasIssue(issuesOf(m), "nodes[0].text", "vírgula, espaço")).toBe(true);
+      },
+    );
+
+    it("o vocativo precisa vir depois de algum texto", () => {
+      const m = loose(valid());
+      m.nodes[0].text = ", {player}! Good morning!";
+      m.nodes[0].translation = ", {player}! Bom dia!";
+      expect(hasIssue(issuesOf(m), "nodes[0].text", "depois de algum texto")).toBe(true);
+    });
+
+    it("4. o recast continua literal na reação com e sem apelido", () => {
+      const ok = loose(valid());
+      ok.nodes[0].replies[1].reaction = { text: "Two loaves of bread, {player}? Sure!", translation: "Dois pães, {player}? Claro!" };
+      expect(issuesOf(ok)).toEqual([]);
+      // O vocativo no meio da forma certa: sem apelido ela aparece, com apelido não.
+      const split = loose(valid());
+      split.nodes[0].replies[1].reaction = { text: "Two loaves, {player}, of bread? Sure!", translation: "Dois pães, {player}? Claro!" };
+      split.nodes[0].replies[1].recast.corrected = "two loaves of bread";
+      expect(hasIssue(issuesOf(split), "nodes[0].replies[1].recast.corrected", "reação")).toBe(true);
+    });
   });
 
   it("pattern fora do catálogo, quando o catálogo vem junto", () => {

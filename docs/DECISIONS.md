@@ -289,4 +289,10 @@ Proposta do dono. Muda a fase 7 e acrescenta itens às fases 4, 5 e 8. Nada é i
   - a troca acontece num lugar só do player e sai sempre como texto;
   - o TTS lê o apelido com a voz do idioma-alvo.
 - **Quem faz:** o Conteúdo faz o schema, a conferência e as missões (com moderação: 1 ou 2 vezes por missão, onde soar natural). O App faz a troca no player, no relatório e na fala.
+- **Nome falado (pedido do dono, para não ficar estranho):** a NPC não usa o apelido cru, e sim um **nome falado** derivado dele por uma função pura, `spokenName(apelido)`, em `src/schemas/player.ts`:
+  - o apelido inteiro, se tiver **até 10 letras e só letras** (acentos valem, porque nomes brasileiros têm acento), com no máximo um hífen ou apóstrofo no meio ("Ana-Lu", "D'Ávila");
+  - senão, a primeira palavra do apelido, se passar na mesma regra ("Maria Clara" vira "Maria");
+  - senão, nenhum nome: o vocativo some ("Good morning!"). Emoji, número, símbolo e palavra com mais de 10 letras não entram.
+  - **O apelido continua como está** (até 30 caracteres): mudar o schema do apelido quebraria perfis e arquivos exportados.
+  - O perfil mostra "Nas conversas, as NPCs vão te chamar de: Maria", ou avisa que não vão usar um nome. Assim a pessoa ajusta se quiser.
 

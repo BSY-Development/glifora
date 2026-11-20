@@ -41,8 +41,8 @@ Portão da fase (SPEC, D-49): o dono joga **5 sessões em dias diferentes, dentr
 | W2-14 | Revisor | **Revisão da fase e roteiro do celular** (5 sessões em dias diferentes, dentro de 7 dias; em cada uma, lembrar sem ver as frases das missões anteriores) | Lista zerada ou aceita pelo Arquiteto | `tests/a11y/` e o roteiro | a fazer |
 | W2-15 | App | **Taverna e Bram** (plano da W2-03). Arte própria (pixel art em código) da taverna e do Bram, chave i18n `place.tavern`, vila com 2 locais e `/place/tavern`. O enum `tavern`/`bram` em `world.ts` e o `locations.json` (Conteúdo) entram junto, combinados entre os dois. Na fase 2 os dois locais ficam abertos; o desbloqueio é da fase 3 | Vila com padaria e taverna, bonita e legível em 360×640; o leitor de tela anuncia os dois | e2e: tocar na taverna abre a tela | aprovada |
 | W2-16 | App | **Teste das frases de voz** em `/settings/voice`: as 44 frases de `content/eval/stt/` uma a uma, com o `matchReply` da fala esperada (as alternativas em ordem, como o player), ✓/✗ por frase, a taxa e "Copiar resultado" para o Conteúdo ajustar as keywords. Nada é gravado | O dono faz o teste inteiro no Chrome do Android e copia o resultado | Componente com Stt falso; e2e do Revisor | aprovada |
-| W2-17 | App | **Achados do dono no celular.** (1) **Urgente:** o "Copiar resultado" do teste de voz não foi encontrado no resumo. Pôr o botão logo abaixo da taxa, antes da lista, e mostrar o texto do resultado selecionável (para quando a cópia falhar). (2) **Vila em rua com rolagem lateral (D-52)**, que também corrige a padaria "no céu" | O dono acha e copia o resultado; a vila funciona com 2 locais e com 6 (fixture) em 360×640 | Componente; e2e e a11y do Revisor | em andamento (parte 1 aprovada) |
-| W2-18 | Conteúdo + App | **Apelido nas falas das NPCs (D-53):** o marcador `{player}` (schema e conferência, Conteúdo), as 5 missões com 1 ou 2 vocativos cada (Conteúdo) e a troca no player, no relatório e no TTS (App) | Com apelido, a NPC fala o nome; sem apelido, a frase continua natural | Tabela no `mission.test`; componente do player | em andamento |
+| W2-17 | App | **Achados do dono no celular.** (1) **Urgente:** o "Copiar resultado" do teste de voz não foi encontrado no resumo. Pôr o botão logo abaixo da taxa, antes da lista, e mostrar o texto do resultado selecionável (para quando a cópia falhar). (2) **Vila em rua com rolagem lateral (D-52)**, que também corrige a padaria "no céu" | O dono acha e copia o resultado; a vila funciona com 2 locais e com 6 (fixture) em 360×640 | Componente; e2e e a11y do Revisor | aprovada |
+| W2-18 | Conteúdo + App | **Apelido nas falas das NPCs (D-53):** o marcador `{player}` (schema e conferência, Conteúdo), as 5 missões com 1 ou 2 vocativos cada (Conteúdo) e a troca no player, no relatório e no TTS (App) | Com apelido, a NPC fala o nome; sem apelido, a frase continua natural | Tabela no `mission.test`; componente do player | aprovada |
 
 ### Notas de passagem (fase 2)
 
@@ -110,6 +110,12 @@ Portão da fase (SPEC, D-49): o dono joga **5 sessões em dias diferentes, dentr
 - **Como testar no celular:** `npm run build && npm run preview` (ou o site publicado), Chrome do Android, Ajustes > Teste de voz > "Começar o teste"; ler as 44; "Ver resumo" > "Copiar resultado" e colar na conversa.
 - **Testes:** componente com Stt falso (`ui/voicePhraseTest.test.tsx`); e2e do Revisor em `tests/e2e/voice-test.spec.ts`.
 
+**W2-17 e W2-18 (App, aprovadas pelo Revisor; e2e inteiro 290/290):**
+- **Teste das frases (17.1):** "Copiar resultado" logo abaixo da taxa, caixa readonly com o texto (selecionável), resumo abre no topo. **R-W2-11-1:** `ui/Quoted.tsx` (`useQuoted`) põe `lang` nos trechos em inglês do relatório.
+- **Rua da vila (D-52):** `ui/Street.tsx` (lista de links, scroll-snap ~2 por vez, setas, ArrowLeft/Right, pontinhos aria-hidden, posição em `glifora.street.pos` com try/catch, reduz movimento, `locked` para silhuetas da fase 3 só visual). Setas e pontinhos só com mais de 2 locais; `home.hint_swipe` só então. `.page` ganhou `min-width:0` (sem isso a rua alargava a página em "Muito grande"). Testado com fixture de 6 locais (`ui/street.test.tsx`).
+- **Apelido nas falas (D-53):** `services/play.ts` `fillMission` (usa `fillPlayer`/`spokenName` do Conteúdo) em `prepare()`: balões, tradução, recast e TTS já vêm trocados. Perfil mostra o nome falado.
+- **Pendência:** o Conteúdo precisa corrigir o erro de parse de `scripts/content/build-index.test.ts` no eslint (se ainda aparecer).
+
 **W2-03 (Conteúdo, aprovada pelo Arquiteto em 2026-11-20):**
 - **Missões, na ordem:** `bakery-01` (A1) → `bakery-02` (A1) → `tavern-01` (A1) → `tavern-02` (A2) → `tavern-03` (A2, **chefe**, com Bram e Tilda).
 - **Mundo:** local novo "tavern" e NPC novo Bram (W2-15). O catálogo de erros tem os 14 padrões do arquivo comercial e mais 3 novos: `en.what_time`, `en.prep_time` e `en.past_simple`.
@@ -171,6 +177,13 @@ Portão da fase (SPEC, D-49): o dono joga **5 sessões em dias diferentes, dentr
 - **Não-nomes (pedido do Revisor):** `couldBeName` recusa fala com palavra que mostra que a pessoa não entendeu ou não disse o nome ("Sorry?", "What?", "Repeat, please", "Yes", "Hello"...). Há uma lista curta por idioma-alvo, sem nomes comuns (Will, Grace, Hope, Joy, May).
 - **Conteúdo:** a resposta livre está na 1ª resposta da fala de nome da bakery-02 e da tavern-02; as reações não repetem o nome.
 - **Player:** não muda; ele usa só o `index`/`reply` do `matchReply`.
+
+**W2-18, parte do Conteúdo (D-53, aprovada pelo Revisor em 2026-11-20):**
+- **`src/schemas/player.ts`:** `spokenName(apelido)` dá o nome falado (o apelido inteiro se tiver até 10 letras e só letras, com acento valendo e no máximo um hífen ou apóstrofo no meio; senão a 1ª palavra; senão `null`). `fillPlayer(texto, apelido)` troca `", {player}"` pelo nome falado ou, com `null`, tira o trecho inteiro. Também exporta `PLAYER_MARKER`, `PLAYER_VOCATIVE` e as funções que conferem o marcador.
+- **Conferência 8 (`mission.check.ts`):** o marcador só entra nas falas das NPCs e nas traduções delas, sempre como `", {player}"` depois de algum texto, e o texto e a tradução têm o mesmo número de vocativos. Em qualquer outro campo é recusado. A conferência 4 agora exige o `recast.corrected` na reação com e sem apelido.
+- **`scripts/content/lib.ts`:** as regras de qualidade da fala (teto, símbolos, pontuação) olham a fala sem o vocativo. O `build-index.test` barra mais de 2 vocativos por missão.
+- **Missões:** 2 vocativos em cada uma destas: bakery-02 (nó "like" e despedida), tavern-02 (nó "questions" e despedida) e tavern-03 (nó "day" e despedida). A bakery-01 e a tavern-01 ficaram sem vocativo porque a NPC ainda não sabe o nome (na bakery-02 a Tilda diz "I don't know your name yet").
+- **Combinado com o App:** a troca acontece num lugar só (`services/play.ts`, `fillMission` no `prepare()`). Recebem o texto trocado o balão, a tradução, o destaque do recast e o TTS. O relatório não mostra fala com marcador, e a romanization não leva marcador. O perfil mostra "as NPCs vão te chamar de: <spokenName>" (App).
 
 ## Fase 1 — Fundação (fechada em 2026-11-20; portão aprovado pelo dono)
 

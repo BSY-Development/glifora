@@ -9,6 +9,8 @@
 //   5. `model_answer` contém uma das palavras-alvo (`closing.target_words` ou, se faltar, o vocabulário).
 //   6. Todo `speaker` (escuta e falas) existe em `characters`.
 //   7. Resposta livre (D-51): no máximo uma por fala, e nunca com `flawed`.
+//   8. Apelido (D-53): `{player}` só nas falas das NPCs e nas traduções delas, sempre como ", {player}"
+//      depois de algum texto, e no mesmo número no texto e na tradução. Em qualquer outro campo, não.
 //
 // Só na embutida: toda resposta tem `keywords`, A1–A2 tem escuta de pelo menos 2 falas e o id é slug.
 // Com o catálogo de erros em mãos, `pattern` precisa existir nele.
@@ -16,6 +18,7 @@
 import type { z } from "zod";
 import { checkClosingAnswer, closingTargets, matchReply, normalize } from "./match";
 import { Mission, type MissionInput } from "./mission";
+import { countPlayerVocatives, fillPlayer, hasPlayerMarker, isPlayerMarkerWellFormed, PLAYER_VOCATIVE } from "./player";
 import { Slug } from "./world";
 
 export interface MissionIssue {
@@ -60,7 +63,27 @@ function containsWords(haystack: string, needle: string, lang: Mission["target"]
   return n.length > 0 && ` ${normalize(haystack, lang)} `.includes(` ${n} `);
 }
 
-/** As conferências 1–6 (e as da origem) sobre uma missão que já passou no Zod. Lista vazia = tudo certo. */
+/** Apelido de exemplo para conferir a fala com o nome no lugar do marcador. */
+const SAMPLE_NICKNAME = "Sam";
+
+/** Os campos onde `{player}` pode aparecer (D-53): as falas das NPCs e as traduções delas. */
+const PLAYER_ALLOWED = [
+  /^nodes\[\d+\]\.(text|translation)$/,
+  /^nodes\[\d+\]\.replies\[\d+\]\.reaction\.(text|translation)$/,
+  /^closing\.(question|success)\.(text|translation)$/,
+];
+
+/** Todo texto da missão, com o caminho no JSON. */
+function stringLeaves(value: unknown, path: PropertyKey[] = [], out: [PropertyKey[], string][] = []): [PropertyKey[], string][] {
+  if (typeof value === "string") out.push([path, value]);
+  else if (Array.isArray(value)) value.forEach((v, i) => stringLeaves(v, [...path, i], out));
+  else if (typeof value === "object" && value !== null) {
+    for (const [k, v] of Object.entries(value)) stringLeaves(v, [...path, k], out);
+  }
+  return out;
+}
+
+/** As conferências 1–8 (e as da origem) sobre uma missão que já passou no Zod. Lista vazia = tudo certo. */
 export function checkMission(m: Mission, options: MissionCheckOptions = {}): MissionIssue[] {
   const origin = options.origin ?? "builtin";
   const issues: MissionIssue[] = [];
@@ -121,7 +144,9 @@ export function checkMission(m: Mission, options: MissionCheckOptions = {}): Mis
       if (!containsWords(r.text, r.recast.original, lang)) {
         add(["nodes", i, "replies", j, "recast", "original"], `"${r.recast.original}" não está no texto da resposta`);
       }
-      if (!containsWords(r.reaction.text, r.recast.corrected, lang)) {
+      // Com e sem apelido (D-53): o vocativo não pode cair no meio da forma certa.
+      const reaction = r.reaction.text;
+      if (![null, SAMPLE_NICKNAME].every((nick) => containsWords(fillPlayer(reaction, nick), r.recast!.corrected, lang))) {
         add(["nodes", i, "replies", j, "recast", "corrected"], `"${r.recast.corrected}" não está na reação da NPC`);
       }
     }),
@@ -154,6 +179,31 @@ export function checkMission(m: Mission, options: MissionCheckOptions = {}): Mis
       seen = true;
     });
   });
+
+  // 8. Apelido (D-53).
+  for (const [path, value] of stringLeaves(m)) {
+    const where = formatPath(path);
+    if (PLAYER_ALLOWED.some((re) => re.test(where))) {
+      if (!isPlayerMarkerWellFormed(value)) {
+        add(path, `o apelido entra só como "${PLAYER_VOCATIVE}" (vírgula, espaço, {player}); sobrou chave fora dessa forma`);
+      } else if (countPlayerVocatives(value) > 0 && (value.indexOf(PLAYER_VOCATIVE) === 0 || fillPlayer(value, null).trim() === "")) {
+        add(path, `"${PLAYER_VOCATIVE}" precisa vir depois de algum texto (ex.: "Good morning, {player}!")`);
+      }
+    } else if (hasPlayerMarker(value)) {
+      add(path, "{player} só pode aparecer nas falas das NPCs (nodes[].text, reaction.text, closing.question, closing.success) e nas traduções delas");
+    }
+  }
+  const samePlayerCount = (line: { text: string; translation: string }, path: PropertyKey[]) => {
+    const a = countPlayerVocatives(line.text);
+    const b = countPlayerVocatives(line.translation);
+    if (a !== b) add([...path, "translation"], `o texto tem ${a} "${PLAYER_VOCATIVE}" e a tradução tem ${b}: use o mesmo número nos dois`);
+  };
+  m.nodes.forEach((node, i) => {
+    samePlayerCount(node, ["nodes", i]);
+    node.replies.forEach((r, j) => r.reaction && samePlayerCount(r.reaction, ["nodes", i, "replies", j, "reaction"]));
+  });
+  samePlayerCount(m.closing.question, ["closing", "question"]);
+  samePlayerCount(m.closing.success, ["closing", "success"]);
 
   // Catálogo de erros.
   if (options.patterns) {

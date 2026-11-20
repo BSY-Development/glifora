@@ -7,4 +7,5 @@ export * from "./npc";
 export * from "./mission";
 export * from "./mission.check";
 export * from "./match";
+export * from "./player";
 export * from "./catalog";

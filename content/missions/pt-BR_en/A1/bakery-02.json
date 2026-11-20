@@ -107,8 +107,8 @@
       "id": "like",
       "speaker": "tilda",
       "emotion": "curious",
-      "text": "So, do you like it here?",
-      "translation": "E aí, está gostando daqui?",
+      "text": "So, do you like it here, {player}?",
+      "translation": "E aí, {player}, está gostando daqui?",
       "replies": [
         {
           "text": "Yes, I love it here!",
@@ -160,7 +160,7 @@
     "target_words": ["i am", "my name", "from", "nice to meet", "brazil", "brazilian"],
     "hint": "Diga o seu nome e de onde você é, por exemplo com \"I'm...\" e \"I'm from...\".",
     "model_answer": { "text": "Hi, Rosa! I'm Alex. I'm from Brazil.", "translation": "Oi, Rosa! Eu sou o Alex. Sou do Brasil." },
-    "success": { "text": "Lovely! Now you two are friends. See you tomorrow!", "translation": "Que bom! Agora vocês são amigos. Até amanhã!" }
+    "success": { "text": "Lovely! Now you two are friends. See you tomorrow, {player}!", "translation": "Que bom! Agora vocês são amigos. Até amanhã, {player}!" }
   },
   "vocabulary": [
     { "term": "I'm...", "translation": "Eu sou... / Meu nome é...", "example": "Hi, I'm Alex." },

@@ -16,6 +16,7 @@ import {
   updatePrefs,
   type NicknameCheck,
 } from "../../services/player";
+import { spokenName } from "../../schemas";
 import { Avatar } from "../Avatar";
 import { ChoiceGroup } from "../ChoiceGroup";
 import { NicknameField } from "../NicknameField";
@@ -68,6 +69,7 @@ export function Profile() {
     }
   }
 
+  const spoken = spokenName(nickname);
   const baseValue: BaseChoice = prefs.baseLang === "pt-BR" || prefs.baseLang === "en" ? prefs.baseLang : "same";
 
   return (
@@ -84,6 +86,7 @@ export function Profile() {
           }}
           problem={problem}
         />
+        {nickname.trim() !== "" && <p className="hint">{spoken === null ? t("profile.spoken_none") : t("profile.spoken", { name: spoken })}</p>}
         <p>
           <button type="submit" className="btn btn-primary">
             {t("profile.save")}
