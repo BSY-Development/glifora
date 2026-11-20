@@ -10,6 +10,8 @@ const ROUTES = [
   { path: "/welcome", name: "boas-vindas" }, // sem perfil; com perfil volta para "/"
   { path: "/place/bakery", name: "padaria" },
   { path: "/place/tavern", name: "taverna" },
+  { path: "/play/bakery-01", name: "missão (apresentação)" },
+  { path: "/report/run-que-nao-existe", name: "relatório inexistente" },
   { path: "/profile", name: "perfil" },
   { path: "/settings", name: "ajustes" },
   { path: "/settings/voice", name: "voz" },
