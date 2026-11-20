@@ -6,7 +6,7 @@ import { ensureMeta } from "./meta";
 import { mergeDocs } from "./merge";
 import { avatarRepo, prefsRepo, profileRepo } from "./repos";
 import type { DocRow, SyncDoc } from "./schema/docs";
-import { EXPORT_VERSION, MAX_IMPORT_BYTES, buildExport, importExport, parseExport, serializeExport, wipeLocalData } from "./transfer";
+import { DOC_DATA_MAX_BYTES, EXPORT_VERSION, MAX_IMPORT_BYTES, buildExport, importExport, parseExport, serializeExport, wipeLocalData } from "./transfer";
 
 let counter = 0;
 const open: GliforaDb[] = [];
@@ -147,15 +147,42 @@ describe("importar", () => {
     }
   });
 
-  it("id desconhecido é pulado (e contado); tabelas futuras são avisadas; versão nova do documento entra como está", () => {
-    const text = JSON.stringify({
-      ...base,
-      cards: [{ qualquer: 1 }],
-      docs: [doc({ id: "npc:en:tilda", data: { x: 1 } }), doc({ id: "avatar", v: 2, data: { figure: "z", novo: 1 } }), doc({})],
-    });
+  it("id desconhecido é pulado (e contado); tabelas futuras são avisadas", () => {
+    const text = JSON.stringify({ ...base, cards: [{ qualquer: 1 }], docs: [doc({ id: "npc:en:tilda", data: { x: 1 } }), doc({})] });
     const result = parseExport(text);
     expect(result).toMatchObject({ ok: true, unknownDocs: 1, futureTables: ["cards"] });
-    if (result.ok) expect(result.docs.map((d) => d.id)).toEqual(["avatar", "profile"]);
+    if (result.ok) expect(result.docs.map((d) => d.id)).toEqual(["profile"]);
+  });
+
+  it("F-W1-16-03: documento conhecido de versão mais nova recusa o arquivo todo, até apagado", async () => {
+    for (const bad of [doc({ v: 2, data: { x: 1 } }), doc({ id: "prefs", v: 99, deleted: 1, data: {} })]) {
+      const text = JSON.stringify({ ...base, docs: [doc({ id: "avatar", data: { figure: "a" } }), bad] });
+      expect(parseExport(text)).toMatchObject({ ok: false, error: { code: "doc_too_new", docVersion: bad.v, appVersion: 1 } });
+    }
+    const db = await newDb();
+    await profileRepo.save(db, { nickname: "Ana", createdAt: 1 }, deps("a"));
+    const text = JSON.stringify({ ...base, docs: [doc({ v: 2, data: { x: 1 }, updatedAt: clock + 1000 })] });
+    expect(await importExport(db, text, clock)).toMatchObject({ ok: false, error: { code: "doc_too_new" } });
+    expect((await profileRepo.get(db))?.nickname).toBe("Ana");
+  });
+
+  it("F-W1-16-04: lápide entra sem conteúdo; data acima de 32 KB recusa o arquivo, para todo documento", () => {
+    const big = { x: "a".repeat(DOC_DATA_MAX_BYTES) };
+    const tomb = parseExport(JSON.stringify({ ...base, docs: [doc({ deleted: 1, data: { x: [1, 2, 3] } })] }));
+    expect(tomb).toMatchObject({ ok: true });
+    if (tomb.ok) expect(tomb.docs[0]).toMatchObject({ deleted: 1, data: {} });
+    for (const d of [doc({ deleted: 1, data: big }), doc({ data: big }), doc({ id: "npc:en:tilda", data: big })]) {
+      const result = parseExport(JSON.stringify({ ...base, docs: [d] }));
+      expect(result).toMatchObject({ ok: false, error: { code: "invalid" } });
+      if (!result.ok && result.error.code === "invalid") expect(result.error.issues[0]).toContain("docs[0].data");
+    }
+  });
+
+  it("a exportação de um estado no limite fica abaixo de 20 MB", async () => {
+    const db = await newDb();
+    const filler = { x: "a".repeat(DOC_DATA_MAX_BYTES - 10) };
+    for (const id of ["profile", "prefs", "avatar"]) await db.docs.put({ id, v: 1, data: filler, updatedAt: 1, deleted: 0, dirty: 0 });
+    expect((await exportText(db)).length).toBeLessThan(MAX_IMPORT_BYTES);
   });
 
   it("recusa arquivo acima do teto de 20 MB", () => {

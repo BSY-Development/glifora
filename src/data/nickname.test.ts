@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { NICKNAME_MAX, Nickname, ProfileV1 } from "./schema/docs";
 
 describe("apelido (texto puro, com limite)", () => {
-  it.each(["", "Ana", "João da Silva", "日本語", "😀 oi", "O'Neil & Cia", "a".repeat(NICKNAME_MAX)])("aceita %j", (value) => {
+  it.each(["", "Ana", "João da Silva", "日本語", "😀 oi", "👩‍💻", "🏳️‍🌈", "👨🏽‍⚕️", "O'Neil & Cia", "a".repeat(NICKNAME_MAX)])("aceita %j", (value) => {
     expect(Nickname.safeParse(value).success).toBe(true);
   });
 
@@ -11,7 +11,7 @@ describe("apelido (texto puro, com limite)", () => {
     expect(Nickname.safeParse("😀".repeat(NICKNAME_MAX + 1)).success).toBe(false);
   });
 
-  it.each(["<b>oi</b>", "a>b", "<script>", "linha\nnova", "tab\there", "nulo\u0000", "‮evil", "⁦x"])("recusa %j", (value) => {
+  it.each(["<b>oi</b>", "a>b", "<script>", "linha\nnova", "tab\there", "nulo\u0000", "‮evil", "⁦x", "‎oi", "‏oi", "؜oi", "a​b", "⁠x", "﻿x", "a b", "a b", "\u{E0067}x", "￹x", "‍", "a‍", "‍a", "a‍b", "😀‍", "​", "​​", "ㅤ", "́", "⠀", "  "])("recusa %j", (value) => {
     expect(Nickname.safeParse(value).success).toBe(false);
   });
 

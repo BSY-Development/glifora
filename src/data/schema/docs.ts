@@ -10,6 +10,7 @@ export const DocRow = z.strictObject({
   id: z.string().min(1).max(120),
   /** Versão do formato de `data`. Funções puras vN → vN+1 aplicam-se ao ler. */
   v: z.number().int().min(1),
+  /** Lápide (`deleted: 1`) guarda `{}`: o conteúdo não viaja nem é conferido. Teto de DOC_DATA_MAX_BYTES na importação. */
   data: z.record(z.string(), z.unknown()),
   /** Epoch ms da última escrita. Sempre sobe: duas escritas no mesmo milissegundo ainda se ordenam. */
   updatedAt: z.number().int().nonnegative(),
@@ -32,15 +33,23 @@ export type MetaRow = z.infer<typeof MetaRow>;
 
 export const NICKNAME_MAX = 30;
 
-/** Nada de `<` nem `>` (HTML), caracteres de controle ou marcas que invertem o sentido do texto (bidi). */
-const chr = String.fromCharCode;
-const NICKNAME_FORBIDDEN = new RegExp(`[<>\\p{Cc}${chr(0x202a)}-${chr(0x202e)}${chr(0x2066)}-${chr(0x2069)}]`, "u");
+/**
+ * Nada de `<` nem `>` (HTML), controle (Cc), formato (Cf: bidi, largura zero, tags, ...) nem separadores de linha/parágrafo (Zl, Zp).
+ * Única exceção: o ZWJ (U+200D) entre dois emoji, para emoji compostos como 👩‍💻.
+ */
+const NICKNAME_FORBIDDEN = /[<>\p{Cc}\p{Cf}\p{Zl}\p{Zp}]/u;
+const ZWJ_BETWEEN_EMOJI = /(?<=\p{Extended_Pictographic}[\p{Emoji_Modifier}️]*)‍(?=\p{Extended_Pictographic})/gu;
+/** Sem nenhum caractere visível: só espaços, marcas combinantes soltas ou preenchimentos em branco. */
+const NICKNAME_HAS_VISIBLE = /[^\p{Z}\s\p{Mn}\p{Me}ᅟᅠㅤﾠ⠀]/u;
 
-/** Apelido opcional ("" = sem apelido). Texto puro, até NICKNAME_MAX caracteres (emoji conta como um). */
+/** Apelido opcional ("" = sem apelido). Texto puro, até NICKNAME_MAX caracteres (emoji conta como um). Não vazio precisa ter algo visível. */
 export const Nickname = z
   .string()
   .refine((s) => Array.from(s).length <= NICKNAME_MAX, { message: `no máximo ${NICKNAME_MAX} caracteres` })
-  .refine((s) => !NICKNAME_FORBIDDEN.test(s), { message: "sem < nem >, e sem caracteres de controle" });
+  .refine((s) => !NICKNAME_FORBIDDEN.test(s.replace(ZWJ_BETWEEN_EMOJI, "")), {
+    message: "sem < nem >, e sem caracteres de controle ou invisíveis",
+  })
+  .refine((s) => s === "" || NICKNAME_HAS_VISIBLE.test(s), { message: "precisa ter ao menos um caractere visível" });
 
 export const ProfileV1 = z.strictObject({
   nickname: Nickname,

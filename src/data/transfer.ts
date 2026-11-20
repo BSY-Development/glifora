@@ -12,6 +12,8 @@ import { DOC_KINDS, isDocKind } from "./schema/kinds";
 export const EXPORT_FORMAT = "glifora-export";
 export const EXPORT_VERSION = 1;
 export const MAX_IMPORT_BYTES = 20 * 1024 * 1024;
+/** Teto do `data` de cada documento em JSON (o mesmo da W0-03 para o Supabase). */
+export const DOC_DATA_MAX_BYTES = 32 * 1024;
 const MAX_DOCS = 10_000;
 const MAX_ISSUES = 8;
 const MAX_ISSUE_CHARS = 200;
@@ -71,6 +73,8 @@ export type ImportError =
   | { code: "not_json" }
   | { code: "wrong_format" }
   | { code: "too_new"; fileVersion: number; appVersion: number }
+  /** Documento de um tipo que o app conhece, mas num formato mais novo que o dele: o arquivo todo é recusado. */
+  | { code: "doc_too_new"; id: string; docVersion: number; appVersion: number }
   /** `issues` são linhas "caminho: problema", para a pessoa copiar e mostrar a quem ajuda. */
   | { code: "invalid"; issues: string[] };
 
@@ -108,26 +112,34 @@ export function parseExport(text: string, now: number = Date.now()): ParseResult
   const docs: SyncDoc[] = [];
   const issues: string[] = [];
   let unknownDocs = 0;
-  parsed.data.docs.forEach((doc, index) => {
-    if (!isDocKind(doc.id)) {
+  const encoder = new TextEncoder();
+  for (const [index, source] of parsed.data.docs.entries()) {
+    if (encoder.encode(JSON.stringify(source.data)).length > DOC_DATA_MAX_BYTES) {
+      issues.push(short(`${pathOf(["docs", index, "data"])}: maior que ${DOC_DATA_MAX_BYTES / 1024} KB`));
+      continue;
+    }
+    if (!isDocKind(source.id)) {
       unknownDocs += 1; // de uma versão mais nova do app: não sabemos ler, não guardamos
-      return;
+      continue;
     }
-    if (doc.updatedAt > now + MAX_FUTURE_MS) {
+    const kind = DOC_KINDS[source.id];
+    // Formato mais novo que o do app: recusa o arquivo todo (uma versão ilegível venceria a mescla e inutilizaria o perfil).
+    if (source.v > kind.version) return fail({ code: "doc_too_new", id: source.id, docVersion: source.v, appVersion: kind.version });
+    if (source.updatedAt > now + MAX_FUTURE_MS) {
       issues.push(short(`${pathOf(["docs", index, "updatedAt"])}: data no futuro (relógio do aparelho que exportou está errado)`));
-      return;
+      continue;
     }
-    const kind = DOC_KINDS[doc.id];
-    // Versão mais nova que a conhecida: entra como está (o repositório avisa na hora de ler). Apagado: sem conteúdo a conferir.
-    if (doc.deleted === 0 && doc.v <= kind.version) {
-      const check = kind.schema.safeParse(doc.data);
-      if (!check.success) {
-        for (const issue of check.error.issues) issues.push(short(`${pathOf(["docs", index, "data", ...issue.path])}: ${issue.message}`));
-        return;
-      }
+    if (source.deleted === 1) {
+      docs.push({ ...source, data: {} }); // lápide entra sem conteúdo
+      continue;
     }
-    docs.push(doc);
-  });
+    const check = kind.schema.safeParse(source.data);
+    if (!check.success) {
+      for (const issue of check.error.issues) issues.push(short(`${pathOf(["docs", index, "data", ...issue.path])}: ${issue.message}`));
+      continue;
+    }
+    docs.push(source);
+  }
   if (issues.length > 0) return fail({ code: "invalid", issues: issues.slice(0, MAX_ISSUES) });
 
   const futureTables = FUTURE_TABLES.filter((name) => parsed.data[name] !== undefined && parsed.data[name].length > 0);

@@ -43,7 +43,8 @@ O deploy (W1-13) foi adiantado em 2026-11-20. O Cloudflare e o ambiente `product
 | W1-13 | App | **Deploy.** Job `deploy` (wrangler, ambiente `production`), `version.json` com o commit, conferência dos cabeçalhos na URL real. **Depende do dono:** repositório público no GitHub, conta no Cloudflare, projeto Direct Upload e token (D-39) | Push na `main` publica sozinho; a URL abre no celular; o DevTools mostra a CSP do arquivo | A conferência pós-deploy | aprovada |
 | W1-14 | Revisor | **Revisão da fase.** Acessibilidade em todas as rotas (axe), segurança contra [W0-03 §1.2 C], princípios da SPEC, README "como rodar", roteiro de teste no celular para o dono | Lista de problemas zerada ou aceita pelo Arquiteto | `tests/a11y/` e o roteiro manual | aprovada |
 | W1-15 | App | **Ajuste do teste do dono.** O aviso "Apelido salvo." aparece perto do botão; antes ficava no fim da tela, fora da área visível. Erros de salvar ficam junto do grupo que falhou | O dono vê o aviso no celular sem rolar | Componente e e2e do aviso visível no Pixel 7 | aprovada |
-| W1-16 | QA Tester | **Ataque à fase 1** (D-47). No build local: CSP e Trusted Types (script externo e inline, `eval`, `fetch` para fora), apelido e importação com payloads hostis, robustez (IndexedDB bloqueado ou cheio, modo anônimo, offline) | Relatório com severidade, reprodução e evidência; nenhum achado crítico ou alto em aberto | `tests/e2e-security/` e `tests/payloads/`, no CI | em andamento |
+| W1-16 | QA Tester | **Ataque à fase 1** (D-47). No build local: CSP e Trusted Types (script externo e inline, `eval`, `fetch` para fora), apelido e importação com payloads hostis, robustez (IndexedDB bloqueado ou cheio, modo anônimo, offline) | Relatório com severidade, reprodução e evidência; nenhum achado crítico ou alto em aberto | `tests/e2e-security/` e `tests/payloads/`, no CI | aprovada |
+| W1-17 | App | **Correções do ataque do QA (W1-16).** F-03: na importação, doc conhecido de versão mais nova recusa o arquivo. F-04: lápide sem `data` e teto de 32 KB por doc. F-01/02: apelido sem `\p{Cf}`, `\p{Zl}` e `\p{Zp}` (ZWJ só entre emoji) e sem apelido invisível | Os `test.fail` do QA viram `test` e passam | `tests/e2e-security/` e unidade em `src/data/` | aprovada |
 
 ### Notas de passagem
 
@@ -135,6 +136,16 @@ O deploy (W1-13) foi adiantado em 2026-11-20. O Cloudflare e o ambiente `product
 **Correções da W1-14 (App):** Home e Welcome mostram o título (h1) mesmo carregando, então o foco vai para ele ao voltar para a vila (TalkBack anuncia a tela). `ci.yml` roda `REQUIRE_DIST=1 npx vitest run tests/security` (pasta inteira). Observações para o Arquiteto: o manifesto tem `description`/`lang` fixos em pt-BR (vite.config.ts); o Cloudflare acrescenta `Access-Control-Allow-Origin: *`, `Report-To` e `NEL` fora do `_headers`.
 
 **W1-15 (App, achado do dono no passo 5):** em `/profile`, "Apelido salvo." e o erro de salvar agora ficam dentro do formulário do apelido, logo após o botão (`aria-live`). Erros de avatar, idioma-base e (em Ajustes) tamanho do texto, movimento e sons aparecem no próprio grupo: `ChoiceGroup` ganhou a prop `error`. Boas-vindas e Seus dados já eram perto da ação. Teste de componente confere a ordem no DOM.
+
+**W1-16 (QA Tester) e W1-17 (App). As notas são do Arquiteto, porque o PC do dono travou antes de o App escrevê-las:**
+- **Ataque do QA:** sem crítico nem alto. Foram 216 testes em `tests/e2e-security/` (payloads em `tests/payloads/`), no CI pelo `testMatch` do `playwright.config.ts` da raiz. O typecheck inclui `tests/e2e-security/tsconfig.json`.
+- **F-03:** a importação recusa o arquivo inteiro (`doc_too_new`) quando um doc de id conhecido tem `v` maior que o do app.
+  - **Atenção, fase 5:** a mescla da **sincronização** precisa de outra regra. Ela tem de guardar o doc de versão mais nova sem quebrar o local, porque não dá para recusar o que vem do servidor.
+- **F-04:** lápide (`deleted: 1`) entra com `data: {}`. O `data` de cada doc tem teto de 32 KB em JSON (`DOC_DATA_MAX_BYTES`), inclusive de id desconhecido.
+- **F-01/02:** o `Nickname` (`src/data/schema/docs.ts`) barra `<`, `>`, `\p{Cc}`, `\p{Cf}`, `\p{Zl}` e `\p{Zp}`, menos o ZWJ entre dois emoji. Apelido sem caractere visível é recusado; o vazio continua valendo.
+- **Travamento do PC do dono (2026-11-20):** vários terminais rodaram o Playwright ao mesmo tempo, cada um com até 8 Chromes. **Regra:** um Playwright por vez nesta máquina (veja `docs/EQUIPE.md`) e workers limitados fora do CI.
+
+**Revisor (W1-17, aprovada) — um Playwright por vez nesta máquina:** antes de rodar a suíte, confira com `maestri list` e `maestri check` se outro terminal não está rodando. Para conferir algo pontual, rode só o arquivo, com `--workers=2`. O `playwright.config.ts` limita a 3 workers fora do CI (`fullyParallel` continua).
 
 **Nada de IA, key, Supabase ou voz na fase 1.** O `connect-src` fica só `'self'`, e isso é testado.
 

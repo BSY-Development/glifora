@@ -15,6 +15,7 @@ function detailsOf(error: ImportError | { code: "read" | "storage" }): string {
   const { version, commit } = getAppInfo();
   const lines = [`glifora ${version} (${commit})`, `error: ${error.code}`];
   if (error.code === "too_new") lines.push(`file format: ${error.fileVersion}`, `app format: ${error.appVersion}`);
+  if (error.code === "doc_too_new") lines.push(`document: ${error.id}`, `document format: ${error.docVersion}`, `app format: ${error.appVersion}`);
   if (error.code === "invalid") lines.push(...error.issues);
   return lines.join("\n");
 }

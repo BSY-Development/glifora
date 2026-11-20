@@ -1,0 +1,302 @@
+{
+  "_comment": "Arquivos glifora-export hostis (W1-16). 'raw' = texto do arquivo; $HEAD, $NOW+Nh, $ID121, $A41, $N30, $N31 sao trocados no teste. 'expect': refuse (alerta, nada gravado) | accept (aviso ok) | either (so exige: nada executa, nada pela metade, app segue usavel).",
+  "head": "\"format\":\"glifora-export\",\"version\":1,\"exportedAt\":\"2026-11-20T15:00:00Z\",\"app\":\"0.1.0\",\"device\":\"dev-x\"",
+  "cases": [
+    {
+      "id": "proto-top",
+      "expect": "refuse",
+      "raw": "{\"__proto__\":{\"polluted\":\"top\"},$HEAD,\"docs\":[]}"
+    },
+    {
+      "id": "constructor-top",
+      "expect": "refuse",
+      "raw": "{\"constructor\":{\"prototype\":{\"polluted\":\"ctor\"}},$HEAD,\"docs\":[]}"
+    },
+    {
+      "id": "proto-in-data",
+      "expect": "either",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"profile\",\"v\":1,\"data\":{\"nickname\":\"x\",\"createdAt\":1,\"__proto__\":{\"polluted\":\"data\"}},\"updatedAt\":$NOW+1h,\"deleted\":0}]}",
+      "note": "o app aceita e descarta a chave __proto__ em silencio (zod); nada gravado com ela"
+    },
+    {
+      "id": "ctor-proto-in-data",
+      "expect": "refuse",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"prefs\",\"v\":1,\"data\":{\"constructor\":{\"prototype\":{\"polluted\":\"p\"}},\"prototype\":1},\"updatedAt\":$NOW+1h,\"deleted\":0}]}"
+    },
+    {
+      "id": "proto-in-deleted-doc",
+      "expect": "either",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"avatar\",\"v\":1,\"data\":{\"__proto__\":{\"polluted\":\"del\"}},\"updatedAt\":$NOW+1h,\"deleted\":1}]}"
+    },
+    {
+      "id": "proto-in-newer-version-doc",
+      "expect": "refuse",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"avatar\",\"v\":2,\"data\":{\"__proto__\":{\"polluted\":\"v2\"}},\"updatedAt\":$NOW+1h,\"deleted\":0}]}"
+    },
+    {
+      "id": "proto-as-doc-id",
+      "expect": "accept",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"__proto__\",\"v\":1,\"data\":{},\"updatedAt\":1,\"deleted\":0},{\"id\":\"constructor\",\"v\":1,\"data\":{},\"updatedAt\":1,\"deleted\":0},{\"id\":\"toString\",\"v\":1,\"data\":{},\"updatedAt\":1,\"deleted\":0}]}"
+    },
+    {
+      "id": "unknown-doc-id",
+      "expect": "accept",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"mission:inventada\",\"v\":1,\"data\":{\"a\":1},\"updatedAt\":1,\"deleted\":0}]}"
+    },
+    {
+      "id": "extra-top-field",
+      "expect": "refuse",
+      "raw": "{$HEAD,\"apiKey\":\"sk-falsa\",\"docs\":[]}"
+    },
+    {
+      "id": "extra-doc-field-dirty",
+      "expect": "refuse",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"avatar\",\"v\":1,\"data\":{\"figure\":\"b\"},\"updatedAt\":$NOW+1h,\"deleted\":0,\"dirty\":0}]}"
+    },
+    {
+      "id": "extra-field-in-data",
+      "expect": "refuse",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"avatar\",\"v\":1,\"data\":{\"figure\":\"b\",\"x\":1},\"updatedAt\":$NOW+1h,\"deleted\":0}]}"
+    },
+    {
+      "id": "version-top-2",
+      "expect": "refuse",
+      "raw": "{\"format\":\"glifora-export\",\"version\":2,\"exportedAt\":\"2026-11-20T15:00:00Z\",\"app\":\"9\",\"device\":\"d\",\"docs\":[]}"
+    },
+    {
+      "id": "version-top-huge",
+      "expect": "refuse",
+      "raw": "{\"format\":\"glifora-export\",\"version\":1e400,\"docs\":[]}"
+    },
+    {
+      "id": "version-top-zero",
+      "expect": "refuse",
+      "raw": "{\"format\":\"glifora-export\",\"version\":0,\"docs\":[]}"
+    },
+    {
+      "id": "version-top-string",
+      "expect": "refuse",
+      "raw": "{\"format\":\"glifora-export\",\"version\":\"1\",\"docs\":[]}"
+    },
+    {
+      "id": "version-top-fraction",
+      "expect": "refuse",
+      "raw": "{\"format\":\"glifora-export\",\"version\":1.5,\"docs\":[]}"
+    },
+    {
+      "id": "deleted-doc-with-garbage-data",
+      "expect": "either",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"avatar\",\"v\":1,\"data\":{\"figure\":\"<script>alert(1)</script>\",\"n\":[1,2,3]},\"updatedAt\":$NOW+1h,\"deleted\":1}]}"
+    },
+    {
+      "id": "newer-version-profile",
+      "expect": "refuse",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"profile\",\"v\":2,\"data\":{\"nome\":\"novo formato\"},\"updatedAt\":$NOW+1h,\"deleted\":0}]}"
+    },
+    {
+      "id": "newer-version-prefs",
+      "expect": "refuse",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"prefs\",\"v\":99,\"data\":{\"x\":1},\"updatedAt\":$NOW+1h,\"deleted\":0}]}"
+    },
+    {
+      "id": "newer-version-avatar",
+      "expect": "refuse",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"avatar\",\"v\":99,\"data\":{\"x\":1},\"updatedAt\":$NOW+1h,\"deleted\":0}]}"
+    },
+    {
+      "id": "future-date-2d",
+      "expect": "refuse",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"avatar\",\"v\":1,\"data\":{\"figure\":\"c\"},\"updatedAt\":$NOW+48h,\"deleted\":0}]}"
+    },
+    {
+      "id": "future-date-unknown-version",
+      "expect": "refuse",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"avatar\",\"v\":2,\"data\":{\"figure\":\"c\"},\"updatedAt\":$NOW+9999h,\"deleted\":0}]}"
+    },
+    {
+      "id": "updatedAt-1e308",
+      "expect": "refuse",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"avatar\",\"v\":1,\"data\":{\"figure\":\"c\"},\"updatedAt\":1e308,\"deleted\":0}]}"
+    },
+    {
+      "id": "updatedAt-unsafe-int",
+      "expect": "refuse",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"avatar\",\"v\":1,\"data\":{\"figure\":\"c\"},\"updatedAt\":9007199254740993,\"deleted\":0}]}"
+    },
+    {
+      "id": "updatedAt-Infinity-literal",
+      "expect": "refuse",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"avatar\",\"v\":1,\"data\":{\"figure\":\"c\"},\"updatedAt\":Infinity,\"deleted\":0}]}"
+    },
+    {
+      "id": "updatedAt-NaN-literal",
+      "expect": "refuse",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"avatar\",\"v\":1,\"data\":{\"figure\":\"c\"},\"updatedAt\":NaN,\"deleted\":0}]}"
+    },
+    {
+      "id": "updatedAt-string-Infinity",
+      "expect": "refuse",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"avatar\",\"v\":1,\"data\":{\"figure\":\"c\"},\"updatedAt\":\"Infinity\",\"deleted\":0}]}"
+    },
+    {
+      "id": "updatedAt-1e400",
+      "expect": "refuse",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"avatar\",\"v\":1,\"data\":{\"figure\":\"c\"},\"updatedAt\":1e400,\"deleted\":0}]}"
+    },
+    {
+      "id": "updatedAt-negative",
+      "expect": "refuse",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"avatar\",\"v\":1,\"data\":{\"figure\":\"c\"},\"updatedAt\":-5,\"deleted\":0}]}"
+    },
+    {
+      "id": "updatedAt-fraction",
+      "expect": "refuse",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"avatar\",\"v\":1,\"data\":{\"figure\":\"c\"},\"updatedAt\":1.5,\"deleted\":0}]}"
+    },
+    {
+      "id": "deleted-2",
+      "expect": "refuse",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"avatar\",\"v\":1,\"data\":{\"figure\":\"c\"},\"updatedAt\":$NOW+1h,\"deleted\":2}]}"
+    },
+    {
+      "id": "deleted-true",
+      "expect": "refuse",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"avatar\",\"v\":1,\"data\":{\"figure\":\"c\"},\"updatedAt\":$NOW+1h,\"deleted\":true}]}"
+    },
+    {
+      "id": "createdAt-huge",
+      "expect": "refuse",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"profile\",\"v\":1,\"data\":{\"nickname\":\"a\",\"createdAt\":1e30},\"updatedAt\":$NOW+1h,\"deleted\":0}]}"
+    },
+    {
+      "id": "types-swapped-docs-object",
+      "expect": "refuse",
+      "raw": "{$HEAD,\"docs\":{\"profile\":{}}}"
+    },
+    {
+      "id": "types-swapped-data-array",
+      "expect": "refuse",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"profile\",\"v\":1,\"data\":[1,2],\"updatedAt\":$NOW+1h,\"deleted\":0}]}"
+    },
+    {
+      "id": "types-swapped-id-number",
+      "expect": "refuse",
+      "raw": "{$HEAD,\"docs\":[{\"id\":5,\"v\":1,\"data\":{},\"updatedAt\":1,\"deleted\":0}]}"
+    },
+    {
+      "id": "types-swapped-prefs",
+      "expect": "refuse",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"prefs\",\"v\":1,\"data\":{\"uiLang\":\"en\",\"baseLang\":null,\"reduceMotion\":\"system\",\"sounds\":\"true\",\"textSize\":\"normal\"},\"updatedAt\":$NOW+1h,\"deleted\":0}]}"
+    },
+    {
+      "id": "prefs-unknown-lang",
+      "expect": "refuse",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"prefs\",\"v\":1,\"data\":{\"uiLang\":\"../../x\",\"baseLang\":null,\"reduceMotion\":\"system\",\"sounds\":true,\"textSize\":\"normal\"},\"updatedAt\":$NOW+1h,\"deleted\":0}]}"
+    },
+    {
+      "id": "prefs-textsize-css",
+      "expect": "refuse",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"prefs\",\"v\":1,\"data\":{\"uiLang\":null,\"baseLang\":null,\"reduceMotion\":\"system\",\"sounds\":true,\"textSize\":\"huge\\\"][x=\\\"\"},\"updatedAt\":$NOW+1h,\"deleted\":0}]}"
+    },
+    {
+      "id": "doc-id-121-chars",
+      "expect": "refuse",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"$ID121\",\"v\":1,\"data\":{},\"updatedAt\":1,\"deleted\":0}]}"
+    },
+    {
+      "id": "doc-id-empty",
+      "expect": "refuse",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"\",\"v\":1,\"data\":{},\"updatedAt\":1,\"deleted\":0}]}"
+    },
+    {
+      "id": "app-41-chars",
+      "expect": "refuse",
+      "raw": "{\"format\":\"glifora-export\",\"version\":1,\"exportedAt\":\"2026-11-20T15:00:00Z\",\"app\":\"$A41\",\"device\":\"d\",\"docs\":[]}"
+    },
+    {
+      "id": "device-empty",
+      "expect": "refuse",
+      "raw": "{\"format\":\"glifora-export\",\"version\":1,\"exportedAt\":\"2026-11-20T15:00:00Z\",\"app\":\"a\",\"device\":\"\",\"docs\":[]}"
+    },
+    {
+      "id": "exportedAt-garbage",
+      "expect": "refuse",
+      "raw": "{\"format\":\"glifora-export\",\"version\":1,\"exportedAt\":\"ontem\",\"app\":\"a\",\"device\":\"d\",\"docs\":[]}"
+    },
+    {
+      "id": "json-null",
+      "expect": "refuse",
+      "raw": "null"
+    },
+    {
+      "id": "json-array",
+      "expect": "refuse",
+      "raw": "[]"
+    },
+    {
+      "id": "json-number",
+      "expect": "refuse",
+      "raw": "123"
+    },
+    {
+      "id": "json-string",
+      "expect": "refuse",
+      "raw": "\"glifora-export\""
+    },
+    {
+      "id": "empty-file",
+      "expect": "refuse",
+      "raw": ""
+    },
+    {
+      "id": "html-with-script",
+      "expect": "refuse",
+      "raw": "<!doctype html><script>alert(1)</script>"
+    },
+    {
+      "id": "trailing-garbage",
+      "expect": "refuse",
+      "raw": "{$HEAD,\"docs\":[]} <script>alert(1)</script>"
+    },
+    {
+      "id": "valid-then-invalid-all-or-nothing",
+      "expect": "refuse",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"profile\",\"v\":1,\"data\":{\"nickname\":\"Hacker\",\"createdAt\":1},\"updatedAt\":$NOW+1h,\"deleted\":0},{\"id\":\"avatar\",\"v\":1,\"data\":{\"figure\":\"zzz\"},\"updatedAt\":$NOW+1h,\"deleted\":0}]}"
+    },
+    {
+      "id": "duplicate-ids",
+      "expect": "accept",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"avatar\",\"v\":1,\"data\":{\"figure\":\"b\"},\"updatedAt\":$NOW+1h,\"deleted\":0},{\"id\":\"avatar\",\"v\":1,\"data\":{\"figure\":\"c\"},\"updatedAt\":$NOW+1h,\"deleted\":0}]}"
+    },
+    {
+      "id": "nickname-lone-surrogate",
+      "expect": "either",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"profile\",\"v\":1,\"data\":{\"nickname\":\"a\\ud800b\",\"createdAt\":1},\"updatedAt\":$NOW+1h,\"deleted\":0}]}"
+    },
+    {
+      "id": "nickname-lrm-in-file",
+      "expect": "refuse",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"profile\",\"v\":1,\"data\":{\"nickname\":\"Ana\\u200eX\",\"createdAt\":1},\"updatedAt\":$NOW+1h,\"deleted\":0}]}"
+    },
+    {
+      "id": "nickname-zwsp-in-file",
+      "expect": "refuse",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"profile\",\"v\":1,\"data\":{\"nickname\":\"A\\u200bna\",\"createdAt\":1},\"updatedAt\":$NOW+1h,\"deleted\":0}]}"
+    },
+    {
+      "id": "nickname-31-in-file",
+      "expect": "refuse",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"profile\",\"v\":1,\"data\":{\"nickname\":\"$N31\",\"createdAt\":1},\"updatedAt\":$NOW+1h,\"deleted\":0}]}"
+    },
+    {
+      "id": "nickname-30-in-file",
+      "expect": "accept",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"profile\",\"v\":1,\"data\":{\"nickname\":\"$N30\",\"createdAt\":1},\"updatedAt\":$NOW+1h,\"deleted\":0}]}"
+    },
+    {
+      "id": "nickname-spaces-only-in-file",
+      "expect": "either",
+      "raw": "{$HEAD,\"docs\":[{\"id\":\"profile\",\"v\":1,\"data\":{\"nickname\":\"   \",\"createdAt\":1},\"updatedAt\":$NOW+1h,\"deleted\":0}]}"
+    }
+  ]
+}

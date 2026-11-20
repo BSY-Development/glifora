@@ -6,7 +6,7 @@ Dono: Arquiteto. A organização e os prompts abaixo são os do dono do projeto 
 
 - **Ativos agora:** Arquiteto (Opus 5.5, maestro), App (Sonnet 5.5), Revisor (Sonnet 5.5), QA Tester (Sonnet 5.5, desde 2026-11-20, D-47) e Fable (Fable 5.2, consultor do Arquiteto só nas chamadas marcadas abaixo; não é dono de pasta e não escreve código de produção).
 - **Entram depois:** Conteúdo na fase 2 e Backend na fase 5. O Arquiteto cria o terminal nessa hora, com o papel do prompt correspondente.
-- **Ligações:** o Arquiteto fala com todos; App ↔ Revisor direto (revisão); QA Tester ↔ Revisor (os testes do QA no CI). Na fase 2, Conteúdo ↔ Revisor e Conteúdo ↔ App (formato dos schemas). Na fase 5, Backend ↔ Revisor e Backend ↔ App (contrato da sincronização).
+- **Ligações:** o Arquiteto fala com todos; App ↔ Revisor direto (revisão); QA Tester ↔ Revisor (os testes do QA no CI); App ↔ QA Tester (o executor chama o QA para tirar o `test.fail` de um achado corrigido). Na fase 2, Conteúdo ↔ Revisor e Conteúdo ↔ App (formato dos schemas). Na fase 5, Backend ↔ Revisor e Backend ↔ App (contrato da sincronização).
 - **Papel de cada terminal:** é o *role* do Maestri com o mesmo nome (o prompt do dono + as regras de fluxo abaixo). Sobrevive ao `/clear`.
 - **Fluxo de uma tarefa:**
   1. O Arquiteto manda a tarefa (ID de `docs/PLAN.md`).
@@ -18,6 +18,7 @@ Dono: Arquiteto. A organização e os prompts abaixo são os do dono do projeto 
   - Entrega ao Arquiteto achados com severidade, reprodução e evidência.
   - Cada achado vira teste em `tests/e2e-security/` (falha esperada até a correção).
   - O Arquiteto manda a correção ao dono da pasta.
+- **Um Playwright por vez nesta máquina:** a suíte inteira abre vários Chromes. Antes de rodar, confira com `maestri check` se outro terminal não está rodando. Fora do CI, use o limite de workers do `playwright.config.ts`. Em 2026-11-20 o PC do dono travou com três terminais rodando juntos.
 - **Git:** só o Arquiteto faz commit. Ninguém instala software no sistema sem pedir; dependências npm do projeto podem.
 - **Versão comercial (D-38):** o código dela não está neste repositório. Fica no arquivo privado do autor (`C:\glifora-arquivo-comercial`, tag `comercial-expo-v0`). Só se lê de lá quando uma tarefa mandar aproveitar alguma peça.
 

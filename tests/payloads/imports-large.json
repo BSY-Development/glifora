@@ -1,0 +1,14 @@
+{
+  "_comment": "Receitas de arquivos grandes/binários (W1-16). Montados no teste a partir destes parâmetros, para não guardar 20 MB no repositório.",
+  "limitBytes": 20971520,
+  "roundtrip-growth": { "docId": "avatar", "deleted": 1, "arrayOnes": 2600000, "note": "~5 MB compactos; a exportação indenta (2 espaços) e passa de 20 MB" },
+  "over-limit-by-one": { "padTo": 20971521, "note": "JSON válido com espaços no fim; um byte acima do limite" },
+  "at-limit": { "padTo": 20971520, "note": "JSON válido, exatamente no limite" },
+  "binary": {
+    "png-header": [137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82],
+    "nul-bytes": [0, 0, 0, 0, 0, 0, 0, 0],
+    "random-high": [255, 254, 253, 252, 128, 129, 200, 201, 1, 2, 3],
+    "utf16le-bom-json": "utf16le",
+    "utf8-bom-json": "utf8bom"
+  }
+}
