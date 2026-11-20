@@ -16,7 +16,7 @@ Ordem: W1-01 → (W1-02, W1-03, W1-05 em paralelo) → (W1-04, W1-06) → W1-07 
 
 | ID | Dono | Tarefa | Critério de pronto | Testes esperados | Status |
 | --- | --- | --- | --- | --- | --- |
-| W1-01 | Arquiteto | **Esqueleto.** `package.json`, lockfile, `.nvmrc`, `.npmrc`, TS estrito, Vite + React, ESLint (fronteiras de D-41, sem texto solto no JSX, sem `dangerouslySetInnerHTML`, sem `eval`), pastas com um `README.md` curto em cada, `index.html` sem script inline, `i18n/` com 3 chaves, `src/schemas/lang.ts` e `world.ts`, `content/world/locations.json` com 1 local, `SECURITY.md` | `git clone` → `npm ci` → `dev`, `build`, `test`, `lint` e `typecheck` passam. Só as dependências de D-41 | Teste de fumaça; o lint acusa uma importação proibida de exemplo | em andamento |
+| W1-01 | Arquiteto | **Esqueleto.** `package.json`, lockfile, `.nvmrc`, `.npmrc`, TS estrito, Vite + React, ESLint (fronteiras de D-41, sem texto solto no JSX, sem `dangerouslySetInnerHTML`, sem `eval`), pastas com um `README.md` curto em cada, `index.html` sem script inline, `i18n/` com 3 chaves, `src/schemas/lang.ts` e `world.ts`, `content/world/locations.json` com 1 local, `SECURITY.md` | `git clone` → `npm ci` → `dev`, `build`, `test`, `lint` e `typecheck` passam. Só as dependências de D-41 | Teste de fumaça; o lint acusa uma importação proibida de exemplo | aprovada |
 | W1-02 | App | **CI.** `ci.yml` com o job `check`; Actions por SHA; permissões mínimas; Dependabot | O PR mostra o resultado; erro de tipo, lint ou teste derruba | O próprio pipeline | a fazer |
 | W1-03 | App | **Cabeçalhos.** `public/_headers` igual a [W0-03 §2.8]; o `vite preview` aplica o bloco `/*`; `assetsInlineLimit: 0`; `z.config({ jitless: true })` no início do `main.tsx` | No preview, o DevTools mostra a CSP inteira e o console fica limpo | Unidade para o leitor do `_headers` | a fazer |
 | W1-04 | Revisor | **Testes da CSP.** Playwright (Chromium, Pixel 7) e os testes "arquivo", "build" e "navegador" de [W0-03 §7]. O App liga o job `e2e` no `ci.yml` (D-41) | Tirar uma diretiva ou pôr um script inline faz o CI falhar | Os três testes, com os casos negativos (`fetch` externo, `eval`, `innerHTML`) | a fazer |
@@ -30,6 +30,20 @@ Ordem: W1-01 → (W1-02, W1-03, W1-05 em paralelo) → (W1-04, W1-06) → W1-07 
 | W1-12 | App | **PWA.** Manifesto, ícones, `vite-plugin-pwa` (`generateSW`, `injectRegister: false`), `sw-register.ts` com a política `glifora-sw`, aviso de versão nova, `Cache-Control` no `_headers` | Instala na tela inicial do Android; abre em modo avião depois da primeira visita; nenhuma violação de CSP ao registrar | e2e: recarregar offline; registro sem violação (resolve o "provar no teste" do Trusted Types) | a fazer |
 | W1-13 | App | **Deploy.** Job `deploy` (wrangler, ambiente `production`), `version.json` com o commit, conferência dos cabeçalhos na URL real. **Depende do dono:** repositório público no GitHub, conta no Cloudflare, projeto Direct Upload e token (D-39) | Push na `main` publica sozinho; a URL abre no celular; o DevTools mostra a CSP do arquivo | A conferência pós-deploy | a fazer |
 | W1-14 | Revisor | **Revisão da fase.** Acessibilidade em todas as rotas (axe), segurança contra [W0-03 §1.2 C], princípios da SPEC, README "como rodar", roteiro de teste no celular para o dono | Lista de problemas zerada ou aceita pelo Arquiteto | `tests/a11y/` e o roteiro manual | a fazer |
+
+### Notas de passagem
+
+**W1-01 (Arquiteto, aprovada pelo Revisor na 2ª rodada):**
+- **Versões:** Vite 8.3, React 19.3, React Router 8.5, Dexie 4.4, Zod 4.6, Vitest 5.1, ESLint 10.15.
+  - O TypeScript fica no **6.0.3**: o typescript-eslint 8.73 ainda não aceita o 7.
+  - Sem eslint-plugin-react, que não roda no ESLint 10. O texto solto no JSX e o HTML perigoso são barrados por `no-restricted-syntax`.
+- **Lint (`eslint.config.js`):** um bloco por camada com todas as regras (fronteiras de D-41, também em `import()`). Rede só em `ai/` e `data/`; `content/` e `import.meta.glob` só em `catalog/`.
+  - Mexeu numa regra: rode `tests/arch/` (52 sondagens do Revisor, com os falsos positivos que não podem voltar).
+  - **Regex dos padrões:** sem escapar `-` nem `/`, porque o ESLint compila com a flag `u` e o erro só aparece quando existe um arquivo naquela camada.
+- **tsconfig em três:** `tsconfig.json` (src, sem tipos do Node), `tsconfig.tests.json` (tests/, com Node) e `tsconfig.node.json` (configs).
+- **Tela provisória:** `src/ui/App.tsx` lê `i18n/pt-BR.json` direto. A W1-05 troca por `t()` e precisa atualizar `document.documentElement.lang` (o `index.html` nasce com `lang="pt-BR"`).
+- **Para a W1-03:** o Revisor escreve o teste do `_headers` em `tests/security/`.
+- **SECURITY.md:** tem o aviso "em construção". O aviso sai quando a fase 1 fechar.
 
 **Nada de IA, key, Supabase ou voz na fase 1.** O `connect-src` fica só `'self'`, e isso é testado.
 

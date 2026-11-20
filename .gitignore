@@ -31,3 +31,6 @@ Thumbs.db
 
 # Documento de origem do dono (o conteúdo está em docs/SPEC.md e docs/EQUIPE.md)
 glifora-prompt-maestri.md
+
+# Índice de conteúdo gerado no build (fase 2)
+src/catalog/generated/

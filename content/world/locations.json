@@ -1,0 +1,4 @@
+{
+  "schema": 1,
+  "locations": [{ "id": "bakery", "order": 0, "npcs": ["tilda"] }]
+}

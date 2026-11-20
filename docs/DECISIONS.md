@@ -68,6 +68,14 @@ Status: `aceita` · `provisória` · `proposta` · `ajustada por D-xx` · `subst
   - o ping agendado do GitHub para quando o repositório fica 60 dias parado;
   - o rascunho do schema passa a usar chaves em inglês.
 - **A conferir na fase 6:** a afirmação de que a API atual da Anthropic recusa `temperature` [§2.6] não está marcada como conferida na proposta.
+- **Fronteiras no lint, depois da revisão da W1-01:**
+  - os padrões valem igual para `import` e `import()` dinâmico, e `import()` só aceita caminho literal;
+  - caminho absoluto, via `src/`, `./../` e `pasta/../` são barrados;
+  - `content/` só entra por `src/catalog/`, e `import.meta.glob` também;
+  - `schemas/` e `engine/` não usam relógio, sorteio, rede, temporizador nem `globalThis`;
+  - **rede só em `src/ai/` e `src/data/`** (defesa contra vazamento, [W0-03 §1.2 C]);
+  - **`ui/` importa `services/`, `i18n/`, `schemas/` e `engine/`** (os dois últimos são puros); dados, catálogo, voz e IA chegam à interface só por `services/`. Isso ajusta a tabela [W0-03 §2.1], que permitia só tipos de `engine/`;
+  - testes ao lado do código podem ter texto literal, mas nunca injetar HTML.
 - **Ajuste do Arquiteto na W1-04:** o Revisor entrega os testes e2e e o `playwright.config.ts`; quem liga o job `e2e` no `ci.yml` (pasta do App) é o App.
 
 ### D-42 — Pontos que ficam para depois (2026-11-20) · aberta
