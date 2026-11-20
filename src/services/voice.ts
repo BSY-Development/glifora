@@ -19,7 +19,7 @@ export const voiceTag = (lang: VoiceLang): string => BCP47[lang];
 
 /**
  * Frase de teste, no idioma que se fala (conteúdo, não texto de interface: igual nas duas línguas da interface).
- * Quando existir content/eval/ (W2-12), a tela passa a ler as frases de lá.
+ * O teste das 44 frases (W2-16) lê as frases de content/eval/stt/; esta é só a do diagnóstico.
  */
 const TEST_PHRASE: Record<VoiceLang, string> = { en: "Hello! I would like a coffee, please." };
 export const testPhrase = (lang: VoiceLang): string => TEST_PHRASE[lang];

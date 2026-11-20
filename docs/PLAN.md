@@ -40,6 +40,7 @@ Portão da fase (SPEC, D-49): o dono joga **5 sessões em dias diferentes, dentr
 | W2-13 | QA Tester | **Ataque à fase 2.** Sem microfone, permissão negada, offline no meio da missão, troca de idioma no meio da missão, duas abas na mesma missão, importação com `events`/`runs` hostis, XP forjado | Sem crítico ou alto em aberto | `tests/e2e-security/` | a fazer |
 | W2-14 | Revisor | **Revisão da fase e roteiro do celular** (5 sessões em dias diferentes, dentro de 7 dias; em cada uma, lembrar sem ver as frases das missões anteriores) | Lista zerada ou aceita pelo Arquiteto | `tests/a11y/` e o roteiro | a fazer |
 | W2-15 | App | **Taverna e Bram** (plano da W2-03). Arte própria (pixel art em código) da taverna e do Bram, chave i18n `place.tavern`, vila com 2 locais e `/place/tavern`. O enum `tavern`/`bram` em `world.ts` e o `locations.json` (Conteúdo) entram junto, combinados entre os dois. Na fase 2 os dois locais ficam abertos; o desbloqueio é da fase 3 | Vila com padaria e taverna, bonita e legível em 360×640; o leitor de tela anuncia os dois | e2e: tocar na taverna abre a tela | aprovada |
+| W2-16 | App | **Teste das frases de voz** em `/settings/voice`: as 44 frases de `content/eval/stt/` uma a uma, com o `matchReply` da fala esperada (as alternativas em ordem, como o player), ✓/✗ por frase, a taxa e "Copiar resultado" para o Conteúdo ajustar as keywords. Nada é gravado | O dono faz o teste inteiro no Chrome do Android e copia o resultado | Componente com Stt falso; e2e do Revisor | aprovada |
 
 ### Notas de passagem (fase 2)
 
@@ -89,6 +90,12 @@ Portão da fase (SPEC, D-49): o dono joga **5 sessões em dias diferentes, dentr
 - **Taverna e Bram (W2-15):** `TAVERN` e `BRAM` em `ui/art/sprites.ts`, `place.tavern` e `npc.bram.*` nos dois idiomas, `PLACE_*`/`NPCS` em `ui/world.ts`. No mapa, padaria e taverna lado a lado (46% de largura cada, taverna mais abaixo). Os dois locais abertos (desbloqueio é da fase 3). Enum `tavern`/`bram` e `locations.json` são do Conteúdo.
 - **Como testar no celular:** `npm run build && npm run preview`, Chrome do Android. Vila: dois locais sem sobrepor, tocar na Taverna mostra o Bram. Ajustes > Teste de voz: tocar a frase; tocar no microfone mostra o aviso de privacidade, depois permissão do navegador, falar e ver as alternativas com a confiança; negar a permissão mostra a mensagem; no Firefox o microfone some.
 - **Pendências:** o QA/PW local sem navegador instalado usa `PW_CHANNEL=chrome`. Se o ledger passar de 25.000 eventos, exportar precisará de plano (compactar o JSON ou dividir).
+
+**W2-16 (App, aprovada pelo Revisor):**
+- **Teste das frases:** `PhraseTest` (`ui/screens/VoicePhraseTest.tsx`) em `/settings/voice`, abaixo do diagnóstico. Frases de `content/eval/stt/pt-BR_en.json` por `loadVoicePhrases`, agora com `parseVoiceEvalSet` (a conferência à mão saiu de `catalog/voice.ts`). `services/voiceTest.ts`: `judge` (o mesmo `matchReply` do player, alternativas em ordem), `tally` (pular não conta) e `formatResult` (texto em inglês: cabeçalho com a taxa, uma linha por frase tentada).
+- **Tela:** "Frase N de 44" grande com `lang`, Ouvir opcional, microfone, ✓/✗ (casou com outra mostra qual), alternativas com confiança, Repetir/Pular/Próxima/Ver resumo, resumo com taxa, lista dos ✗ e "Copiar resultado". Nada é gravado. Sem escuta, só avisa. Textos `voice.test.*` nos dois idiomas; o aviso de privacidade diz que a voz vai ao serviço de fala do navegador.
+- **Como testar no celular:** `npm run build && npm run preview` (ou o site publicado), Chrome do Android, Ajustes > Teste de voz > "Começar o teste"; ler as 44; "Ver resumo" > "Copiar resultado" e colar na conversa.
+- **Testes:** componente com Stt falso (`ui/voicePhraseTest.test.tsx`); e2e do Revisor em `tests/e2e/voice-test.spec.ts`.
 
 **W2-03 (Conteúdo, aprovada pelo Arquiteto em 2026-11-20):**
 - **Missões, na ordem:** `bakery-01` (A1) → `bakery-02` (A1) → `tavern-01` (A1) → `tavern-02` (A2) → `tavern-03` (A2, **chefe**, com Bram e Tilda).

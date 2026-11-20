@@ -982,3 +982,21 @@ mark.recast {
     transform: scale(1);
   }
 }
+
+/* Teste das frases (W2-16): a frase a ler é grande; ✓ e ✗ levam o símbolo além da cor. */
+.voice-test-phrase {
+  font-size: 1.6rem;
+  line-height: 1.3;
+}
+
+.voice-test-ok {
+  font-weight: 700;
+}
+
+.voice-test-bad {
+  font-weight: 700;
+}
+
+.voice-test-misses {
+  padding-left: 1.25rem;
+}

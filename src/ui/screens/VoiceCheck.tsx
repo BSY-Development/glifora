@@ -20,6 +20,7 @@ import {
 } from "../../services/voice";
 import { MicConsentDialog } from "../MicConsentDialog";
 import { PageTitle } from "../PageTitle";
+import { PhraseTest } from "./VoicePhraseTest";
 import { useT } from "../useT";
 
 type Heard = { kind: "ok"; alternatives: SttAlternative[] } | { kind: "fail"; reason: SttFailReason };
@@ -174,6 +175,8 @@ export function VoiceCheck() {
           )}
         </section>
       )}
+
+      <PhraseTest />
 
       {askConsent && <MicConsentDialog onAccept={onConsent} onCancel={() => setAskConsent(false)} />}
     </>
