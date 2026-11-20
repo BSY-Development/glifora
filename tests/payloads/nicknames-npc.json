@@ -1,0 +1,47 @@
+{
+  "_comment": "W2-13 (D-53): apelido -> nome falado esperado pela NPC (null = a NPC nao usa nome, o vocativo some). 'spoken' vem do texto da D-53: ate 10 letras e so letras (acento vale), no maximo um hifen ou apostrofo no meio, senao a primeira palavra pela mesma regra. 'suspect': deveriam dar null mas passam (achado F-W2-13-04). Caracteres invisiveis montados por \\u para o arquivo ficar legivel.",
+  "ok": {
+    "Maria": "Maria",
+    "Maria Clara": "Maria",
+    "João Açaí": "João",
+    "D'Ávila": "D'Ávila",
+    "Ana-Lu": "Ana-Lu",
+    "Abcdefghij": "Abcdefghij",
+    "Zoë": "Zoë",
+    "Ana Bob": "Ana",
+    "Ana　Bob": "Ana"
+  },
+  "none": {
+    "Abcdefghijk": null,
+    "Ana--Lu": null,
+    "-Ana": null,
+    "Ana-": null,
+    "Jo1": null,
+    "😀": null,
+    "Ana😀": null,
+    "😀 Ana": null,
+    "{player}": null,
+    "{player}, hi": null,
+    "$&": null,
+    "$1 $2": null,
+    "javascript:alert(1)": null,
+    "a{color:red}": null,
+    "${7*7}": null,
+    "100%": null,
+    "Ana_Lu": null,
+    "Ana.Lu": null,
+    "&lt;b&gt;": null,
+    "&#60;script&#62;": null,
+    "%3Cb%3E": null,
+    "\\u003cb\\u003e": null,
+    "Ana, Bob": null,
+    "O'Brian-Smith": null
+  },
+  "suspect": {
+    "keycap": "a⃣",
+    "cgj-invisivel": "A͏na",
+    "vs16": "A️na",
+    "khmer-vogal-invisivel": "Ana឴",
+    "zalgo": "Z̵̶̷̸a̵̶̷̸l̵̶̷̸g̵̶̷̸o̵̶̷̸"
+  }
+}

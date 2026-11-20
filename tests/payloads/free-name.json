@@ -1,0 +1,5 @@
+{
+  "_comment": "W2-13 (D-51): o que a pessoa diz na fala 'name' da bakery-02. accepted = a NPC aceita como nome e a reacao fixa aparece; rejected = a NPC pede de novo (fails=1) e nada e pago. 'echo' = o texto aparece na tela so como texto.",
+  "accepted": ["Maria", "Maria Clara", "O'Brien", "Zoë", "{player}", "$& $1 $`", "${7*7}", "__proto__", "aaa bbb ccc", "My name is {player}", "I am call Maria", "‮Maria"],
+  "rejected": ["Sorry", "What?", "Hello", "Yes", "Maria Clara de Souza", "<script>alert(1)</script>", "uma duas tres quatro cinco"]
+}

@@ -120,8 +120,8 @@ export async function prepare(missionId: string): Promise<PrepareResult> {
   const day = localDay(getDeps().now());
   const [runs, row] = await Promise.all([listRuns(db), loadSession(db)]);
 
-  const npcs: Record<string, Npc> = {};
-  const voices: Record<string, Voice> = {};
+  const npcs: Record<string, Npc> = Object.create(null);
+  const voices: Record<string, Voice> = Object.create(null);
   for (const c of mission.characters) {
     const sheet = c.npc === undefined ? undefined : await loadNpc(c.npc);
     if (sheet) npcs[c.id] = sheet;

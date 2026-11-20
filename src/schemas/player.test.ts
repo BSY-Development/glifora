@@ -40,6 +40,22 @@ describe("spokenName (D-53, nome falado)", () => {
     ["{player}", null],
     ["Ana_Bia", null],
     ["Zoë", "Zoë"],
+    ["Inês", "Inês"],
+    ["Ine\u0302s", "Inês"], // acento separado vira a letra pronta
+    ["Ngo\u031B\u0300", "Ng\u1EDD"], // o + chifre + grave: o NFC junta tudo em uma letra
+    // F-W2-13-04: marcas que não são acento, ou acento empilhado.
+    ["a\u20E3", null], // keycap
+    ["A\u034Fna", null], // CGJ, invisível
+    ["A\uFE0Fna", null], // VS16
+    ["Ana\u17B4", null], // vogal inerente khmer, invisível
+    ["Z\u0335\u0336\u0337\u0338a\u0335\u0336\u0337\u0338l\u0335\u0336\u0337\u0338g\u0335\u0336\u0337\u0338o\u0335\u0336\u0337\u0338", null], // Zalgo
+    ["Za\u0335lgo", null], // uma só marca, mas não é acento
+    ["Jo\u0301\u0301\u0301", null], // acento empilhado: depois do NFC, "ó" com mais duas marcas
+    ["\u3164", null], // preenchimento do hangul: "letra" invisível
+    ["Ana\u3164", null],
+    ["Ana\u200B", null], // zero-width space
+    ["Мария", "Мария"],
+    ["李雷", "李雷"],
   ])("%j → %j", (nick, expected) => {
     expect(spokenName(nick)).toBe(expected);
   });

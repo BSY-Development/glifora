@@ -33,16 +33,20 @@ const EN_CONTRACTION_HOSTS = new Set([
   "i", "you", "he", "she", "it", "we", "they", "that", "this", "there", "here",
   "what", "where", "who", "how", "when", "why", "which",
 ]);
-const EN_SUFFIX: Record<string, string> = { s: "is", re: "are", ll: "will", d: "would", ve: "have", m: "am" };
+// As tabelas buscadas com texto da pessoa são Map, nunca objeto comum: "constructor", "__proto__" ou
+// "toString" num objeto devolvem o que vem do Object.prototype (F-W2-13-01).
+const table = (entries: Record<string, string>): ReadonlyMap<string, string> => new Map(Object.entries(entries));
+
+const EN_SUFFIX = table({ s: "is", re: "are", ll: "will", d: "would", ve: "have", m: "am" });
 /** "n't" com forma própria; o resto é só "<verbo> not". */
-const EN_NOT_SPECIAL: Record<string, string> = { ca: "can", wo: "will", sha: "shall" };
+const EN_NOT_SPECIAL = table({ ca: "can", wo: "will", sha: "shall" });
 
 /**
  * Contrações escritas sem apóstrofo que não se confundem com outra palavra.
  * Ficam de fora as ambíguas: "were" (we're), "ill" (I'll), "well" (we'll), "hell", "shell", "shed",
  * "wed", "lets" (let's). O possessivo "its" vira "it is", como manda a D-43 ("'s" depois de pronome).
  */
-const EN_BARE: Record<string, string> = {
+const EN_BARE = table({
   im: "i am", youre: "you are", theyre: "they are",
   ive: "i have", youve: "you have", weve: "we have", theyve: "they have",
   id: "i would", youd: "you would", hed: "he would", theyd: "they would",
@@ -53,19 +57,19 @@ const EN_BARE: Record<string, string> = {
   wasnt: "was not", werent: "were not", havent: "have not", hasnt: "has not", hadnt: "had not",
   wont: "will not", wouldnt: "would not", shouldnt: "should not", couldnt: "could not",
   cant: "can not", cannot: "can not", mustnt: "must not",
-};
+});
 
 function expandEnglish(token: string): string {
   const apos = token.indexOf("'");
-  if (apos < 0) return EN_BARE[token] ?? token;
+  if (apos < 0) return EN_BARE.get(token) ?? token;
   if (token === "can't") return "can not";
   if (token.endsWith("n't")) {
     const verb = token.slice(0, -3);
-    if (!verb.includes("'")) return `${EN_NOT_SPECIAL[verb] ?? verb} not`;
+    if (!verb.includes("'")) return `${EN_NOT_SPECIAL.get(verb) ?? verb} not`;
   }
   const host = token.slice(0, apos);
   const suffix = token.slice(apos + 1);
-  const full = EN_SUFFIX[suffix];
+  const full = EN_SUFFIX.get(suffix);
   if (full && EN_CONTRACTION_HOSTS.has(host)) return `${host} ${full}`;
   // Possessivo ("tilda's") e qualquer outro apóstrofo: o apóstrofo some.
   return token.replaceAll("'", "");
@@ -96,10 +100,10 @@ function numberWords(n: number, lang: ContentLang): string {
 }
 
 /** Formas do mesmo número que viram uma só (gênero e grafia): "duas" = "dois" = "2". */
-const NUMBER_FOLD: Record<ContentLang, Record<string, string>> = {
-  en: {},
-  es: { un: "uno", una: "uno", veintiun: "veintiuno", veintiuna: "veintiuno" },
-  "pt-BR": { uma: "um", duas: "dois", quatorze: "catorze" },
+const NUMBER_FOLD: Record<ContentLang, ReadonlyMap<string, string>> = {
+  en: table({}),
+  es: table({ un: "uno", una: "uno", veintiun: "veintiuno", veintiuna: "veintiuno" }),
+  "pt-BR": table({ uma: "um", duas: "dois", quatorze: "catorze" }),
 };
 
 const TYPOGRAPHIC_APOSTROPHES = /[’‘´`ʼ′]/g;
@@ -124,7 +128,7 @@ export function normalize(text: string, lang: ContentLang): string {
     for (const word of expanded.split(" ")) {
       if (!word) continue;
       if (/^\d+$/.test(word) && Number(word) <= 99) out.push(...numberWords(Number(word), lang).split(" "));
-      else out.push(fold[word] ?? word);
+      else out.push(fold.get(word) ?? word);
     }
   }
   return out.join(" ");

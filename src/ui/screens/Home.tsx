@@ -17,11 +17,8 @@ export function Home() {
   const t = useT();
   const profile = useLiveQuery(() => loadProfile());
   const avatar = useLiveQuery(() => loadAvatar()) ?? DEFAULT_AVATAR;
-  // Enquanto carrega, a barra aparece como no nível 1 vazio (o mesmo de quem ainda não tem eventos).
+  // Até ter a soma do livro-razão não há número: nada de "Nível 1" falso para quem já está bem acima.
   const progress = useLiveQuery(() => loadProgress());
-  const level = progress?.level ?? 1;
-  const into = progress?.into ?? 0;
-  const toNext = progress?.toNext ?? 50;
 
   // Mesmo enquanto o perfil carrega, o título já existe: o Layout põe o foco nele ao trocar de rota.
   if (profile === undefined) {
@@ -45,11 +42,15 @@ export function Home() {
         <div className="hud-info">
           <p className="hud-name">{greeting}</p>
           <p className="hud-level">
-            {t("hud.level", { n: level })} · {t(`hud.title.${progress?.title ?? "apprentice"}`)}
+            {progress === undefined ? t("common.loading") : `${t("hud.level", { n: progress.level })} · ${t(`hud.title.${progress.title}`)}`}
           </p>
           {/* A barra é só o desenho; o número vai em texto logo abaixo, para o leitor de tela e para quem aumenta a letra. */}
-          <progress className="xp" aria-hidden="true" value={into} max={into + toNext} />
-          <p className="hud-xp">{t("hud.xp", { into, total: into + toNext })}</p>
+          {progress !== undefined && (
+            <>
+              <progress className="xp" aria-hidden="true" value={progress.into} max={progress.into + progress.toNext} />
+              <p className="hud-xp">{t("hud.xp", { into: progress.into, total: progress.into + progress.toNext })}</p>
+            </>
+          )}
         </div>
       </section>
 

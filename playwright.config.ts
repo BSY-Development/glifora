@@ -2,6 +2,8 @@
 // que aplica a CSP de public/_headers. Dono: Revisor. O job `e2e` do ci.yml roda `npx playwright test`.
 import { defineConfig, devices } from "@playwright/test";
 
+// A porta é fixa: alguns testes (e2e-security) citam a 4173. O servidor só é reaproveitado com PW_REUSE_SERVER=1:
+// reaproveitar um `vite preview` esquecido serviu o build ANTIGO a uma rodada (2026-11-20, W2-19).
 const PORT = 4173;
 
 export default defineConfig({
@@ -24,7 +26,7 @@ export default defineConfig({
   webServer: {
     command: `npm run build && npm run preview -- --port ${PORT} --strictPort`,
     url: `http://localhost:${PORT}`,
-    reuseExistingServer: !process.env["CI"],
+    reuseExistingServer: process.env["PW_REUSE_SERVER"] === "1" && !process.env["CI"],
     timeout: 120_000,
   },
 });

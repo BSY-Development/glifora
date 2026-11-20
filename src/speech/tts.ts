@@ -64,8 +64,13 @@ export function createTts(): Tts {
       if (list.length === 0) return "unavailable";
       const voice = voices.find((v) => v.voiceURI === list[0]?.id);
 
-      s.cancel(); // uma fala por vez
-      const utterance = new SpeechSynthesisUtterance(text);
+      let utterance: SpeechSynthesisUtterance;
+      try {
+        s.cancel(); // uma fala por vez
+        utterance = new SpeechSynthesisUtterance(text);
+      } catch {
+        return "unavailable";
+      }
       utterance.lang = lang;
       if (voice) utterance.voice = voice;
       utterance.rate = rate;
@@ -87,7 +92,11 @@ export function createTts(): Tts {
           // `interrupted` e `canceled`: outra fala ou `cancel()` cortou esta. Os demais (`not-allowed`, `synthesis-failed`...): sem áudio.
           finish(event.error === "interrupted" || event.error === "canceled" ? "interrupted" : "unavailable");
         };
-        s.speak(utterance);
+        try {
+          s.speak(utterance);
+        } catch {
+          finish("unavailable"); // speak() que lança: segue sem voz, como quando o TTS não existe
+        }
       });
     },
 

@@ -3,6 +3,7 @@
 // Nada daqui é gravado: o resultado só existe na tela e no texto que a pessoa copiar.
 import { load as loadMission, loadVoicePhrases, type VoicePhrase, type VoicePhrasesResult } from "../catalog";
 import { matchReply, type Mission } from "../schemas";
+import { plain } from "./play";
 import type { SttAlternative, SttFailReason } from "./voice";
 
 export type { VoicePhrase };
@@ -66,8 +67,11 @@ export function tally(total: number, attempts: readonly Attempt[]): Tally {
   return { total, done: tried.length, ok, pct: tried.length === 0 ? 0 : Math.round((ok / tried.length) * 100) };
 }
 
+/** A transcrição vem do reconhecedor: texto puro, numa linha só e com teto (nada de linhas falsas no texto copiado). */
+const clean = (text: string): string => plain(text, 200);
+
 const heardText = (heard: readonly SttAlternative[]): string =>
-  heard.length === 0 ? "-" : heard.map((a) => `"${a.text}" (${a.confidence > 0 ? `${Math.round(a.confidence * 100)}%` : "?"})`).join(" | ");
+  heard.length === 0 ? "-" : heard.map((a) => `"${clean(a.text)}" (${a.confidence > 0 ? `${Math.round(a.confidence * 100)}%` : "?"})`).join(" | ");
 
 function line(a: Attempt): string {
   const { id, expect } = a.phrase;

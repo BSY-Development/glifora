@@ -124,6 +124,15 @@ export const FAILS_PER_RAISE = 2;
 /** Tentativas do fecho antes da resposta-modelo (D-43). */
 export const CLOSING_ATTEMPTS = 2;
 
+/** "AAAA-MM-DD" que existe no calendário ("2026-02-30" e "2026-13-45" não). */
+export function isRealDay(day: unknown): day is string {
+  if (typeof day !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(day)) return false;
+  const [y, m, d] = day.split("-").map(Number) as [number, number, number];
+  const leap = (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
+  const last = m === 2 ? (leap ? 29 : 28) : [4, 6, 9, 11].includes(m) ? 30 : 31;
+  return m >= 1 && m <= 12 && d >= 1 && d <= last;
+}
+
 const clip = (s: string): string => s.slice(0, 300);
 
 /**
@@ -225,7 +234,8 @@ export interface TodayLevels {
 
 /** As rodadas concluídas de hoje da missão (não conta a rodada de `exceptRunId`). */
 export function todayLevels(history: readonly RunSummary[], missionId: string, day: string, exceptRunId?: string): TodayLevels {
-  const nodes: Record<string, number[]> = {};
+  // sem protótipo: `a.node` vem de runs importadas e pode ser "constructor" ou "__proto__"
+  const nodes: Record<string, number[]> = Object.create(null);
   const closing: number[] = [];
   for (const run of history) {
     if (run.missionId !== missionId || run.day !== day || (exceptRunId !== undefined && run.id === exceptRunId)) continue;
@@ -260,7 +270,7 @@ const INPUTS: readonly InputMode[] = ["voice", "typed", "tap"];
 export function parseState(mission: Mission, raw: unknown): PlayState | null {
   if (!isObj(raw) || raw["v"] !== 1 || raw["missionId"] !== mission.id) return null;
   const { runId, day, mode, phase, listen, node, help, fails, retries, steps, closing } = raw;
-  if (typeof runId !== "string" || !/^[A-Za-z0-9_.:-]{1,100}$/.test(runId) || typeof day !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(day)) return null;
+  if (typeof runId !== "string" || !/^[A-Za-z0-9_.:-]{1,100}$/.test(runId) || !isRealDay(day)) return null;
   if (mode !== 1 && mode !== 2 && mode !== 3) return null;
   if (typeof phase !== "string" || !(PHASES as readonly string[]).includes(phase)) return null;
   if (!isInt(listen, 0, Math.max(0, mission.listen.length - 1)) || typeof node !== "string" || !nodeOf(mission, node)) return null;

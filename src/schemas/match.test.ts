@@ -84,6 +84,49 @@ describe("normalize: contrações com e sem apóstrofo (D-43)", () => {
   });
 });
 
+describe("normalize e casamento: palavras que são nomes do Object.prototype (F-W2-13-01)", () => {
+  const WORDS = ["constructor", "__proto__", "toString", "hasOwnProperty", "valueOf"];
+  const cases = (w: string) => [w, w.toLowerCase(), w.toUpperCase(), w[0]!.toUpperCase() + w.slice(1)];
+  const frames = (w: string) => [w, `my name is ${w}`, `${w}, please`, `I'd like a ${w} roll`, `it'${w}`, `${w}'s`, `${w}n't`];
+
+  it.each(WORDS)("%s em qualquer caixa e no meio da frase: normalize devolve texto, nos três idiomas", (word) => {
+    for (const lang of ["en", "es", "pt-BR"] as const) {
+      for (const w of cases(word)) {
+        for (const said of frames(w)) {
+          const out = normalize(said, lang);
+          expect(typeof out, `${lang}: ${said}`).toBe("string");
+          expect(out, `${lang}: ${said}`).not.toMatch(/function|native code|\[object/);
+        }
+      }
+    }
+  });
+
+  it("os valores esperados: a palavra fica como palavra", () => {
+    expect(en("constructor")).toBe("constructor");
+    expect(en("CONSTRUCTOR please")).toBe("constructor please");
+    expect(en("constructorn't")).toBe("constructor not");
+    expect(en("it'constructor")).toBe("itconstructor");
+    expect(en("__proto__")).toBe("proto");
+    expect(en("toString valueOf hasOwnProperty")).toBe("tostring valueof hasownproperty");
+    expect(normalize("constructor", "pt-BR")).toBe("constructor");
+    expect(normalize("Constructor", "es")).toBe("constructor");
+  });
+
+  it.each(WORDS)("%s: matchReply, a resposta livre e o fecho não lançam e respondem", (word) => {
+    const replies = [r("A honey roll, please.", [["honey"]]), { text: "Maria.", keywords: [["maria"]], flawed: false, free: "name" as const }];
+    for (const w of cases(word)) {
+      for (const said of frames(w)) {
+        expect(() => matchReply(replies, said, "en")).not.toThrow();
+        expect(() => matchReply(replies, [said, `honey ${said}`], "en")).not.toThrow();
+        expect(() => checkClosingAnswer(["roll"], said, "en")).not.toThrow();
+        expect(() => contentWords(said, "pt-BR")).not.toThrow();
+      }
+    }
+    expect(matchReply(replies, `${word} honey`, "en")?.index).toBe(0);
+    expect(checkClosingAnswer(["roll"], `a ${word} roll`, "en").accepted).toBe(true);
+  });
+});
+
 describe("normalize: números por extenso ou em dígito", () => {
   it.each([
     ["2 rolls", "two rolls"],
