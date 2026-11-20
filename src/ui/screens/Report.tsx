@@ -5,12 +5,14 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { loadReport } from "../../services/play";
 import { Loading } from "../Loading";
 import { PageTitle } from "../PageTitle";
+import { useQuoted } from "../Quoted";
 import { useT } from "../useT";
 
 const MODE_LABEL = { 1: "play.mode.1", 2: "play.mode.2", 3: "play.mode.3" } as const;
 
 export function Report() {
   const t = useT();
+  const quoted = useQuoted();
   const { runId = "" } = useParams();
   const location = useLocation();
   const fresh = (location.state as { fresh?: unknown } | null)?.fresh === true;
@@ -92,11 +94,11 @@ export function Report() {
             {patterns.map((pattern) => (
               <li key={pattern.id} className="report-item">
                 {pattern.title !== undefined && <p className="report-item-title">{pattern.title}</p>}
-                {pattern.recast && <p>{t("report.recasts.said", { original: pattern.recast.original, corrected: pattern.recast.corrected })}</p>}
+                {pattern.recast && <p>{quoted("report.recasts.said", { original: pattern.recast.original, corrected: pattern.recast.corrected }, mission.target)}</p>}
                 {pattern.explanation !== undefined && <p>{pattern.explanation}</p>}
                 {pattern.example && (
                   <p className="hint">
-                    {t("report.recasts.wrong", { text: pattern.example.wrong })} → {t("report.recasts.right", { text: pattern.example.right })}
+                    {quoted("report.recasts.wrong", { text: pattern.example.wrong }, mission.target)} → {quoted("report.recasts.right", { text: pattern.example.right }, mission.target)}
                   </p>
                 )}
                 <p className="hint">{t("report.recasts.times", { n: pattern.count })}</p>

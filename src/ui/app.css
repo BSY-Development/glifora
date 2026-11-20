@@ -1000,3 +1000,12 @@ mark.recast {
 .voice-test-misses {
   padding-left: 1.25rem;
 }
+
+.voice-test-text {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0.25rem 0 0.75rem;
+  font-family: ui-monospace, monospace;
+  font-size: 0.85rem;
+}

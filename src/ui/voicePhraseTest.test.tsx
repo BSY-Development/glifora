@@ -118,6 +118,29 @@ describe("teste das frases", () => {
   });
 });
 
+describe("resumo", () => {
+  it("o Copiar resultado vem logo abaixo da taxa, antes da lista dos ✗, e o texto fica selecionável", async () => {
+    setup([alts(["pizza", 0.4])]);
+    await start();
+    await mic();
+    fireEvent.click(await screen.findByRole("button", { name: t("voice.test.summary") }));
+    const copy = await screen.findByRole("button", { name: t("voice.test.copy" ) });
+    const misses = screen.getByText(t("voice.test.misses"));
+    expect(copy.compareDocumentPosition(misses) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    const box = screen.getByLabelText(t("voice.test.text_label")) as HTMLTextAreaElement;
+    expect(box.readOnly).toBe(true);
+    expect(box.value).toContain("0/1 = 0%");
+  });
+
+  it("sem nenhuma tentada o botão fica desligado e não há caixa de texto", async () => {
+    setup([]);
+    await start();
+    fireEvent.click(await screen.findByRole("button", { name: t("voice.test.summary") }));
+    expect((await screen.findByRole("button", { name: t("voice.test.copy") }) as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.queryByLabelText(t("voice.test.text_label"))).toBeNull();
+  });
+});
+
 describe("tally e formatResult", () => {
   it("taxa 0 quando nada foi tentado", () => {
     expect(tally(44, [])).toEqual({ total: 44, done: 0, ok: 0, pct: 0 });

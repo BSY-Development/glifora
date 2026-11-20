@@ -189,6 +189,7 @@ export function PhraseTest({ loadPhrases = loadPhraseSet, mission, listen = real
       {showSummary ? (
         <Summary
           list={list}
+          text={formatResult(total, list)}
           stats={stats}
           copyNote={copyNote}
           onCopy={() => void copy()}
@@ -296,6 +297,7 @@ function Result({ attempt }: { attempt: Attempt }) {
 
 function Summary(props: {
   list: readonly Attempt[];
+  text: string;
   stats: ReturnType<typeof tally>;
   copyNote: string | null;
   onCopy: () => void;
@@ -303,27 +305,21 @@ function Summary(props: {
   onBack: (() => void) | undefined;
 }) {
   const t = useT();
+  const top = useRef<HTMLHeadingElement>(null);
+  // O resumo abre no topo e com o foco nele, mesmo que a tela estivesse rolada (o botão de copiar fica logo abaixo da taxa).
+  useEffect(() => {
+    top.current?.scrollIntoView?.({ block: "start" });
+    top.current?.focus({ preventScroll: true });
+  }, []);
   const misses = props.list.filter((a) => a.outcome.kind !== "match" && a.outcome.kind !== "skipped");
   return (
     <div>
-      <h3>{t("voice.test.summary_title")}</h3>
+      <h3 ref={top} tabIndex={-1}>
+        {t("voice.test.summary_title")}
+      </h3>
       <p role="status" className="voice-phrase">
         {props.stats.done === 0 ? t("voice.test.summary_empty") : t("voice.test.rate", { ok: props.stats.ok, done: props.stats.done, pct: props.stats.pct })}
       </p>
-      {misses.length > 0 && (
-        <>
-          <h4>{t("voice.test.misses")}</h4>
-          <ul className="voice-test-misses">
-            {misses.map((a) => (
-              <li key={a.phrase.id}>
-                <span lang={TAG}>{a.phrase.text}</span>
-                {" — "}
-                {a.heard.length > 0 ? <span lang={TAG}>{a.heard.map((h) => `"${h.text}"`).join(" | ")}</span> : <span>{t("voice.test.nothing_heard")}</span>}
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
       <div className="actions">
         <button type="button" className="btn btn-primary" onClick={props.onCopy} disabled={props.stats.done === 0}>
           {t("voice.test.copy")}
@@ -338,6 +334,26 @@ function Summary(props: {
         </button>
       </div>
       <p role="status">{props.copyNote}</p>
+      {props.stats.done > 0 && (
+        <>
+          <label htmlFor="voice-test-text">{t("voice.test.text_label")}</label>
+          <textarea id="voice-test-text" className="voice-test-text" readOnly rows={8} value={props.text} onFocus={(event) => event.currentTarget.select()} />
+        </>
+      )}
+      {misses.length > 0 && (
+        <>
+          <h4>{t("voice.test.misses")}</h4>
+          <ul className="voice-test-misses">
+            {misses.map((a) => (
+              <li key={a.phrase.id}>
+                <span lang={TAG}>{a.phrase.text}</span>
+                {" — "}
+                {a.heard.length > 0 ? <span lang={TAG}>{a.heard.map((h) => `"${h.text}"`).join(" | ")}</span> : <span>{t("voice.test.nothing_heard")}</span>}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
     </div>
   );
 }

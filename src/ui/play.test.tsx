@@ -180,7 +180,10 @@ describe("player", () => {
     await type(mission.closing.target_words![0]!);
     fireEvent.click(await screen.findByRole("button", { name: t("play.done.report") }));
     await screen.findByText(t("report.recasts.title"));
-    expect(screen.getByText(t("report.recasts.said", { original: reply.recast!.original, corrected: reply.recast!.corrected }))).toBeTruthy();
+    const said = t("report.recasts.said", { original: reply.recast!.original, corrected: reply.recast!.corrected });
+    expect(screen.getByText((_, el) => el?.tagName === "P" && el.textContent === said)).toBeTruthy();
+    // R-W2-11-1: os trechos em inglês levam lang do idioma-alvo.
+    expect(screen.getByText(reply.recast!.original, { selector: "span[lang]" }).getAttribute("lang")).toBe(mission.target);
   });
 
   it("depois das duas tentativas do fecho vem a resposta-modelo; seguir sem dizer não trava", async () => {

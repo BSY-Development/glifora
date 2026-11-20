@@ -268,3 +268,25 @@ Proposta do dono. Muda a fase 7 e acrescenta itens às fases 4, 5 e 8. Nada é i
 - **Versão:** campo opcional novo, então não sobe `schema` (W0-03 §5.1).
 - **Fábrica (fase 4):** o prompt não pede esse campo. Se vier, é validado igual.
 
+### D-52 — A vila vira uma rua com rolagem lateral (2026-11-20) · aceita (dono)
+- **Problema:** com a taverna, a padaria foi parar "no céu", e quanto mais locais, pior fica a navegação (achado do dono no celular). A fase 3 chega a 6 locais.
+- **Decisão:**
+  - **Rua:** os locais ficam lado a lado numa rua de pixel art. A pessoa desliza para os lados (scroll-snap) e vê cerca de 2 locais por vez em 360 px.
+  - **Navegação:** pontinhos mostram a posição. Setas e teclado servem para quem não desliza. Para o leitor de tela, continua uma lista de links.
+  - **Locais trancados (fase 3):** aparecem como silhuetas, o que mostra o que vem pela frente.
+  - **Posição:** o app lembra a última posição da rua (conveniência local, com try/catch).
+- **Por quê:** cresce sem apertar nada, é fácil com uma mão e mantém a sensação de andar pela vila. As alternativas eram bairros com abas e um mapa para arrastar, este mais difícil com uma mão e para o leitor de tela.
+
+### D-53 — As NPCs chamam a pessoa pelo apelido (2026-11-20) · aceita (dono)
+- **O que muda:** a Tilda e o Bram usam o apelido do perfil nas falas deles ("Good morning, Maria!"). O Ben da escuta continua sendo o freguês de exemplo: a escuta é ouvir alguém fazendo o pedido, e não pôr frases na boca da pessoa.
+- **Custo:** nenhum. A voz do modo demo é a do navegador, no próprio aparelho, sem crédito nem token. Vale para todos os modos.
+- **Formato** (campo de texto novo, sem subir `schema`):
+  - **Marcador:** `{player}`, só na forma de vocativo com vírgula antes (`", {player}"`). Sem apelido, o trecho inteiro some e a frase continua natural ("Good morning!"), sem problema de gênero.
+  - **Onde pode:** só nas falas das NPCs (`nodes[].text`, `reaction.text`, `closing.question` e `closing.success`) e nas traduções delas.
+  - **Onde não pode:** em `replies[].text`, `keywords`, `recast`, `model_answer`, `hint` e `listen`. O `mission.check` confere.
+- **Segurança:**
+  - o apelido já passa pelo schema `Nickname` (sem `<`, `>`, controle nem invisíveis; até 30 caracteres);
+  - a troca acontece num lugar só do player e sai sempre como texto;
+  - o TTS lê o apelido com a voz do idioma-alvo.
+- **Quem faz:** o Conteúdo faz o schema, a conferência e as missões (com moderação: 1 ou 2 vezes por missão, onde soar natural). O App faz a troca no player, no relatório e na fala.
+

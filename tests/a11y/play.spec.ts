@@ -206,10 +206,9 @@ test.describe("lang= nos textos em inglês (idioma-alvo) dentro da interface em 
     expect(await words.first().getAttribute("lang"), "palavra nova").toMatch(/^en/);
   });
 
-  // ACHADO R-W2-11-1 (menor, App): Report.tsx monta "Você disse “A roll of honey” e a conversa seguiu com “A honey roll”" com t(), sem marcar
-  // o trecho em inglês com lang="en" (nem o exemplo "Em vez de / Melhor"). Leitor de tela lê o inglês com a voz do português.
-  // Quando o App corrigir, este test.fail passa a falhar: troque por test.
-  test.fail("R-W2-11-1 · relatório: o inglês citado no recast tem lang=en", async ({ page }) => {
+  // R-W2-11-1 (corrigido pelo App): o inglês citado no recast (e no exemplo "Em vez de / Melhor") dentro da frase em português
+  // precisa de lang="en", senão o leitor de tela o lê com a voz do português.
+  test("R-W2-11-1 · relatório: o inglês citado no recast tem lang=en", async ({ page }) => {
     await installSpeech(page, "ok", { consent: true });
     await onboard(page);
     await page.goto("/play/bakery-01");

@@ -196,6 +196,7 @@
   "voice.test.misses": "Phrases that did not match",
   "voice.test.nothing_heard": "nothing heard",
   "voice.test.copy": "Copy result",
+  "voice.test.text_label": "Result text (if copying fails, select it and copy by hand)",
   "voice.test.copied": "Copied. Paste it in the conversation.",
   "voice.test.copy_failed": "Could not copy. Select the text and copy it by hand.",
   "voice.test.continue": "Back to the test",
@@ -281,8 +282,8 @@
     "one": "{n} time",
     "other": "{n} times"
   },
-  "report.recasts.wrong": "Instead of: {text}",
-  "report.recasts.right": "Better: {text}",
+  "report.recasts.wrong": "Instead of: “{text}”",
+  "report.recasts.right": "Better: “{text}”",
   "report.words.title": "New words",
   "report.closing.title": "Your closing phrase",
   "report.closing.yours": "You said",

@@ -157,3 +157,60 @@ test("o texto de privacidade do teste não promete o que o navegador não cumpre
   await expect(page.getByText(/nothing leaves this device/i)).toHaveCount(0);
   await expect(page.getByText(/heard by the browser.s speech service/)).toBeVisible();
 });
+
+// W2-17.1: o resumo com 0, 5 e 44 frases tentadas em 360×640: o botão de copiar logo abaixo da taxa (sem rolar), a caixa de
+// texto para copiar à mão, o foco no título e o axe limpo.
+async function readPhrases(page: Page, n: number): Promise<void> {
+  for (let i = 0; i < n; i += 1) {
+    // as pares erram de propósito (✗), as ímpares acertam
+    await queueSpeech(page, i % 2 === 0 ? PHRASES[i]!.text : "banana split");
+    await mic(page).click();
+    await expect(page.locator(".voice-test-result")).toBeVisible();
+    await page.getByRole("button", { name: "Next", exact: true }).click();
+  }
+}
+
+for (const n of [0, 5, 44]) {
+  test(`resumo com ${n} frases tentadas: botão de copiar e caixa de texto à vista, foco no título, axe limpo`, async ({ page, context }) => {
+    test.setTimeout(n === 44 ? 90_000 : 30_000);
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    await installSpeech(page, "ok", { consent: true });
+    await open(page);
+    await page.getByRole("button", { name: "Start the test" }).click();
+    await readPhrases(page, n);
+    if (n < 44) await page.getByRole("button", { name: "See summary" }).click();
+    const title = page.getByRole("heading", { name: "Summary" });
+    await expect(title).toBeVisible();
+    await expect(title).toBeFocused();
+    const copy = page.getByRole("button", { name: "Copy result" });
+    const box = page.locator("textarea#voice-test-text");
+    if (n === 0) {
+      await expect(page.getByText("No phrase tried yet.")).toBeVisible();
+      await expect(copy).toBeDisabled();
+      await expect(box).toHaveCount(0);
+    } else {
+      await expect(copy).toBeEnabled();
+      await expect(copy).toBeInViewport({ ratio: 1 }); // sem rolar
+      const b = (await box.boundingBox())!;
+      expect(b.y, "a caixa de texto aparece perto do topo (antes da lista dos ✗)").toBeLessThan(640 * 1.5);
+      expect(b.x).toBeGreaterThanOrEqual(0);
+      expect(b.x + b.width).toBeLessThanOrEqual(360);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
+      await expect(box).toHaveAttribute("readonly", "");
+      expect(await box.inputValue()).toMatch(/^Glifora voice test pt-BR_en: \d+\/\d+ = \d+% \(44 phrases, 0 skipped\)/);
+      expect((await box.inputValue()).split(/\r?\n/)).toHaveLength(n + 1); // cabeçalho + uma linha por frase tentada
+      await box.focus();
+      const selected = await page.evaluate(() => {
+        const el = document.getElementById("voice-test-text") as HTMLTextAreaElement;
+        return el.selectionEnd - el.selectionStart;
+      });
+      expect(selected, "seleciona tudo ao focar").toBe((await box.inputValue()).length);
+      await copy.click();
+      await expect(page.getByText("Copied. Paste it in the conversation.")).toBeVisible();
+      const norm = (s: string): string => s.split(String.fromCharCode(13)).join(""); // o Windows põe CRLF na área de transferência
+      expect(norm(await page.evaluate(() => navigator.clipboard.readText()))).toBe(norm(await box.inputValue()));
+    }
+    const r = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "best-practice"]).analyze();
+    expect(r.violations.map((v) => `${v.impact}/${v.id}: ${v.nodes.map((x) => x.target.join(" ")).join(" | ")}`)).toEqual([]);
+  });
+}

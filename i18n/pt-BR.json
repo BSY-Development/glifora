@@ -196,6 +196,7 @@
   "voice.test.misses": "Frases que não casaram",
   "voice.test.nothing_heard": "nada ouvido",
   "voice.test.copy": "Copiar resultado",
+  "voice.test.text_label": "Texto do resultado (se a cópia falhar, selecione e copie à mão)",
   "voice.test.copied": "Copiado. Cole na conversa.",
   "voice.test.copy_failed": "Não consegui copiar. Selecione o texto e copie à mão.",
   "voice.test.continue": "Voltar ao teste",
@@ -281,8 +282,8 @@
     "one": "{n} vez",
     "other": "{n} vezes"
   },
-  "report.recasts.wrong": "Em vez de: {text}",
-  "report.recasts.right": "Melhor: {text}",
+  "report.recasts.wrong": "Em vez de: “{text}”",
+  "report.recasts.right": "Melhor: “{text}”",
   "report.words.title": "Palavras novas",
   "report.closing.title": "Sua frase final",
   "report.closing.yours": "Você disse",
