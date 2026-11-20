@@ -43,3 +43,13 @@ describe("previewHeaders", () => {
     expect(parseHeadersFile(text)["/assets/*"]?.["Cache-Control"]).toBe("public, max-age=31536000, immutable");
   });
 });
+
+describe("detachedHeaders (D-46)", () => {
+  it("lê as linhas '! Nome' do bloco pedido e o parser não as trata como cabeçalho", async () => {
+    const { detachedHeaders, parseHeadersFile } = await import("./headers");
+    const text = "/*\n  X-A: 1\n  ! Report-To\n  !NEL\n\n/assets/*\n  ! Outro\n";
+    expect(detachedHeaders(text)).toEqual(["report-to", "nel"]);
+    expect(detachedHeaders(text, "/assets/*")).toEqual(["outro"]);
+    expect(parseHeadersFile(text)["/*"]).toEqual({ "X-A": "1" });
+  });
+});

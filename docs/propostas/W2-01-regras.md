@@ -1,8 +1,8 @@
 # W2-01 — Regras de jogo v1 (Fable, 2026-11-20)
 
-Proposta para o Arquiteto decidir (D-48). Traz os números de `rules.v1` para as interfaces de [W0-03 §6]: XP por fonte, curva de nível e títulos, níveis de domínio, e já a fase 3 (desbloqueios, moedas, ofensiva, conquistas). No fim: simulação, conformidade com as 6 guardas e os pontos para decidir.
+Proposta para o Arquiteto decidir (D-49). Traz os números de `rules.v1` para as interfaces de [W0-03 §6]: XP por fonte, curva de nível e títulos, níveis de domínio, e já a fase 3 (desbloqueios, moedas, ofensiva, conquistas). No fim: simulação, conformidade com as 6 guardas e os pontos para decidir.
 
-Li: `docs/SPEC.md`, D-41, D-43, W0-03 §4.1 e §6, `docs/PLAN.md` (fase 2) e `tests/pedagogy/principles.test.ts`.
+Li: `docs/SPEC.md`, D-41, D-43, W0-03 §4.1 e §6, `docs/PLAN.md` (fase 2, com a W2-03 aprovada e a taverna da W2-15), `src/data/schema/records.ts` (dados v2, W2-05) e `tests/pedagogy/principles.test.ts`.
 
 Todos os números da seção 6 saíram de um script que implementa exatamente as tabelas daqui (400 jogadores sorteados por perfil; mostro a mediana). O que depende de hipótese minha está marcado com **[hipótese]**. O que só o teste do dono resolve está marcado com **[provar no portão]**.
 
@@ -18,7 +18,7 @@ Todos os números da seção 6 saíram de um script que implementa exatamente as
 | Replay sem farm | Cada fala paga cheio **uma vez por dia em cada degrau de ajuda**. Repetir no mesmo dia com a mesma ajuda (ou mais) paga ½, depois ¼. Nunca zero, sem teto |
 | Curva | Do nível L ao L+1 custa `50 × L`. Total até o nível L: `25 × L × (L − 1)`. Sem nível máximo |
 | Títulos | 8 faixas: Aprendiz (1), Viajante (5), Mercador (10), Diplomata (16), Embaixador (23), Erudito (31), Sábio (40), Lenda da Vila (50) |
-| Locais | Padaria no nível 1; os outros cinco nos níveis 5, 9, 14, 20 e 27 |
+| Locais | Padaria no nível 1, taverna no 3; os quatro seguintes nos níveis 8, 13, 19 e 26 |
 | Moedas | Só por marcos: estrelas, missão do dia e conquistas. Resposta não dá moeda |
 | Ofensiva | 1 congelamento a cada 2 dias jogados, guarda até 2. Aguenta um fim de semana. Não dá XP |
 | Conquistas | 12 iniciais, em três tamanhos (20 / 50 / 100 XP) |
@@ -75,10 +75,10 @@ Todos os números da seção 6 saíram de um script que implementa exatamente as
 - **No fecho** vale a mesma conta, com três níveis: frase própria (0), resposta-modelo repetida (1), toque (2).
 - **No feitiço** (fase 3): `repeat` = quantas vezes o mesmo card já foi revisto hoje.
 
-**Exemplo, uma fala num dia só:** tocou (4) → leu a frase (8, cheio: menos ajuda) → só com a ideia (12) → sem ajuda (16) → sem ajuda de novo (8) → de novo (4) → com a frase (2, porque já fez melhor três vezes hoje).
+**Exemplo, uma fala num dia só:** tocou (4) → leu a frase (8, cheio: menos ajuda) → só com a ideia (12) → sem ajuda (16) → sem ajuda de novo (8) → de novo (4) → com a frase (2, porque hoje já respondeu cinco vezes com a mesma ajuda ou com menos).
 
 **Por quê:**
-- **Sobe o desafio, vale cheio.** A escada de domínio (frase → ideia → nada) pode ser feita num dia só sem perder nada. O que rende menos é repetir o que já foi feito.
+- **Sobe o desafio, vale cheio.** Na escada de domínio (frase → ideia → nada) feita num dia só, as respostas pagam cheio em cada degrau. Só o fecho rende menos na 2ª e na 3ª rodada (24 → 12 → 6), porque é o mesmo ato repetido. O que rende menos é repetir o que já foi feito.
 - **Acompanha a pedagogia.** Repetir a mesma conversa cinco vezes seguidas ensina pouco; repetir amanhã ensina mais (princípio 4). O XP cheio volta todo dia, e isso é um motivo honesto para voltar.
 - **Não pune.** O fator nunca chega a zero, não existe teto diário e nada é tirado. A pessoa pode treinar o quanto quiser.
 - **Não tem brecha de escolha de modo.** A conta é por fala e pela ajuda de fato usada. Escolher "sem ajuda" e tocar em tudo não rende mais que tocar.
@@ -88,7 +88,7 @@ Todos os números da seção 6 saíram de um script que implementa exatamente as
 
 | Jeito | XP por rodada | XP por hora | Comparação |
 | --- | --- | --- | --- |
-| Só tocar | 7 | ~630 | Uma hora tocando rende o mesmo que uma sessão honesta de 12 min falando (~620) |
+| Só tocar | 7 | ~220 (até ~630 para quem pula a escuta e toca sem ler) | Uma hora tocando rende, no máximo, o mesmo que uma sessão honesta de 12 min falando (~620) |
 | Falar sem ajuda | 30 | ~700 | É uma hora falando inglês em voz alta. Isso é o objetivo do jogo, não um abuso |
 
 **Como mostrar (sugestão para o App):** nunca "−50%". A missão que ainda paga cheio hoje ganha uma marca ("XP cheio hoje"); as outras ficam sem marca. O relatório pode dizer "treino extra de hoje".
@@ -164,17 +164,19 @@ O XP de conversa (2.1 a 2.3) é o que se repete. A fonte `mission` paga só **pr
 
 ### 2.7 O que vira evento
 
-| Evento | Id | XP | Moedas |
+| Evento (`kind`) | Id | XP | Moedas |
 | --- | --- | --- | --- |
-| `mission_completed` ou `boss_defeated` (um por rodada concluída) | uuid | Soma das respostas e do fecho | 0 |
-| `mission_first` | `first:<missionId>` | Prêmio da 1ª conclusão | 5 |
-| `mission_star` | `star:<missionId>:<1 a 3>` | Prêmio da estrela | 5 / 10 / 15 |
-| `daily_complete` | `daily:<dia>` | 40 | 10 |
+| `mission_completed` ou `boss_defeated` (um por rodada concluída) | uuid, com `runId` e `ref` = missão | Soma das respostas e do fecho | 0 |
+| `mission_first` **(novo)** | `first:<missionId>` | Prêmio da 1ª conclusão | 5 (chefe: 10) |
+| `mission_star` **(novo)** | `star:<missionId>:<1 a 3>` | Prêmio da estrela | 5 / 10 / 15 (chefe: o dobro) |
+| `daily_completed` | `daily:<dia>` | 40 | 10 |
 | `achievement` | `ach:<id>` | 20 / 50 / 100 | 10 / 25 / 50 |
 
-- **Por que os prêmios são eventos próprios, com id determinístico:** é o princípio 3 da W0-03 §4.1 ("determinístico para o que só existe uma vez"). Dois aparelhos offline que ganham a mesma estrela geram a mesma linha, e a mescla não paga duas vezes.
+- **Por que os prêmios são eventos próprios, com id determinístico:** é o princípio 3 da W0-03 §4.1 ("determinístico para o que só existe uma vez"). Dois aparelhos offline que ganham a mesma estrela geram a mesma linha, e a mescla não paga duas vezes. O `appendEvent` da W2-05 já devolve o que existe quando o id se repete.
 - **Continua "um evento por missão":** os prêmios somam no máximo 4 linhas na vida inteira de cada missão.
-- **Limite para a importação (W2-05, W2-13):** nas regras v1, nenhum evento legítimo passa de **400 XP** (rodada de 20 falas: 344; maior prêmio: 270) nem de **50 moedas**. Serve de teto barato contra XP forjado no arquivo.
+- **Dois tipos novos em `EVENT_KINDS`** (`src/data/schema/records.ts`): `mission_first` e `mission_star`. Usar `mission_completed` para os prêmios faria as estatísticas contarem missão em dobro.
+- **`freeze_earned` fica sem uso em v1** (seção 5.3).
+- **Limite da importação:** hoje é 10.000 XP e 10.000 moedas por evento. Nas regras v1, nenhum evento legítimo passa de **344 XP** (rodada de 20 falas) nem de **50 moedas**. Dá para apertar o teto para 400 XP e 100 moedas ganhas, se o QA quiser (W2-13). Não impede quem edita o próprio arquivo; só barra o absurdo.
 
 ---
 
@@ -265,20 +267,22 @@ O XP de conversa (2.1 a 2.3) é o que se repete. A fonte `mission` paga só **pr
 
 ### 5.1 Desbloqueio de locais (`unlocksAt`)
 
-| Nível | Local | Sessão em que chega: fala / digita / só toca¹ |
-| --- | --- | --- |
-| 1 | Padaria (`bakery`) | — |
-| 5 | 2º local (sugestão: Mercado) | 1 / 2 / 3 |
-| 9 | 3º (Taverna) | 3 / 4 / 8 |
-| 14 | 4º (Estação) | 7 / 9 / 20 |
-| 20 | 5º (Ferraria) | 13 / 18 / 42 |
-| 27 | 6º (Biblioteca) | 23 / 32 / 76 |
+| Nível | `order` do local | Local | Sessão em que chega: fala / digita / só toca¹ |
+| --- | --- | --- | --- |
+| 1 | 0 | Padaria (`bakery`) | — |
+| 3 | 1 | Taverna (`tavern`) | 1 / 1 / 1 |
+| 8 | 2 | 3º local (sugestão: Mercado) | 3 / 3 / 7 |
+| 13 | 3 | 4º (Estação) | 6 / 8 / 18 |
+| 19 | 4 | 5º (Ferraria) | 12 / 17 / 38 |
+| 26 | 5 | 6º (Biblioteca) | 21 / 30 / 71 |
 
 ¹ Cenário B da seção 6.
 
 - **`unlocksAt(level)`** devolve o que abre **exatamente** naquele nível: `{ type: 'location', id }` e, nos níveis da seção 3, `{ type: 'title', id }`.
-- **A ordem dos temas é do Conteúdo.** A tabela fixa os níveis por posição; os nomes são sugestão (do mais concreto, A1, para o mais abstrato).
-- **O 2º local coincide com o título Viajante** (nível 5): é o grande momento do fim da 1ª sessão.
+- **A taverna abre no nível 3** (150 XP), isto é, logo depois das duas missões da padaria para quem fala ou digita (272 XP). É o primeiro "local novo!" e acontece no meio da 1ª sessão. Quem só toca chega lá no fim da 1ª sessão, rejogando a padaria.
+- **Na fase 2 os dois locais ficam abertos** (W2-15). A trava só entra na fase 3, e quem já joga estará acima do nível 3.
+- **A ordem dos temas do 3º local em diante é do Conteúdo.** A tabela fixa os níveis pela posição (`order`); os nomes são sugestão.
+- **Primeira sessão de quem fala, na fase 3:** taverna no nível 3 e título Viajante no nível 5. São dois marcos em 12 minutos.
 - **Quem só toca não fica trancado:** chega a tudo, só que 3 a 4 vezes mais devagar.
 - **Itens cosméticos não têm trava de nível em v1:** a loja usa só moedas. Duas travas no mesmo item confundem.
 - **Depende de conteúdo:** só vale abrir um local quando houver missões nele. Os níveis ficam numa tabela à parte e podem ser adiados sem tocar no XP.
@@ -383,7 +387,7 @@ devolve { current: atual, best: melhor, freezesLeft: estoque, frozenDays }
 
 | Hipótese | Valor |
 | --- | --- |
-| Conteúdo da fase 2 **[hipótese: a W2-03 ainda está em andamento]** | 3 encontros A1 e 1 encontro A2 com 6 falas; 1 chefe A2 com 8 falas |
+| Conteúdo da fase 2 | O plano aprovado da W2-03: `bakery-01`, `bakery-02` e `tavern-01` (A1), `tavern-02` (A2) e o chefe `tavern-03` (A2). **[hipótese]** 6 falas por encontro e 8 no chefe (as missões ainda estão sendo escritas, W2-04) |
 | Duração de uma rodada | Só toca: ~1,9 min. Fala: ~2,6 min. Digita no celular: ~3,8 min |
 | Rodadas por sessão de 10–15 min | Só toca: 6. Digita: 3. Fala: 5 |
 | **Só toca** | Toca em todas as respostas e no fecho. Nunca ganha estrela |
@@ -423,7 +427,7 @@ Este é o cenário do portão. Depois da sessão 5 ele é o pior caso (nenhum co
 | **Digita** | XP / nível | 408 / 4 | 989 / 6 | 1.355 / 7 | 1.741 / 8 | 2.114 / 9 |
 | **Fala** | XP / nível | 925 / 6 | 1.597 / 8 | 2.345 / 10 | 2.754 / 11 | 2.938 / 11 |
 
-- **A escada inteira paga cheio num dia só**, então as sessões 1 a 3 quase não mudam.
+- **As respostas pagam cheio em cada degrau novo, mesmo no mesmo dia**, então as sessões 1 a 3 quase não mudam.
 - **A 5ª sessão de quem fala rende só ~180 XP**, sem level up: tudo já foi feito hoje, e é exatamente aí que o retorno decrescente age.
 - **Consequência para o roteiro do portão (W2-14):** as 5 sessões devem ser em dias diferentes. É também o que "voltar no dia seguinte" pede.
 
@@ -452,7 +456,7 @@ Este é o cenário do portão. Depois da sessão 5 ele é o pior caso (nenhum co
 | 1º level up na 1ª sessão | Sim, nos três perfis, já no fim da 1ª missão |
 | Não estagna | Quem produz tem level up em toda sessão do portão. No pior caso (sem conteúdo novo), quem fala ainda faz ~620 XP por sessão |
 | Não infla | O último título pede ~75 sessões de quem fala todo dia. No longo prazo o ritmo é de um nível a cada 2 a 3 sessões |
-| Tocar dá menos | 4× menos por resposta; 26% a 28% do XP total; zero estrela |
+| Tocar dá menos | 4× menos por resposta; 24% a 28% do XP total de quem fala; zero estrela |
 | Portão: "quer voltar no dia seguinte" | Os números sustentam: há título novo nas sessões 1 e 3 e level up até a 5ª. **O limite é o conteúdo:** quem fala bem fecha as 15 estrelas na sessão 4, e a sessão 5 fica sem estrela nova **[provar no portão]** |
 
 **Se o portão falhar, o que girar:**
@@ -460,8 +464,8 @@ Este é o cenário do portão. Depois da sessão 5 ele é o pior caso (nenhum co
 | Sintoma | Botão | Efeito |
 | --- | --- | --- |
 | "Acabou o que fazer na sessão 4 ou 5" | Nenhum número. É conteúdo: a fábrica sobe na fila (D-43) | — |
-| "Subo devagar" | Prêmios das estrelas (40 / 56 / 80), ou o coeficiente da curva, de 25 para 20 | +20% de ritmo |
-| "Subo rápido demais, perdeu a graça" | Coeficiente da curva, de 25 para 30, **antes** de fechar a fase | −15% de níveis |
+| "Subo devagar" | Prêmios das estrelas (40 / 56 / 80), ou o coeficiente da curva, de 25 para 20 | Curva: +12% de níveis para o mesmo XP |
+| "Subo rápido demais, perdeu a graça" | Coeficiente da curva, de 25 para 30, **antes** de fechar a fase | −9% de níveis |
 | "Tocar compensa" | Toque de 4 para 2. Custo: a 1ª missão de quem só toca dá 38 XP, e o 1º level up passa para a 2ª missão | −50% no toque |
 | "Não quero falar, digitar rende igual" | +2 por resposta falada (18 / 14 / 10). Custo: a tabela deixa de ter ½ e ¼ exatos em todos os valores, e iPhone e Firefox ficam atrás | +12% na voz |
 
@@ -499,9 +503,10 @@ Conferi por enumeração: todas as combinações de entrada, degrau, `flawed`, t
 | --- | --- | --- |
 | 1 | `repeat: number` em `reply`, `closing` e `spell` | É a entrada do retorno decrescente (2.2). Fica dentro de `xpFor`, então as guardas testam a regra inteira |
 | 2 | `mission`: mesmo tipo, com a leitura "uma chamada por prêmio" (2.4) | Evita campo novo e casa com os eventos de id determinístico |
-| 3 | `RunSummary` precisa ter, no mínimo: `missionId`, `day`, `replies[]` com `{ node, input, scaffold, flawed, attempts }` e `closing` com `{ input, accepted, usedModelAnswer }` | `masteryOf`, `repeat` e o relatório leem daqui. `runs` guarda só rodadas concluídas |
+| 3 | **`Run` (W2-05) ganha dois campos:** `answers`, com até 20 itens `{ node, input, scaffold }` na ordem em que foram respondidos (`node` = id ou índice da fala), e `closing.input`. O `RunSummary` de §6 é a própria linha de `runs` | `masteryOf`, `repeat` e as conquistas de voz leem daqui. Hoje `Run` só tem contagens (`good`, `flawed`, `retry`), e delas não dá para tirar a estrela. Ainda não existe nenhuma rodada gravada, então não há migração |
+| 3b | O "modo da rodada" deste documento (1, 2 ou 3) é o `Run.level` que já existe | Só vocabulário |
 | 4 | `streak(activeDays, extraFreezes, today)`: o 2º parâmetro vira "congelamentos de presente"; em v1 é `[]` | Ganhar passa a ser derivado (5.3) |
-| 5 | `EventKind` ganha `mission_first`, `mission_star` e `daily_complete`, com os ids da seção 2.7 | Prêmio único não duplica na mescla |
+| 5 | `EVENT_KINDS` ganha `mission_first` e `mission_star`, com os ids da seção 2.7. A fonte `daily_complete` de §6 grava o evento `daily_completed`, que já existe | Prêmio único não duplica na mescla |
 | 6 | `Unlock` = `{ type: 'location'; id: LocationId } \| { type: 'title'; id: TitleId }` | Seção 5.1 |
 | 7 | `Stats` com os campos da seção 5.4 | Conquistas |
 
@@ -521,10 +526,10 @@ const missionFactor = (level: Cefr, kind: 'encounter' | 'boss') =>
 const SPELL_XP = { ai: 16, local: 12, self: 8 }, SPELL_TAP_XP = 2;
 const DAILY = { xp: 40, coins: 10 };
 const ACH_REWARD = { S: { xp: 20, coins: 10 }, M: { xp: 50, coins: 25 }, L: { xp: 100, coins: 50 } };
-const ACH_SIZE = {
+const ACH_SIZE: Record<string, 'S' | 'M' | 'L'> = {       // S = P, M = M, L = G na tabela 5.4
   first_mission: 'S', first_star3: 'M', first_boss: 'M', voice_50: 'M', own_words_25: 'M', recast_10: 'S',
   spells_100: 'L', all_npcs: 'L', can_do_5: 'M', streak_7: 'M', days_30: 'L', comeback: 'S',
-} as const;
+};
 
 function xpFor(s: XpSource): number {
   switch (s.kind) {
@@ -573,14 +578,14 @@ function levelAt(totalXp: number) {
   return { level, into: totalXp - totalAt(level), toNext: totalAt(level + 1) - totalXp, title };
 }
 
-const UNLOCK_LEVELS = [1, 5, 9, 14, 20, 27];             // posição = `order` do local em locations.json
+const UNLOCK_LEVELS = [1, 3, 8, 13, 19, 26];             // posição = `order` do local em locations.json
 
 const helpOf = (r: { input: InputMode; scaffold: Scaffold }) => (r.input === 'tap' ? 3 : Math.min(r.scaffold, 2));
-function runDegree(run: RunSummary): number {
-  const n = run.replies.length, need = n - Math.floor(n / 5);
-  const upTo = (h: number) => run.replies.filter((r) => helpOf(r) <= h).length;
-  const produced = run.closing.input !== 'tap';
-  const own = produced && run.closing.accepted && !run.closing.usedModelAnswer;
+function runDegree(run: RunSummary): number {          // `answers` e `closing.input` são os campos novos de Run
+  const n = run.answers.length, need = n - Math.floor(n / 5);
+  const upTo = (h: number) => run.answers.filter((r) => helpOf(r) <= h).length;
+  const produced = run.closing !== undefined && run.closing.input !== 'tap';
+  const own = produced && run.closing!.accepted && !run.closing!.usedModel;
   if (own && upTo(0) >= need) return 3;
   if (own && upTo(1) >= need) return 2;
   if (produced && upTo(2) >= need) return 1;
@@ -605,7 +610,7 @@ O algoritmo de `streak` está em 5.3.
 | 3 | **Voz = digitado** no XP por resposta | Sim (2.1). A fala é premiada pelas conquistas | +2 por resposta falada (ver 6.6) |
 | 4 | **Tocar não dá estrela**, e o modo sugerido segue a estrela conquistada, não o número de vezes que jogou | Sim. É um ajuste fino da D-43 | Dar ★ por qualquer conclusão: mais simples, mas aí o toque leva 32% do bônus em vez de 12% |
 | 5 | **Roteiro do portão em 5 dias diferentes** | Sim (6.4). No mesmo dia, a 5ª sessão rende pouco por desenho | Manter livre e avisar o dono |
-| 6 | **Ofensiva: ganhar congelamento é derivado** (1 a cada 2 dias ativos, até 2) | Sim. Sem evento `freeze_earned` em v1 | 1 a cada 3 dias: quem joga só de segunda a sexta perde a ofensiva na 4ª semana |
+| 6 | **Ofensiva: ganhar congelamento é derivado** (1 a cada 2 dias ativos, até 2) | Sim. Sem evento `freeze_earned` em v1 | 1 a cada 3 dias: quem joga só de segunda a sexta chega ao sábado com 1 guardado e perde a ofensiva já no primeiro fim de semana |
 | 7 | **Ordem dos locais** e nomes dos títulos e das conquistas | Os níveis e os ids são a proposta; nomes e ordem dos temas são do Conteúdo e do dono | — |
 | 8 | **Curva congelada depois do portão da fase 2** | Sim. Depois disso, rebalancear só pelas fontes de XP | — |
 
@@ -613,4 +618,5 @@ O algoritmo de `streak` está em 5.3.
 - **Fábrica (fase 4):** missão colada tem id novo, então cada uma traria 200 XP de prêmio. Sugestão para a chamada da fábrica: prêmio proporcional ao número de falas (`min(n, 6) / 6`), para que missão de 2 falas não vire fonte de bônus.
 - **Modo completo (fase 6):** a conversa livre não tem degrau de ajuda nem opção para tocar. Vai pedir uma fonte nova (`turn`) numa `rules.v2`. O fecho avaliado por IA pode valer mais que 24.
 - **Agendador (SM-2):** fora deste pedido. As regras só precisam da nota e de quem avaliou.
-- **Dependência da W2-03:** se as 5 missões tiverem outro número de falas ou não tiverem chefe, os totais da seção 6 mudam na mesma proporção (o XP de conversa é linear no número de falas). As regras não mudam.
+- **Dependência da W2-04:** se as 5 missões tiverem outro número de falas, os totais da seção 6 mudam na mesma proporção (o XP de conversa é linear no número de falas). As regras não mudam.
+- **Script da simulação:** não está no repositório (não escrevo código de produção). Se o Arquiteto quiser refazer as tabelas depois de mexer num número, eu entrego o arquivo para ele decidir onde guardar.

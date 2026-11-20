@@ -63,7 +63,7 @@ Cada **missão** é uma conversa curta (1–3 min) com um NPC. A "missão do dia
 ## Conta e login
 - **Login opcional**, com Supabase Auth (Google e e-mail). O projeto `glifora-dev` já existe.
 - Sem login: tudo funciona localmente (IndexedDB), com botão de exportar/importar progresso em JSON.
-- Com login: progresso, Grimório, avatar, conquistas e cenários são sincronizados entre aparelhos. O login também é necessário para publicar cenários públicos.
+- Com login: progresso, Grimório, avatar, conquistas e cenários são sincronizados entre aparelhos, de forma privada (cada pessoa só lê o que é dela). Publicar não passa pelo Supabase (D-50).
 - O banco guarda **apenas** progresso e conteúdo do jogo. **A API key nunca vai para o Supabase**, nem criptografada.
 - Usar só o plano gratuito do Supabase. RLS em todas as tabelas. Botão "Apagar minha conta e meus dados" (LGPD).
 
@@ -82,7 +82,7 @@ Cada **missão** é uma conversa curta (1–3 min) com um NPC. A "missão do dia
 2. O site monta um **prompt pronto** (tema + nível + instruções + formato JSON esperado com exemplo) e mostra **"Copiar prompt"**.
 3. O jogador cola no ChatGPT/Gemini/Claude gratuito, copia a resposta e cola no site.
 4. O site extrai o JSON (tolerando texto ou ```json em volta), valida e transforma numa missão jogável, com um NPC e um local da vila.
-5. Ao salvar, há uma **caixinha "Tornar este tema público"** (desmarcada por padrão; exige login).
+5. O cenário salvo fica só com a pessoa. Para compartilhar, existe o botão **"Enviar para a comunidade"** (D-50), que nunca aparece para material pessoal.
 6. Se a validação falhar, mostrar os erros num bloco pronto para copiar de volta à IA: "Corrija este JSON: o campo `nivel` deve ser um de A1…C2; `falas[3].texto` passou de 300 caracteres."
 
 ### 3. Modo completo (key do usuário)
@@ -146,12 +146,20 @@ Simulados no formato de exames de proficiência, para quem estuda para uma prova
 - Nunca usar campos do JSON como URL, código, nome de arquivo ou atributo HTML.
 - Ao reenviar um cenário colado para a IA no modo completo: conteúdo entre delimitadores, system prompt deixando claro que é material de referência, e escopo da IA limitado.
 
-## Cenários públicos
-- Marcar "Tornar este tema público" envia o cenário para uma tabela no Supabase com status `pendente`.
-- Validação automática pelo schema no envio; moderação manual pelo autor antes de ficar `publicado`.
-- Catálogo público navegável por idioma, nível e tema, com autor (apelido) e contador de jogadas.
-- Avisar que o conteúdo ficará público e não deve conter dados pessoais. Botão de denunciar cenário.
-- Nada é publicado sem ação explícita do usuário.
+## Material pessoal e biblioteca da comunidade (D-50)
+- **Material próprio:** a pessoa converte o material dela (por exemplo, um livro que comprou) com a própria IA, no schema de missão ou de simulado, e cola no app.
+  - Esse conteúdo é marcado pelo app como `personal` e **nunca pode ser publicado**: o envio não aparece e é recusado no código, com teste automatizado.
+  - Sincroniza só com a conta da própria pessoa.
+  - Aviso na importação e nos termos: "Você declara ter direito de usar este material. Ele fica só com você e é sua responsabilidade."
+  - O app não oferece busca nem download de provas ou de material de terceiros.
+- **Biblioteca da comunidade:** repositório público `glifora-content`, só de conteúdo original (missões, temas, simulados), com licença CC BY-SA 4.0 e pacotes versionados por par e nível.
+  - O app incorpora os pacotes no build, validados pelo mesmo schema, e valida de novo ao carregar.
+  - Tela "Fases da comunidade": por idioma, nível e tema, com o autor.
+- **Contribuir:** o botão "Enviar para a comunidade" valida e abre o GitHub com o arquivo pronto, que faz o fork e o PR sozinho.
+  - Antes, a declaração "sou autor, é original, aceito a CC BY-SA 4.0".
+  - DCO no CI, validação de schema, limites e idioma, e merge só com revisão do mantenedor.
+  - Canal para pedidos de remoção.
+- Nada é publicado sem ação explícita do usuário. Avisar que o conteúdo ficará público e não deve ter dados pessoais.
 
 ## Schema de missão (v1, D-43)
 Formato completo, limites e conferências: `docs/propostas/W0-03-arquitetura.md` §5.1. Resumo:
@@ -195,7 +203,7 @@ Formato completo, limites e conferências: `docs/propostas/W0-03-arquitetura.md`
 
 ## Tecnologia
 - Vite + React + TypeScript, PWA (manifest + service worker), mobile-first.
-- Zod para schemas; IndexedDB (Dexie) para dados locais; Supabase (Auth + Postgres) só para conta, sincronização e cenários públicos.
+- Zod para schemas; IndexedDB (Dexie) para dados locais; Supabase (Auth + Postgres) só para conta e sincronização (D-50).
 - Hospedagem estática no **Cloudflare Pages** via GitHub Actions, com a CSP em cabeçalho HTTP (D-39).
 - Arquitetura detalhada (camadas, CSP exata, dados, adaptadores, testes): `docs/propostas/W0-03-arquitetura.md` (D-41). Quando divergir de `DECISIONS.md`, vale `DECISIONS.md`.
 - **Aparelho-alvo** dos testes de fim de fase: Android + Chrome. No iPhone o jogo funciona com texto, convida a instalar e lembra de exportar (D-44).
@@ -210,11 +218,11 @@ Formato completo, limites e conferências: `docs/propostas/W0-03-arquitetura.md`
 4. **Fábrica de cenários:** tema escolhido/aleatório → copiar prompt → colar → validar → jogar, com erros copiáveis.
 5. **Conta:** login opcional com Supabase, sincronização, apagar conta.
 6. **Modo completo com key:** adaptadores de provedor, conversa livre com recast, nível CEFR adaptativo, feitiços avaliados por IA, voz do provedor.
-7. **Comunidade:** cenários públicos com moderação e catálogo.
+7. **Comunidade (D-50):** biblioteca `glifora-content` (repositório só de conteúdo, CC BY-SA 4.0), tela "Fases da comunidade" e botão "Enviar para a comunidade" (PR no GitHub, com DCO e revisão). Pode vir antes das fases 5 e 6.
 8. **Preparação para exames:** formato IELTS primeiro (leitura e escuta pré-geradas; escrita e fala corrigidas pela IA com os critérios públicos), histórico de notas, depois DELE/SIELE.
 9. **Depois:** japonês e chinês com traçado, modo offline, Azure opcional para pronúncia.
 
-Portão da fase 2: eu jogo 5 sessões seguidas e quero voltar no dia seguinte. Se não, ajustar o núcleo antes de seguir.
+Portão da fase 2: eu jogo 5 sessões em dias diferentes, dentro de 7 dias. Passa se eu sentir vontade de voltar e conseguir lembrar das frases das missões anteriores sem ver. Se não, ajustar o núcleo antes de seguir (D-49).
 
 ## Regras de trabalho entre terminais
 - O Arquiteto é dono de `docs/SPEC.md`, `docs/PLAN.md` e `docs/DECISIONS.md`.

@@ -1,7 +1,7 @@
 // Registro do service worker, escrito à mão (W0-03 §2.3). Por quê: com `require-trusted-types-for 'script'`, o navegador
 // só aceita `serviceWorker.register()` com um TrustedScriptURL, e o `virtual:pwa-register` do plugin passa uma string
 // (barrado). A única política permitida na CSP é `glifora-sw`: ela só aceita exatamente "/sw.js" e não existe política `default`.
-import { offerUpdate } from "./services/appUpdate";
+import { onUpdateReady } from "./services/appUpdate";
 
 export const SW_URL = "/sw.js";
 
@@ -45,17 +45,18 @@ async function start(): Promise<void> {
   const registration = await navigator.serviceWorker.register(swScriptUrl((window as { trustedTypes?: Parameters<typeof createSwPolicy>[0] }).trustedTypes));
   const hadController = navigator.serviceWorker.controller !== null; // false na primeira visita: nada para trocar
 
-  // Abriu o app e já há versão nova esperando: ativa e recarrega sozinha.
+  // Abriu o app e já há versão nova esperando: ativa e recarrega sozinha. Não consulta holdUpdates de propósito: isto
+  // acontece na própria abertura, antes de a pessoa ter qualquer coisa em andamento.
   if (registration.waiting && hadController) {
     activate(registration.waiting);
     return;
   }
 
-  // App aberto e uma versão nova termina de instalar: só avisa.
+  // App aberto e uma versão nova termina de instalar: ativa sozinha só se a regra da D-46 deixar (appUpdate.ts); senão, avisa.
   registration.addEventListener("updatefound", () => {
     const installing = registration.installing;
     installing?.addEventListener("statechange", () => {
-      if (installing.state === "installed" && navigator.serviceWorker.controller) offerUpdate(() => activate(installing));
+      if (installing.state === "installed" && navigator.serviceWorker.controller) onUpdateReady(() => activate(installing));
     });
   });
 

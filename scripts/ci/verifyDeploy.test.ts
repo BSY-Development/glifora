@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { checkVersion, compareHeaders, describeMismatches } from "./verifyDeploy.ts";
+import { checkVersion, compareHeaders, describeMismatches, presentDetached } from "./verifyDeploy.ts";
 
 const FILE = "/*\n  X-Test: um\n  Content-Security-Policy: default-src 'none'\n\n/assets/*\n  Cache-Control: immutable\n";
 
@@ -29,5 +29,19 @@ describe("version.json", () => {
     expect(checkVersion({ commit: "velho" }, "abc1234")).toContain("esperado: abc1234");
     expect(checkVersion(null, "abc1234")).not.toBeNull();
     expect(checkVersion("x", "abc1234")).not.toBeNull();
+  });
+});
+
+describe("cabeçalhos que o _headers manda tirar (D-46)", () => {
+  const FILE_DETACH = ["/*", "  X-Test: um", "  ! Report-To", "  ! NEL", "", "/assets/*", "  ! Server-Timing", ""].join("\n");
+
+  it("acusa os que chegaram mesmo assim, só do bloco /*", () => {
+    const received = new Headers({ "x-test": "um", nel: "{}", "report-to": "{}", "server-timing": "x" });
+    expect(presentDetached(FILE_DETACH, received)).toEqual(["report-to", "nel"]);
+  });
+
+  it("vazio quando nenhum chegou, e o ! não vira cabeçalho a exigir", () => {
+    expect(presentDetached(FILE_DETACH, new Headers({ "x-test": "um" }))).toEqual([]);
+    expect(compareHeaders(FILE_DETACH, new Headers({ "x-test": "um" }))).toEqual([]);
   });
 });

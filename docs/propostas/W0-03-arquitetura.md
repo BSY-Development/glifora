@@ -132,7 +132,7 @@ O que conferi em documentação nesta data está marcado com **[conferido]**, co
 | `/profile` | Perfil e avatar | 1 |
 | `/settings`, `/settings/ai`, `/settings/data`, `/settings/voice` | Configurações | 1 / 5 / 6 |
 | `/about` | Privacidade, licenças, versão e commit | 1 |
-| `/catalog` | Cenários públicos | 7 |
+| `/catalog` | Cenários públicos (**substituído pela D-50**: "Fases da comunidade", pacotes do `glifora-content` no build) | 7 |
 
 - O Cloudflare Pages devolve `index.html` para rota desconhecida quando não existe `404.html`. O service worker faz o mesmo offline.
 - Nada sensível na URL. O código do OAuth é trocado e removido com `history.replaceState`.
@@ -519,7 +519,7 @@ create policy ev_insert on sync_events for insert with check (user_id = (select 
 | Primeiro login | Tudo que é local está marcado para envio; se a conta já tem dados, vira união |
 | Falha (offline, projeto pausado, cota) | Estado "sincronização indisponível", nova tentativa com espera crescente. O jogo nunca espera pela rede |
 
-**Cenários públicos (fase 7):**
+**Cenários públicos (fase 7):** **substituído pela D-50.** A tabela `scenarios` e o `scripts/moderation/` não serão feitos; a comunidade vira o repositório `glifora-content`, com PR revisado. O texto abaixo fica só como histórico.
 
 | Item | Desenho |
 | --- | --- |

@@ -1,5 +1,5 @@
 // Lógica pura da conferência pós-deploy (W1-13; W0-03 §7 "CSP — produção"). O script que roda no CI é verify-deploy.ts.
-import { previewHeaders } from "../../config/headers.ts";
+import { detachedHeaders, previewHeaders } from "../../config/headers.ts";
 
 export interface HeaderMismatch {
   name: string;
@@ -28,4 +28,9 @@ export function checkVersion(body: unknown, expectedCommit: string): string | nu
   if (typeof body !== "object" || body === null) return "version.json não é um objeto";
   const commit = (body as Record<string, unknown>)["commit"];
   return commit === expectedCommit ? null : `commit em version.json: ${JSON.stringify(commit)}; esperado: ${expectedCommit}`;
+}
+
+/** Cabeçalhos que o `_headers` mandou tirar ("! Nome") e que mesmo assim chegaram (D-46). Nomes em minúsculas. */
+export function presentDetached(headersFileText: string, received: Headers): string[] {
+  return detachedHeaders(headersFileText).filter((name) => received.has(name));
 }

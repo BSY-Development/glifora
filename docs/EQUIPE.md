@@ -19,6 +19,7 @@ Dono: Arquiteto. A organização e os prompts abaixo são os do dono do projeto 
   - Cada achado vira teste em `tests/e2e-security/` (falha esperada até a correção).
   - O Arquiteto manda a correção ao dono da pasta.
 - **Um Playwright por vez nesta máquina:** a suíte inteira abre vários Chromes. Antes de rodar, confira com `maestri check` se outro terminal não está rodando. Fora do CI, use o limite de workers do `playwright.config.ts`. Em 2026-11-20 o PC do dono travou com três terminais rodando juntos.
+- **Suíte e2e inteira antes de aprovar:** entrega que mexe em `src/`, `public/`, `i18n/` ou `content/` só é aprovada pelo Revisor depois da suíte e2e inteira, rodada contra um build novo. Se não puder rodar, diga isso na aprovação. Motivo: o commit `3fbb18f` ficou vermelho no CI por um teste de privacidade que nenhuma revisão rodou.
 - **Git:** só o Arquiteto faz commit. Ninguém instala software no sistema sem pedir; dependências npm do projeto podem.
 - **Versão comercial (D-38):** o código dela não está neste repositório. Fica no arquivo privado do autor (`C:\glifora-arquivo-comercial`, tag `comercial-expo-v0`). Só se lê de lá quando uma tarefa mandar aproveitar alguma peça.
 

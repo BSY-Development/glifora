@@ -223,6 +223,12 @@ a {
   background: var(--surface);
 }
 
+.notice-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
 .notice-error {
   border-color: var(--danger);
 }

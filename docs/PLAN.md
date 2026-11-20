@@ -10,7 +10,7 @@ IDs: `W<fase>-<nº>` (W de web), para não confundir com as tarefas `F…` da ve
 
 ## Fase atual: 2 — Núcleo jogável sem IA
 
-Portão da fase (SPEC): o dono joga **5 sessões seguidas** no celular (Android + Chrome) e quer voltar no dia seguinte. Se não, ajustar o núcleo antes de seguir. Antes do portão, o QA Tester ataca a fase (D-47).
+Portão da fase (SPEC, D-49): o dono joga **5 sessões em dias diferentes, dentro de 7 dias**, no celular (Android + Chrome). Passa se ele sentir vontade de voltar **e** conseguir lembrar das frases das missões anteriores sem ver. Se não, ajustar o núcleo antes de seguir. Antes do portão, o QA Tester ataca a fase (D-47).
 
 **O que entra:**
 - player de missões v1 (D-43) com níveis de domínio;
@@ -25,23 +25,36 @@ Portão da fase (SPEC): o dono joga **5 sessões seguidas** no celular (Android 
 
 | ID | Dono | Tarefa | Pronto quando | Testes | Status |
 | --- | --- | --- | --- | --- | --- |
-| W2-01 | Fable (chamada nº 2) | **Regras de jogo v1.** Números para as interfaces de W0-03 §6: XP por fonte (resposta por modo e ajuda, fecho, missão, níveis de domínio), curva de nível, títulos, desbloqueios. Também moedas, ofensiva e conquistas iniciais, já para a fase 3. Proposta em `docs/propostas/W2-01-regras.md`; o Arquiteto decide (D-49) | Os números passam nas 6 guardas de W0-03 §6, com justificativa de equilíbrio (dopamina × aprendizado) | Simulação de 5, 30 e 90 sessões na proposta | em andamento |
+| W2-01 | Fable (chamada nº 2) | **Regras de jogo v1.** Números para as interfaces de W0-03 §6: XP por fonte (resposta por modo e ajuda, fecho, missão, níveis de domínio), curva de nível, títulos, desbloqueios. Também moedas, ofensiva e conquistas iniciais, já para a fase 3. Proposta em `docs/propostas/W2-01-regras.md`; o Arquiteto decide (D-49) | Os números passam nas 6 guardas de W0-03 §6, com justificativa de equilíbrio (dopamina × aprendizado) | Simulação de 5, 30 e 90 sessões na proposta | aprovada |
 | W2-02 | Conteúdo | **Schemas e casamento.** `mission.ts` (v1, D-43, com `closing.target_words`), `mission.check.ts` (as 6 conferências), `npc.ts`, `vocab.ts` e `pattern.ts`. `match.ts` com a comparação tolerante da D-43 e o fecho por palavras-alvo. Portar do arquivo comercial (W0-03 §5.5). Um `parseMission` só | A tabela de testes da D-43 passa | Unidade ao lado do código | aprovada |
 | W2-03 | Conteúdo | **Plano de conteúdo da fase 2.** As 5 missões EN A1–A2: local, NPC, `can_do`, padrões de erro, ordem e qual é `boss` (se houver). Se precisar de local novo, dizer. O Arquiteto aprova antes de escrever | Plano aprovado | — | aprovada |
 | W2-04 | Conteúdo | **Conteúdo.** `content/npcs/` (Tilda e as novas), `content/patterns/pt-BR_en.json` e as 5 missões. `scripts/content/build-index.ts` valida tudo e gera o índice. Frases do teste de voz em `content/eval/` | Tudo passa no schema e nas conferências; amostra revisada pelo dono | Unidade do script; validação no CI | em andamento |
 | W2-05 | App | **Dados v2.** Tabelas `events`, `runs` e `session` (W0-03 §4.1). Exportar e importar passam a incluir `events` e `runs` (registros por união de id, com os limites da W1-17) | A migração v1 → v2 não perde nada; os arquivos v1 continuam importando | `fake-indexeddb`; fixture v1 | aprovada |
 | W2-06 | App | **Voz.** `speech/` com `Tts` e `Stt` (W0-03 §2.5), aviso de privacidade antes do 1º microfone e `/settings/voice` (diagnóstico com alternativas e confiança) | Fala e escuta no Chrome do Android; sem suporte, o microfone some e o texto vira o caminho | Dublês no e2e (Revisor) | aprovada |
-| W2-07 | App | **Motor e catálogo.** `engine/` com as regras v1 (D-48): `xpFor`, `levelAt`, `masteryOf`, `deriveProgress`. `catalog/` com `list` e `load`, carregando pelo `parseMission` | As guardas de `tests/pedagogy/` passam | Unidade e guardas do Revisor | a fazer |
+| W2-07 | App | **Motor e catálogo.** `engine/` com as regras v1 (D-49): `xpFor`, `levelAt`, `masteryOf`, `deriveProgress`. `catalog/` com `list` e `load`, carregando pelo `parseMission` | As guardas de `tests/pedagogy/` passam | Unidade e guardas do Revisor | em andamento |
 | W2-08 | App | **Player de missão.** Escuta → falas → resposta por voz, digitada ou toque → reação com o recast destacado → `retry` → fecho (duas tentativas e resposta-modelo). Níveis de domínio (frase à vista / ideia em pt-BR / nada). Sessão retomável. XP e level up com animação (respeita reduzir movimento). HUD de XP real | `bakery-01` jogável do começo ao fim no celular, por voz e por texto | Componente e e2e com dublês | a fazer |
 | W2-09 | App | **Relatório da sessão.** O que a pessoa conseguiu (`can_do`), recasts com a explicação do padrão, palavras novas, XP, a frase do fecho ao lado do modelo e convite para jogar de novo com menos ajuda | Relatório correto para uma rodada real | Componente | a fazer |
-| W2-10 | App | **Pendências da D-46.** Tentar tirar `NEL`/`Report-To` e `Access-Control-Allow-Origin` pelo `_headers` (e conferir no `verify-deploy`). Atualização automática na abertura quando a pessoa está na vila. Aviso para iPhone (instalar e exportar). `navigator.storage.persist()` depois da 1ª missão | Conferido na URL real | `verify-deploy` e e2e | a fazer |
-| W2-11 | Revisor | **Guardas e e2e da fase.** `tests/pedagogy/` com as 6 guardas sobre as regras v1, e2e do player com dublês de voz, a11y das telas novas, teste da atualização com 2 builds (D-46) | Tudo no CI | — | a fazer |
+| W2-10 | App | **Pendências da D-46.** Tentar tirar `NEL`/`Report-To` e `Access-Control-Allow-Origin` pelo `_headers` (e conferir no `verify-deploy`). Atualização automática na abertura quando a pessoa está na vila. Aviso para iPhone (instalar e exportar). `navigator.storage.persist()` depois da 1ª missão | Conferido na URL real | `verify-deploy` e e2e | aprovada |
+| W2-11 | Revisor | **Guardas e e2e da fase.** `tests/pedagogy/` com as 12 guardas sobre as regras v1 (W0-03 §6 e §7 da W2-01), e2e do player com dublês de voz, a11y das telas novas, teste da atualização com 2 builds (D-46) | Tudo no CI | — | a fazer |
 | W2-12 | Dono + Conteúdo | **Taxa de casamento da voz.** O dono lê as frases de `content/eval/` em `/settings/voice` no celular; o Conteúdo ajusta as `keywords` | Taxa registrada; `keywords` ajustadas | — | a fazer |
 | W2-13 | QA Tester | **Ataque à fase 2.** Sem microfone, permissão negada, offline no meio da missão, troca de idioma no meio da missão, duas abas na mesma missão, importação com `events`/`runs` hostis, XP forjado | Sem crítico ou alto em aberto | `tests/e2e-security/` | a fazer |
-| W2-14 | Revisor | **Revisão da fase e roteiro do celular** (5 sessões seguidas) | Lista zerada ou aceita pelo Arquiteto | `tests/a11y/` e o roteiro | a fazer |
+| W2-14 | Revisor | **Revisão da fase e roteiro do celular** (5 sessões em dias diferentes, dentro de 7 dias; em cada uma, lembrar sem ver as frases das missões anteriores) | Lista zerada ou aceita pelo Arquiteto | `tests/a11y/` e o roteiro | a fazer |
 | W2-15 | App | **Taverna e Bram** (plano da W2-03). Arte própria (pixel art em código) da taverna e do Bram, chave i18n `place.tavern`, vila com 2 locais e `/place/tavern`. O enum `tavern`/`bram` em `world.ts` e o `locations.json` (Conteúdo) entram junto, combinados entre os dois. Na fase 2 os dois locais ficam abertos; o desbloqueio é da fase 3 | Vila com padaria e taverna, bonita e legível em 360×640; o leitor de tela anuncia os dois | e2e: tocar na taverna abre a tela | aprovada |
 
 ### Notas de passagem (fase 2)
+
+**W2-10 (App, aprovada pelo Revisor):**
+- **Cabeçalhos (D-46):** `public/_headers` ganhou `! Report-To`, `! NEL` e `! Access-Control-Allow-Origin` no bloco `/*`. `config/headers.ts`: o parser ignora linhas `!` e `detachedHeaders()` lista os nomes. `verify-deploy` só **avisa** (`console.warn`) se algum ainda chegar em `/`; com `STRICT_DETACHED=1` vira erro. **Não conferido na URL real:** falta ver no 1º deploy se o Cloudflare deixa tirar. Se deixar, ligar `STRICT_DETACHED=1` no workflow; se não, domínio próprio (D-46).
+- **Atualização automática:** `services/appUpdate.ts`, `onUpdateReady()`. Ativa e recarrega sozinha só se passaram **no máximo 5 s** desde a abertura, o caminho é exatamente `/` (vila) e não há trava `holdUpdates()`. Senão, aviso com o botão (como antes). **Por que 5 s:** a versão nova baixa em 1 a 3 s no celular (caso do 1º acesso depois de um deploy); passado isso a pessoa já começou a usar, e recarregar tiraria o lugar dela. Fora da vila nunca recarrega sozinha (missão, perfil, ajustes, boas-vindas com rascunho). `holdUpdates()` devolve a função que solta; já usado na importação. **A W2-08 deve chamar `holdUpdates()` durante a missão** (rede de segurança além do caminho). O ramo "já havia versão esperando na abertura" (W1-12) segue ativando direto, de propósito.
+- **Aviso de iPhone (D-44):** `services/install.ts` + `ui/IosInstallNotice.tsx` na vila. Aparece se `navigator.standalone === false`, sem `display-mode: standalone` e sem `onbeforeinstallprompt` (sem User-Agent). Convida a Compartilhar → Adicionar à Tela de Início, lembra da exportação (link para Ajustes) e some para sempre ao dispensar (`glifora.install.ios-notice`). Textos `install.ios.*` em pt-BR e en.
+- **`navigator.storage.persist()`:** não entrou aqui (vai para a W2-08, depois da 1ª missão concluída).
+- **Para o Revisor (W2-11, teste com 2 builds):** servir o build A com o SW controlando; subir o B na mesma origem; abrir `/` e ver recarregar sozinho em até 5 s; em `/place/*`, `/settings` ou depois de 5 s ver `.update-notice` com o botão; durante uma importação não recarrega.
+- **Como testar no celular:** iPhone/Safari fora da Tela de Início: aviso na vila, dispensar e reabrir (não volta); instalado ou no Chrome do Android: não aparece. Android: depois de um deploy novo, abrir o app na vila e ele atualiza sozinho; abrir em Ajustes e ver o botão.
+
+**W2-01 (Fable, aprovada como D-49 em 2026-11-20):** as regras v1 estão em `docs/propostas/W2-01-regras.md`.
+- **Para o App (W2-07):** o `rules.v1` de referência está na §8.
+- **Para o Revisor (W2-11):** as guardas 7 a 12 estão na §7.
+- **O dono decidiu:** 5 sessões em dias diferentes, dentro de 7 dias. O critério é ter vontade de voltar e lembrar das frases sem ver. O roteiro da W2-14 precisa ter, em cada sessão, um teste de lembrar sem ver as frases das missões anteriores (o modo "de cor", ★★★).
 
 **W2-05, W2-06 e W2-15 (App, aprovadas pelo Revisor):**
 - **Dados v2 (`src/data/`):** Dexie versão 2 só acrescenta `events`, `runs` e `session` (sem `upgrade`; `docs` e `meta` ficam como estavam). Schemas em `schema/records.ts`; `records.ts` tem `appendEvent`, `appendRun`, `listEvents`, `listRuns` e `saveSession`/`loadSession`/`clearSession`. Registro só se acrescenta: id repetido devolve o que já existe.
@@ -233,13 +246,13 @@ Portão da fase: o dono aprova a arquitetura, a estrutura de pastas e o modelo d
 
 ## Fases seguintes (da SPEC; cada uma é detalhada quando a anterior fechar)
 
-2. **Núcleo jogável sem IA:** player de missões (v1, D-43) com níveis de domínio, 5 missões demo em inglês A1–A2 (D-40), teste da taxa de casamento da voz, XP, nível do personagem, level up, relatório da sessão, voz do navegador. Portão: o dono joga 5 sessões seguidas e quer voltar no dia seguinte.
+2. **Núcleo jogável sem IA:** player de missões (v1, D-43) com níveis de domínio, 5 missões demo em inglês A1–A2 (D-40), teste da taxa de casamento da voz, XP, nível do personagem, level up, relatório da sessão, voz do navegador. Portão: o dono joga 5 sessões em dias diferentes, dentro de 7 dias; passa se tiver vontade de voltar e lembrar das frases sem ver (D-49).
 3. **Progressão completa:** missão diária com 3 encontros + chefe, Grimório com feitiços (SM-2), ofensiva, conquistas, metas "consigo...", moedas e avatar básico, desbloqueio de locais.
-4. **Fábrica de cenários.**
-5. **Conta:** login opcional com Supabase, sincronização, apagar conta (exportar/importar já entra na fase 1).
+4. **Fábrica de cenários**, com "Importar material próprio" (missão, `origin: personal`, nunca publicável), o aviso de responsabilidade e a primeira versão dos termos de uso (D-50). QA: tentar publicar material pessoal.
+5. **Conta:** login opcional com Supabase, sincronização privada com RLS (sem cenários públicos no Supabase, D-50), apagar conta. Exportar e importar já entram na fase 1.
 6. **Modo completo com key.**
-7. **Comunidade:** cenários públicos com moderação.
-8. **Preparação para exames.**
+7. **Comunidade (D-50):** repositório `glifora-content` (CI com DCO, validação e só a pasta de pacotes), pacotes incorporados no build, tela "Fases da comunidade" e botão "Enviar para a comunidade". QA: material pessoal e JSON malicioso pelo envio. Não depende das fases 5 e 6 e pode subir na fila.
+8. **Preparação para exames**, com a importação de simulado próprio (`personal`, D-50).
 9. **Depois:** japonês e chinês com traçado, modo offline, Azure opcional (o espanhol entra antes, logo depois do inglês).
 
 Parar ao fim de cada fase para o dono testar no celular.

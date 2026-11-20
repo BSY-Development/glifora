@@ -56,11 +56,11 @@ test("fluxo completo (visita, perfil, ajustes, exportar, importar, idioma, apaga
   expect(problems).toEqual([]);
 });
 
-test("exportação: só format/version/exportedAt/app/device/docs; cada doc só id/v/data/updatedAt/deleted; nada de key, meta ou dirty", async ({ page }) => {
+test("exportação: só app/device/docs/events/exportedAt/format/runs/version; cada doc só id/v/data/updatedAt/deleted; nada de key, meta ou dirty", async ({ page }) => {
   await start(page, "Ana");
   const text = await exportFile(page);
   const file = JSON.parse(text) as Record<string, unknown>;
-  expect(Object.keys(file).sort()).toEqual(["app", "device", "docs", "exportedAt", "format", "version"]);
+  expect(Object.keys(file).sort()).toEqual(["app", "device", "docs", "events", "exportedAt", "format", "runs", "version"]);
   expect(file["format"]).toBe("glifora-export");
   expect(file["version"]).toBe(1);
   const docs = file["docs"] as Record<string, unknown>[];
@@ -74,6 +74,57 @@ test("exportação: só format/version/exportedAt/app/device/docs; cada doc só 
   }
   // O id do aparelho é um UUID aleatório: não é a identidade da pessoa.
   expect(file["device"]).toMatch(/^[0-9a-f-]{36}$/);
+  expect(file["events"]).toEqual([]);
+  expect(file["runs"]).toEqual([]);
+});
+
+// Campos permitidos de cada registro exportado (src/data/schema/records.ts, W2-05): EventFile e RunFile, sem `synced`.
+const EVENT_KEYS = ["id", "at", "day", "kind", "xp", "coins", "rules", "target", "ref", "runId", "device"];
+const EVENT_REQUIRED = ["id", "at", "day", "kind", "xp", "coins", "rules", "device"];
+const RUN_KEYS = ["id", "missionId", "at", "day", "level", "xp", "rules", "canDo", "replies", "recasts", "words", "answers", "closing", "device"];
+const RUN_REQUIRED = RUN_KEYS.filter((k) => k !== "closing");
+
+test("exportação com events e runs: só os campos do schema, sem synced/dirty/session/key; a session nunca sai", async ({ page }) => {
+  await start(page, "Ana");
+  // Semeia direto no IndexedDB (o player ainda não grava): marcas locais synced=1 e uma rodada em andamento.
+  await page.evaluate(async () => {
+    const db = await new Promise<IDBDatabase>((res, rej) => {
+      const r = indexedDB.open("glifora");
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    });
+    await new Promise<void>((res, rej) => {
+      const tx = db.transaction(["events", "runs", "session"], "readwrite");
+      tx.objectStore("events").put({ id: "ev-1", at: 1000, day: "2026-11-20", kind: "mission_completed", xp: 20, coins: 5, rules: 1, target: "bakery-01", runId: "run-1", device: "dev-1", synced: 1 });
+      tx.objectStore("runs").put({
+        id: "run-1", missionId: "bakery-01", at: 1000, day: "2026-11-20", level: 1, xp: 20, rules: 1, canDo: true,
+        replies: { good: 2, flawed: 1, retry: 0 }, recasts: [{ pattern: "p-1", count: 1 }], words: ["pão"],
+        answers: [{ node: "n1", input: "typed", scaffold: 0 }], closing: { text: "Um pão, por favor.", input: "voice", accepted: true, usedModel: false },
+        device: "dev-1", synced: 1,
+      });
+      tx.objectStore("session").put({ id: "current", v: 1, missionId: "bakery-01", updatedAt: 1000, state: { segredo: "SESSAO-NAO-EXPORTAR" } });
+      tx.oncomplete = () => res();
+      tx.onerror = () => rej(tx.error);
+    });
+    db.close();
+  });
+  const text = await exportFile(page);
+  const file = JSON.parse(text) as { events: Record<string, unknown>[]; runs: Record<string, unknown>[] };
+  expect(file.events).toHaveLength(1);
+  expect(file.runs).toHaveLength(1);
+  for (const e of file.events) {
+    for (const k of Object.keys(e)) expect(EVENT_KEYS, `events.${k}`).toContain(k);
+    for (const k of EVENT_REQUIRED) expect(e, `events.${k}`).toHaveProperty(k);
+  }
+  for (const r of file.runs) {
+    for (const k of Object.keys(r)) expect(RUN_KEYS, `runs.${k}`).toContain(k);
+    for (const k of RUN_REQUIRED) expect(r, `runs.${k}`).toHaveProperty(k);
+  }
+  expect(text).not.toContain("SESSAO-NAO-EXPORTAR");
+  expect(text).not.toContain('"synced"');
+  expect(text).not.toContain('"dirty"');
+  expect(Object.keys(file)).not.toContain("session");
+  for (const word of ["apikey", "api_key", "token", "secret", "password", "authorization", "bearer"]) expect(text.toLowerCase(), word).not.toContain(word);
 });
 
 test("nada parecido com key fica no armazenamento do navegador (localStorage, sessionStorage, IndexedDB) na fase 1", async ({ page }) => {

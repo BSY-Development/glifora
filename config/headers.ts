@@ -16,6 +16,7 @@ export function parseHeadersFile(text: string): HeaderBlocks {
       continue;
     }
     if (current === null) throw new Error(`_headers: cabeçalho sem rota antes: "${raw.trim()}"`);
+    if (raw.trim().startsWith("!")) continue; // "! Nome": o Cloudflare tira esse cabeçalho (ver detachedHeaders)
     const colon = raw.indexOf(":");
     if (colon === -1) throw new Error(`_headers: linha sem ":": "${raw.trim()}"`);
     const name = raw.slice(0, colon).trim();
@@ -32,4 +33,23 @@ export function previewHeaders(text: string): Record<string, string> {
   const all = parseHeadersFile(text)["/*"];
   if (all === undefined) throw new Error('_headers: bloco "/*" não encontrado');
   return all;
+}
+
+/** Cabeçalhos que o `_headers` manda o Cloudflare TIRAR (sintaxe "! Nome") no bloco da rota. Nomes em minúsculas. */
+export function detachedHeaders(text: string, route = "/*"): string[] {
+  const names: string[] = [];
+  let inRoute = false;
+  for (const raw of text.split(/\r?\n/)) {
+    if (raw.trim() === "" || raw.trimStart().startsWith("#")) continue;
+    if (!/^\s/.test(raw)) {
+      inRoute = raw.trim() === route;
+      continue;
+    }
+    const line = raw.trim();
+    if (inRoute && line.startsWith("!")) {
+      const name = line.slice(1).trim().toLowerCase();
+      if (name !== "") names.push(name);
+    }
+  }
+  return names;
 }

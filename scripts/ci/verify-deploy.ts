@@ -4,7 +4,7 @@
 // Tenta de novo por até ~3 minutos (propagação) e falha alto, mostrando a diferença.
 // Uso: DEPLOY_URL=https://glifora.pages.dev EXPECTED_COMMIT=<sha> node scripts/ci/verify-deploy.ts
 import { readFileSync } from "node:fs";
-import { checkVersion, compareHeaders, describeMismatches } from "./verifyDeploy.ts";
+import { checkVersion, compareHeaders, describeMismatches, presentDetached } from "./verifyDeploy.ts";
 
 const base = (process.env["DEPLOY_URL"] ?? "").replace(/\/$/, "");
 const sha = process.env["EXPECTED_COMMIT"] ?? process.env["GITHUB_SHA"] ?? "";
@@ -14,6 +14,9 @@ if (!/^https:\/\//.test(base) || !/^[0-9a-f]{7,40}$/i.test(sha)) {
 }
 const expectedCommit = sha.slice(0, 7).toLowerCase(); // o mesmo formato do /about e do version.json
 const headersFile = readFileSync("public/_headers", "utf8");
+// D-46: Report-To, NEL e Access-Control-Allow-Origin têm "! Nome" no _headers. Enquanto não se sabe se o Cloudflare deixa
+// tirar, a conferência só avisa. Com STRICT_DETACHED=1 vira erro (ligar quando der certo na URL real).
+const strictDetached = process.env["STRICT_DETACHED"] === "1";
 const DEADLINE = Date.now() + 3 * 60 * 1000;
 const WAIT_MS = 10_000;
 
@@ -27,6 +30,12 @@ async function attempt(): Promise<string[]> {
 
   const home = await get("/");
   if (home.status !== 200) problems.push(`GET / respondeu ${home.status}`);
+  const stillThere = presentDetached(headersFile, home.headers);
+  if (stillThere.length > 0) {
+    const text = `O Cloudflare ainda manda ${stillThere.join(", ")} em / (o _headers pede para tirar). Se persistir: domínio próprio (D-46).`;
+    if (strictDetached) problems.push(text);
+    else console.warn(`AVISO: ${text}`);
+  }
   const mismatches = compareHeaders(headersFile, home.headers);
   if (mismatches.length > 0) problems.push(`Cabeçalhos de / diferentes do public/_headers:\n${describeMismatches(mismatches)}`);
 

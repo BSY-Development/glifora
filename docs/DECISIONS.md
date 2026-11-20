@@ -172,3 +172,82 @@ Status: `aceita` · `provisória` · `proposta` · `ajustada por D-xx` · `subst
 - **Por quê:** o teste da taxa de casamento (W2-12) é feito pelo dono no celular, no site publicado e também offline. São frases curtas, sem segredo, com o mesmo cuidado de conteúdo do resto de `content/`.
 - **Quem pediu:** o App, com a concordância do Conteúdo, na W2-02/W2-06.
 
+### D-49 — Regras de jogo v1 (2026-11-20) · aceita (Arquiteto; item 5 pelo dono)
+- **O que vale:** os números da proposta do Fable, `docs/propostas/W2-01-regras.md`, como estão.
+  - **Resposta:** 16 / 12 / 8 por falar ou digitar sem ajuda, com a ideia ou com a frase. Tocar vale 4.
+  - **Fecho:** 24 / 12 / 4.
+  - **Prêmios únicos por missão:** 1ª conclusão e cada estrela.
+  - **Curva e títulos:** do nível L ao L+1 custam `50 × L`, com 8 títulos.
+  - **Fase 3:** desbloqueios, moedas, ofensiva e conquistas.
+  - **O App implementa `rules.v1` a partir da §8** (W2-07).
+- **Os 8 pontos da §9:**
+  1. **Repetição:** campo `repeat` contado por fala, pela ajuda de fato usada. O replay no mesmo dia paga ½ e depois ¼, nunca zero e sem teto diário. Muda o tipo de W0-03 §6.
+  2. **Prêmios de missão como eventos próprios, com id determinístico** (`first:<missão>`, `star:<missão>:<n>`). `EVENT_KINDS` ganha `mission_first` e `mission_star`.
+  3. **`Run` ganha `answers` e `closing.input`:** `answers` são até 20 itens `{ node, input, scaffold }`. Sem eles não dá para calcular a estrela nem o `repeat`. Não há migração, porque ainda não existe rodada gravada.
+  4. **Voz vale o mesmo que digitado** no XP por resposta, porque quem não tem reconhecimento de voz não fez menos esforço (D-44). A fala é premiada por conquistas.
+  5. **Portão em dias diferentes (decisão do dono):**
+     - **Como:** 5 sessões em dias diferentes, dentro de uma janela de 7 dias.
+     - **Passa se:** o dono sentir vontade de voltar **e** conseguir lembrar das frases das missões anteriores sem ver.
+     - **O que muda:** a SPEC foi ajustada; antes eram "5 sessões seguidas". No mesmo dia, a 5ª sessão rende pouco, por desenho.
+  6. **Tocar não dá estrela.** O modo sugerido segue a estrela conquistada, não o número de vezes jogadas. É um ajuste fino da D-43: a 1ª, a 2ª e a 3ª vez viram ★, ★★ e ★★★, e a pessoa pode escolher menos ajuda desde a 1ª vez.
+  7. **Congelamento da ofensiva:** derivado dos dias ativos, 1 a cada 2 dias, guardando até 2. `freeze_earned` fica sem uso na v1.
+  8. **Curva congelada depois do portão da fase 2.** Depois disso, rebalancear só pelas fontes de XP, que têm versão. A curva só pode ficar mais fácil.
+- **Também decidido:**
+  - **Teto por evento na importação:** 400 XP e 100 moedas ganhas. Nas regras v1, nenhum evento legítimo passa de 344 XP nem de 50 moedas.
+  - **Nomes:** títulos e conquistas seguem a proposta. A ordem dos locais da fase 3 é do Conteúdo, com o dono.
+- **Guardas pedagógicas:** às 6 de W0-03 §6 somam-se as 6 sugeridas na §7 da proposta (7 a 12), testadas pelo Revisor na W2-11.
+- **Por quê:**
+  - o XP paga a ajuda dispensada, não o acerto;
+  - o prêmio grande é único;
+  - repetir no mesmo dia rende menos, sem punir;
+  - nada desce.
+  Assim a dopamina vem de produzir, e os princípios 5 a 7 continuam de pé.
+
+### D-50 — Material pessoal privado e biblioteca da comunidade em repositório próprio (2026-11-20) · aceita (dono), com ajustes do Arquiteto
+Proposta do dono. Muda a fase 7 e acrescenta itens às fases 4, 5 e 8. Nada é implementado agora.
+
+**1. Importar material próprio** (fase 4 para missões, fase 8 para simulados)
+- **O que é:** uma opção "Importar material próprio". A pessoa converte o material dela com a própria IA (por exemplo, um livro de preparação que comprou), no schema de missão ou de simulado, e cola no app.
+- **Origem:** `origin: "personal"`. Fica **na linha do Dexie (e do Supabase), não no JSON da missão**. O app marca, como já faz com o `id` (W0-03 §5.1); o que a IA mandar é ignorado.
+- **Nunca é publicado:**
+  - a opção de enviar para a comunidade não aparece;
+  - o envio recusa no código, com teste automatizado;
+  - a origem sobrevive a exportar e importar e a sincronizar, e nunca vira outra.
+- **Sincronização (fase 5):** só com a conta da própria pessoa, com RLS. Na fase 5 ninguém lê dado de outro usuário, então isso já vale para tudo.
+- **Aviso na importação e nos termos:** "Você declara ter direito de usar este material. Ele fica só com você e é sua responsabilidade." Os termos de uso ainda não existem e entram na fase 4, junto com esta opção.
+- **Sem busca:** o app não oferece busca nem download de provas ou de material de terceiros.
+- **Limite honesto:** o bloqueio evita o envio por engano, não a fraude de quem edita o próprio arquivo exportado. A proteção de verdade é a declaração de autoria no envio (item 3), a revisão do mantenedor e o canal de remoção.
+
+**2. Biblioteca da comunidade num repositório só de conteúdo** (fase 7, que pode vir antes das fases 5 e 6, porque não depende delas)
+- **Repositório público `glifora-content`:** missões, temas e simulados originais, em pacotes versionados por par de idiomas e nível. Licença CC BY-SA 4.0.
+- **Licença do código: continua AGPL-3.0 (D-45).** A proposta dizia MIT, mas a licença já foi trocada.
+- **O conteúdo central fica no repositório do app:** as missões demo, NPCs e locais, em `content/`, porque dependem dos enums e da arte do app. Os pacotes da comunidade só usam locais e NPCs que existem, ou a figura genérica do local (W0-03 §5.1).
+- **Como o app carrega os pacotes: no build, não em tempo de execução.**
+  - O CI do app baixa uma versão fixada do `glifora-content`, confere o hash e valida tudo com o mesmo `parseMission`.
+  - Os pacotes viram pedaços do bundle: entram no precache, funcionam offline e **não abrem `connect-src` para o GitHub**, então a CSP fica como está.
+  - Ao carregar, a validação roda de novo, como em toda missão (W0-03 §5.3).
+- **Tela "Fases da comunidade":** navegar por idioma, nível e tema, jogar e ver o autor (apelido do GitHub).
+
+**3. Fluxo de contribuição**
+- **Botão "Enviar para a comunidade"** (só para conteúdo que não é pessoal):
+  - valida o schema e abre a página de criação de arquivo do GitHub com o arquivo pronto. Para quem não é colaborador, ela faz o fork e o PR sozinha.
+  - **Risco a provar:** missão grande pode passar do tamanho de URL que o GitHub aceita. Plano B: copiar o JSON e abrir a página vazia, para a pessoa colar.
+- **Declaração antes de enviar:** caixa "Declaro que sou autor deste conteúdo, que ele é original e que aceito a licença CC BY-SA 4.0".
+- **DCO (Signed-off-by)** com check no CI. No repositório, ligar "exigir sign-off em commits pela web", para quem envia pelo navegador não precisar saber git.
+- **CI do `glifora-content`:**
+  - validação com os schemas do app (de uma versão fixada) e limites de tamanho;
+  - idioma declarado × idioma detectado e lint de conteúdo;
+  - **falha se o PR mexer em qualquer coisa fora da pasta de pacotes**;
+  - roda com `pull_request` (nunca `pull_request_target`), token só de leitura e sem secrets.
+  - Merge só com revisão do mantenedor.
+- **README e CONTRIBUTING** com as regras de conteúdo e o canal de pedido de remoção (direito autoral ou conteúdo impróprio).
+
+**4. Supabase sem cenários públicos (opção A)**
+- **O que muda:** o Supabase fica só com login e sincronização. A tabela `scenarios`, o `/catalog` pelo Supabase e o `scripts/moderation/` da W0-03 §4.2 saem.
+- **Por quê:** menos superfície de ataque (nenhuma tabela pública, nenhum conteúdo de usuário servido a terceiros), moderação pelo PR, que já tem histórico e revisão, e nenhum custo de plano.
+- **A opção B** (rascunhos compartilhados por link entre amigos) pode vir depois, se houver pedido.
+
+**5. QA Tester** (fases 4 e 7)
+- tentar publicar ou enviar conteúdo `personal` por todas as camadas: interface, chamada direta, arquivo exportado editado e sincronização;
+- mandar JSON malicioso pelo fluxo de contribuição.
+

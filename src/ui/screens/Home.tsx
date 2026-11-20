@@ -7,6 +7,7 @@ import { getLocations } from "../../services/world";
 import { Avatar } from "../Avatar";
 import { PixelArt } from "../art/PixelArt";
 import { VILLAGE } from "../art/sprites";
+import { IosInstallNotice } from "../IosInstallNotice";
 import { Loading } from "../Loading";
 import { PageTitle } from "../PageTitle";
 import { useT } from "../useT";
@@ -47,6 +48,8 @@ export function Home() {
           </div>
         </div>
       </section>
+
+      <IosInstallNotice />
 
       <p className="hint">{t("home.hint")}</p>
 

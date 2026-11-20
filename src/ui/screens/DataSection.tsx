@@ -1,6 +1,7 @@
 // "Seus dados": exportar, importar e apagar os dados deste aparelho (W1-09).
 import { useRef, useState } from "react";
 import { getAppInfo } from "../../services/about";
+import { holdUpdates } from "../../services/appUpdate";
 import { MAX_IMPORT_BYTES, exportData, importData, wipeThisDevice, type ImportError } from "../../services/transfer";
 import { ConfirmDialog } from "../ConfirmDialog";
 import { downloadText } from "../download";
@@ -58,6 +59,7 @@ export function DataSection() {
     setNotice(null);
     if (file.size > MAX_IMPORT_BYTES) return fail({ code: "too_large", maxBytes: MAX_IMPORT_BYTES });
     setBusy(true);
+    const release = holdUpdates(); // importando: a atualização automática espera (D-46)
     try {
       let text: string;
       try {
@@ -77,6 +79,7 @@ export function DataSection() {
       const main = changed === 0 ? t("data.import.nothing") : t("data.import.done", { n: changed });
       setNotice({ tone: "ok", text: skipped ? `${main} ${t("data.import.skipped")}` : main });
     } finally {
+      release();
       setBusy(false);
     }
   }
