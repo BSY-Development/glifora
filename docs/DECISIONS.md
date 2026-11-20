@@ -151,4 +151,7 @@ Status: `aceita` · `provisória` · `proposta` · `ajustada por D-xx` · `subst
   - o teste automático da atualização do service worker com 2 builds;
   - o aviso de iPhone da D-44 (instalar e exportar);
   - `navigator.storage.persist()` depois da primeira missão.
+  - **Atualização na 1ª abertura depois de um deploy** (achado no teste do dono): hoje aparece o aviso "Atualizar", porque a versão nova termina de baixar com o app já aberto.
+    - **Avaliar na fase 2:** se ela terminar de instalar nos primeiros segundos e a pessoa ainda estiver na vila, sem missão aberta, ativar e recarregar sozinha.
+    - **No meio de missão:** continua o aviso.
 - **Configurações da fase 1 que não dá para testar no código:** token só de Pages, ambiente `production` só para a `main`, sem integração Git no Cloudflare. O dono configurou em 2026-11-20, e o Arquiteto conferiu o ambiente pela API do GitHub.

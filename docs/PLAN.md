@@ -15,9 +15,12 @@ Portão da fase: no celular do dono (Android + Chrome), o site publicado pelo Gi
 **Estado do portão (2026-11-20):** W1-01 a W1-14 aprovadas e no ar. O que ficou aceito para depois está na D-46.
 
 O dono testou no celular com o roteiro [docs/roteiros/fase-1-celular.md](roteiros/fase-1-celular.md). Resultado:
-- **Passou:** primeira visita, apelido com `<b>` recusado, vila e padaria, ajustes no site e no app instalado, instalar, exportar, importar arquivo errado e JSON quebrado (mensagem de erro, nada alterado), idioma, Sobre e licenças.
+- **Passou:** primeira visita, apelido com `<b>` recusado, vila e padaria, ajustes no site e no app instalado, instalar, abrir em modo avião, apagar e importar de volta (apelido e avatar recuperados), exportar, importar arquivo errado e JSON quebrado (mensagem de erro, nada alterado), idioma, Sobre e licenças.
 - **Achado:** o aviso de apelido salvo não aparecia, porque ficava fora da área visível. A correção é a W1-15.
-- **Falta:** o passo 26 (atualização), que precisa de um deploy novo.
+- **Passo 26 (atualização):** passou, com o deploy `32a17de`.
+  - Na 1ª abertura depois do deploy, o app abriu na versão antiga e mostrou o aviso "Atualizar". Um toque atualizou.
+  - Era o esperado pelo desenho (W0-03 §2.3): a versão nova só "espera" depois de baixada, e o app estava fechado durante o deploy.
+- **Aviso de apelido salvo (W1-15):** conferido no celular.
 
 Ordem: W1-01 → (W1-02, W1-03, W1-05 em paralelo) → (W1-04, W1-06) → W1-07 → (W1-08, W1-09) → W1-13 → (W1-10, W1-11) → W1-12 → W1-14. Detalhes de cada tarefa: [W0-03 §8] e as seções citadas.
 
