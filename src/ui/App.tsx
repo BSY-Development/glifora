@@ -1,19 +1,10 @@
-// Tela provisória do esqueleto (W1-01), já com i18n (W1-05). As telas de verdade chegam nas próximas tarefas.
-import { LanguageSelector } from "./LanguageSelector";
-import { useT } from "./useT";
+import "./app.css";
+import { useState } from "react";
+import { createBrowserRouter, RouterProvider } from "react-router";
+import { routes } from "./routes";
 
 export function App() {
-  const t = useT();
-  return (
-    <>
-      <main>
-        <h1>{t("app.name")}</h1>
-        <p>{t("app.tagline")}</p>
-        <p>{t("app.under_construction")}</p>
-      </main>
-      <footer>
-        <LanguageSelector />
-      </footer>
-    </>
-  );
+  // Criado uma vez só. O histórico do navegador cuida do botão Voltar (inclusive no Android).
+  const [router] = useState(() => createBrowserRouter(routes));
+  return <RouterProvider router={router} />;
 }

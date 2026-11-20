@@ -1,0 +1,1 @@
+{"format":"glifora-export","version":1,"exportedAt":"2026-11-20T15:00:00Z","app":"0.1.0","device":"dev-a","docs":[{"id":"profile","v":1,"data":{"nickname":"Ana","createdAt":5},"updatedAt":1700000005000,"deleted":0},{"id":"prefs","v":1,"data":{"uiLang":"en","baseLang":null,"reduceMotion":"system","sounds":true,"textSize":"normal"},"updatedAt":1700000005000,"deleted":0}]}

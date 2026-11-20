@@ -9,7 +9,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { previewHeaders } from "../../config/headers.ts";
 
 /** Acrescente aqui toda rota nova (W1-08 em diante). */
-const ROUTES = ["/"];
+const ROUTES = ["/", "/welcome", "/place/bakery", "/profile", "/settings", "/about", "/rota-que-nao-existe"];
 
 const fileHeaders = previewHeaders(readFileSync("public/_headers", "utf8"));
 

@@ -1,0 +1,274 @@
+/* Casca do app (W1-08). Sem estilo inline em lugar nenhum: a CSP não deixa (style-src 'self').
+   Tamanhos em rem, para o texto escalar com a preferência do sistema; alvos de toque de pelo menos 44px. */
+:root {
+  --bg: #fbf7ef;
+  --surface: #ffffff;
+  --text: #241f1a;
+  --muted: #5c5349;
+  --border: #d9cfbf;
+  --accent: #8a4b00; /* contraste 6,5:1 sobre --bg */
+  --accent-text: #ffffff;
+  --danger: #a31616;
+  --focus: #1a5fb4;
+  --nav-h: 3.5rem;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #17130f;
+    --surface: #241e18;
+    --text: #f4ede2;
+    --muted: #bfb3a3;
+    --border: #4a3f33;
+    --accent: #f0b35a;
+    --accent-text: #241f1a;
+    --danger: #ff9b9b;
+    --focus: #8ab8ff;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 1rem/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  overflow-wrap: anywhere; /* nada de rolagem lateral em 360px, mesmo com texto longo */
+}
+
+h1 {
+  font-size: 1.5rem;
+  line-height: 1.25;
+  margin: 0 0 0.75rem;
+}
+
+h2 {
+  font-size: 1.2rem;
+  margin: 1.5rem 0 0.5rem;
+}
+
+p {
+  margin: 0 0 0.75rem;
+}
+
+a {
+  color: var(--accent);
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* O título recebe foco ao trocar de tela (leitor de tela), mas não é um controle: sem contorno. */
+[tabindex="-1"]:focus {
+  outline: none;
+}
+
+.shell {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.skip-link {
+  position: absolute;
+  left: 0.5rem;
+  top: -4rem;
+  z-index: 10;
+  padding: 0.75rem 1rem;
+  background: var(--surface);
+  border: 2px solid var(--focus);
+  border-radius: 0.5rem;
+}
+
+.skip-link:focus {
+  top: 0.5rem;
+}
+
+.top-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.brand {
+  font-weight: 700;
+  font-size: 1.15rem;
+}
+
+.lang-select {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.lang-select select {
+  min-height: 2.75rem;
+}
+
+.page {
+  width: 100%;
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 2rem;
+}
+
+.bottom-nav {
+  position: sticky;
+  bottom: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.bottom-nav ul {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bottom-nav li {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.bottom-nav a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--nav-h);
+  padding: 0.25rem;
+  color: var(--muted);
+  text-align: center;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.bottom-nav a[aria-current="page"] {
+  color: var(--accent);
+  font-weight: 700;
+  box-shadow: inset 0 3px 0 var(--accent);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0.5rem 1rem;
+  border: 2px solid var(--accent);
+  border-radius: 0.5rem;
+  background: var(--surface);
+  color: var(--accent);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+.btn-danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.btn-danger.btn-primary {
+  background: var(--danger);
+  color: var(--bg);
+}
+
+.btn[disabled] {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 0.75rem 0;
+}
+
+.notice {
+  margin: 0.75rem 0;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface);
+}
+
+.notice-error {
+  border-color: var(--danger);
+}
+
+.details {
+  display: block;
+  width: 100%;
+  min-height: 7rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--bg);
+  color: var(--text);
+  font: 0.85rem/1.4 ui-monospace, Consolas, monospace;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+dialog.confirm {
+  width: min(28rem, calc(100vw - 2rem));
+  padding: 1.25rem;
+  border: 2px solid var(--danger);
+  border-radius: 0.75rem;
+  background: var(--surface);
+  color: var(--text);
+}
+
+dialog.confirm::backdrop {
+  background: rgb(0 0 0 / 0.6);
+}
+
+.centered {
+  max-width: 32rem;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

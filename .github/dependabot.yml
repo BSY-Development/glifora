@@ -6,6 +6,11 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    ignore:
+      # TypeScript 7 quebra o `npm ci`: o typescript-eslint 8.73 exige TS < 6.1 (peer dependency).
+      # Tirar este bloco quando o typescript-eslint aceitar o TypeScript 7 (e subir o TS na mão, junto).
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
     groups:
       npm:
         patterns: ["*"]

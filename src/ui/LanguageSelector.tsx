@@ -8,7 +8,7 @@ export function LanguageSelector() {
   const t = useT();
   const locale = useLocale();
   return (
-    <label>
+    <label className="lang-select">
       {t("lang.label")}{" "}
       <select
         value={locale}

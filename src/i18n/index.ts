@@ -77,6 +77,11 @@ function readStored(): Locale | null {
   }
 }
 
+/** O idioma que a pessoa escolheu (guardado no localStorage), ou `null` se nunca escolheu. */
+export function getStoredLocale(): Locale | null {
+  return readStored();
+}
+
 function applyToDocument(locale: Locale): void {
   if (typeof document !== "undefined") document.documentElement.lang = locale;
 }
@@ -95,15 +100,16 @@ export function getLocale(): Locale {
   return current;
 }
 
-/** Troca na hora, persiste e atualiza <html lang>. */
+/** Troca na hora, persiste e atualiza <html lang>. Escolher o idioma que já está valendo também persiste (a escolha vira explícita), sem avisar ninguém. */
 export function setLocale(locale: Locale): void {
-  if (locale === current) return;
+  const changed = locale !== current;
   current = locale;
   try {
     localStorage.setItem(STORAGE_KEY, locale);
   } catch {
     // sem persistência; a troca vale nesta sessão
   }
+  if (!changed) return;
   applyToDocument(locale);
   listeners.forEach((listener) => listener());
 }

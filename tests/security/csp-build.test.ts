@@ -13,6 +13,14 @@ const KNOWN_URLS = [
   /^https?:\/\/react\.dev(\/|$)/, // links de erro do React
   /^https?:\/\/reactjs\.org(\/|$)/,
   /^https?:\/\/www\.w3\.org\/(1999\/xhtml|2000\/svg|1998\/Math\/MathML|1999\/xlink|XML\/1998\/namespace)$/, // namespaces XML
+  // W1-07/08/09: strings das bibliotecas empacotadas (sem fetch; a CSP barra de qualquer forma). Exatas de propósito: URL nova = revisão.
+  /^https:\/\/reactrouter\.com\/en\/main\/routers\/picking-a-router\.?$/, // react-router: texto de aviso
+  /^http:\/\/\[\$\{e\}\]$/, // zod: monta URL só para validar IPv6 (new URL)
+  /^https:\/\/json-schema\.org\/draft\/2020-12\/schema$/, // zod: identificadores de $schema
+  /^http:\/\/json-schema\.org\/draft-0[47]\/schema#$/,
+  /^https:\/\/tinyurl\.com\/y2uuvskb$/, // dexie: texto de erro
+  /^http:\/\/bit\.ly\/2kdckMn$/, // dexie: texto de erro
+  /^http:\/\/localhost$/, // react-router: base para new URL() ao resolver caminhos
 ];
 
 function walk(dir: string): string[] {
