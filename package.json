@@ -9,16 +9,13 @@
     "node": ">=22.18"
   },
   "scripts": {
-    "predev": "node scripts/content/build-index.ts",
-    "dev": "vite",
-    "prebuild": "node scripts/content/build-index.ts",
-    "build": "vite build",
+    "dev": "node scripts/content/build-index.ts && vite",
+    "build": "node scripts/content/build-index.ts && vite build",
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.tests.json && tsc -p tsconfig.node.json && tsc -p tests/e2e/tsconfig.json && tsc -p tests/e2e-security/tsconfig.json",
     "lint": "eslint .",
-    "pretest": "node scripts/content/build-index.ts",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test": "node scripts/content/build-index.ts && vitest run",
+    "test:watch": "node scripts/content/build-index.ts && vitest",
     "test:e2e": "playwright test",
     "check": "npm run typecheck && npm run lint && npm run test && npm run build"
   },
