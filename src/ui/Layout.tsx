@@ -4,6 +4,7 @@ import { NavLink, Outlet, useLocation } from "react-router";
 import type { MessageKey } from "../i18n";
 import { useDisplayPrefs } from "./display";
 import { LanguageSelector } from "./LanguageSelector";
+import { UpdateNotice } from "./UpdateNotice";
 import { useT } from "./useT";
 
 const NAV: ReadonlyArray<{ to: string; label: MessageKey; end?: boolean }> = [
@@ -40,10 +41,13 @@ export function Layout() {
       <a className="skip-link" href="#main" onClick={skipToContent}>
         {t("a11y.skip")}
       </a>
-      <header className="top-bar">
-        <span className="brand">{t("app.name")}</span>
-        {!OWN_LANGUAGE_CHOICE.has((pathname.length > 1 && pathname.endsWith("/") ? pathname.slice(0, -1) : pathname)) && <LanguageSelector />}
-      </header>
+      <div>
+        <header className="top-bar">
+          <span className="brand">{t("app.name")}</span>
+          {!OWN_LANGUAGE_CHOICE.has((pathname.length > 1 && pathname.endsWith("/") ? pathname.slice(0, -1) : pathname)) && <LanguageSelector />}
+        </header>
+        <UpdateNotice />
+      </div>
       <main id="main" tabIndex={-1} className="page">
         <Outlet />
       </main>

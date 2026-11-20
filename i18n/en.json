@@ -7,6 +7,8 @@
   "a11y.skip": "Skip to content",
   "common.loading": "Loading…",
   "common.save_failed": "Could not save. Please try again.",
+  "update.available": "A new version is available.",
+  "update.apply": "Update",
   "nav.label": "Main navigation",
   "nav.home": "Village",
   "nav.profile": "Profile",

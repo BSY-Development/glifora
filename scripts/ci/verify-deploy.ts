@@ -1,5 +1,6 @@
 // Conferência pós-deploy (W1-13): busca a URL real e exige (1) os cabeçalhos do bloco `/*` do _headers com o valor exato,
-// (2) /version.json com o commit desta rodada e (3) uma rota profunda caindo no app (fallback de SPA).
+// (2) /version.json com o commit desta rodada, (3) uma rota profunda caindo no app (fallback de SPA) e
+// (4) /sw.js (JavaScript, sem cache, cabeçalhos do /*) e /manifest.webmanifest (W1-12).
 // Tenta de novo por até ~3 minutos (propagação) e falha alto, mostrando a diferença.
 // Uso: DEPLOY_URL=https://glifora.pages.dev EXPECTED_COMMIT=<sha> node scripts/ci/verify-deploy.ts
 import { readFileSync } from "node:fs";
@@ -64,7 +65,7 @@ for (let n = 1; ; n += 1) {
     last = [`falha de rede: ${error instanceof Error ? error.message : String(error)}`];
   }
   if (last.length === 0) {
-    console.log(`OK: ${base} serve os cabeçalhos do _headers, o commit ${expectedCommit} e o fallback de SPA (tentativa ${n}).`);
+    console.log(`OK: ${base} serve os cabeçalhos do _headers, o commit ${expectedCommit} o fallback de SPA, o /sw.js e o manifesto (tentativa ${n}).`);
     break;
   }
   if (Date.now() + WAIT_MS > DEADLINE) {

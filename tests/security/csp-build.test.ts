@@ -20,6 +20,7 @@ const KNOWN_URLS = [
   /^http:\/\/json-schema\.org\/draft-0[47]\/schema#$/,
   /^https:\/\/tinyurl\.com\/y2uuvskb$/, // dexie: texto de erro
   /^http:\/\/bit\.ly\/2kdckMn$/, // dexie: texto de erro
+  /^https:\/\/bit\.ly\/wb-precache$/, // workbox (embutido no sw.js): texto de aviso
   /^http:\/\/localhost$/, // react-router: base para new URL() ao resolver caminhos
 ];
 

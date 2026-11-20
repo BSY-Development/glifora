@@ -100,8 +100,12 @@ async function watchViolations(page: Page): Promise<void> {
 async function openWithProbe(page: Page): Promise<void> {
   await watchViolations(page);
   await page.route("**/assets/*.js", async (route) => {
-    const response = await route.fetch();
-    await route.fulfill({ response, body: `${await response.text()}\n${PROBE}` });
+    try {
+      const response = await route.fetch();
+      await route.fulfill({ response, body: `${await response.text()}\n${PROBE}` });
+    } catch {
+      // o teste terminou com um chunk ainda a caminho (carga preguiçosa de rota): resposta descartada, sem importância
+    }
   });
   await page.goto("/");
   await page.locator("#root *").first().waitFor();

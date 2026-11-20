@@ -3,11 +3,13 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { initLocale } from "./i18n";
 import { boot } from "./services/boot";
+import { registerServiceWorker } from "./sw-register";
 import { loadPrefs } from "./services/player";
 import { App } from "./ui/App";
 import { applyDisplayPrefs } from "./ui/display";
 import { StorageError } from "./ui/StorageError";
 
+registerServiceWorker(); // espera o `load` e só roda em produção
 initLocale(); // lê o idioma salvo (síncrono) e põe <html lang> antes da primeira tela
 const container = document.getElementById("root");
 if (!container) throw new Error("#root não encontrado");
