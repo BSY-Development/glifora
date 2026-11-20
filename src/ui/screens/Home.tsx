@@ -3,6 +3,7 @@
 import { Link, Navigate } from "react-router";
 import { useLiveQuery } from "dexie-react-hooks";
 import { DEFAULT_AVATAR, loadAvatar, loadProfile } from "../../services/player";
+import { loadProgress } from "../../services/progress";
 import { getLocations } from "../../services/world";
 import { Avatar } from "../Avatar";
 import { PixelArt } from "../art/PixelArt";
@@ -17,6 +18,11 @@ export function Home() {
   const t = useT();
   const profile = useLiveQuery(() => loadProfile());
   const avatar = useLiveQuery(() => loadAvatar()) ?? DEFAULT_AVATAR;
+  // Enquanto carrega, a barra aparece como no nível 1 vazio (o mesmo de quem ainda não tem eventos).
+  const progress = useLiveQuery(() => loadProgress());
+  const level = progress?.level ?? 1;
+  const into = progress?.into ?? 0;
+  const toNext = progress?.toNext ?? 50;
 
   // Mesmo enquanto o perfil carrega, o título já existe: o Layout põe o foco nele ao trocar de rota.
   if (profile === undefined) {
@@ -40,12 +46,11 @@ export function Home() {
         <div className="hud-info">
           <p className="hud-name">{greeting}</p>
           <p className="hud-level">
-            {t("hud.level", { n: 1 })} · {t("hud.title.apprentice")}
+            {t("hud.level", { n: level })} · {t(`hud.title.${progress?.title ?? "apprentice"}`)}
           </p>
-          {/* Enfeite por enquanto: o XP de verdade chega na fase 2. */}
-          <div className="xp" aria-hidden="true">
-            <div className="xp-fill" />
-          </div>
+          {/* A barra é só o desenho; o número vai em texto logo abaixo, para o leitor de tela e para quem aumenta a letra. */}
+          <progress className="xp" aria-hidden="true" value={into} max={into + toNext} />
+          <p className="hud-xp">{t("hud.xp", { into, total: into + toNext })}</p>
         </div>
       </section>
 

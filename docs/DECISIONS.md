@@ -146,6 +146,10 @@ Status: `aceita` · `provisória` · `proposta` · `ajustada por D-xx` · `subst
   - **`Access-Control-Allow-Origin: *`:** só deixa outro site ler arquivos que já são públicos, sem cookie nem credencial.
   - **Decisão:** aceitar e explicar no `SECURITY.md` ("Privacidade e hospedagem").
   - **Na fase 2:** tentar tirar os dois com a sintaxe `! Cabeçalho` do `_headers` e conferir no `verify-deploy`. Se o Cloudflare não deixar, o caminho é um domínio próprio, com o NEL desligado na zona.
+  - **Resultado (W2-10, deploy `06a1897`):**
+    - O `Access-Control-Allow-Origin` **saiu** com o `! Cabeçalho`, e o `verify-deploy` passa a exigir que ele não volte.
+    - O `Report-To`/`NEL` **continua**: é injetado pela borda do Cloudflare, e o `_headers` não alcança.
+    - Segue aceito como acima (só falha de rede, `success_fraction` 0). Tirar de vez depende de domínio próprio, com o NEL desligado na zona; a compra é decisão do dono, sem pressa.
 - **Manifesto:** `lang` e `description` ficam fixos em pt-BR. O manifesto é um só para os dois idiomas. Rever quando houver público em inglês.
 - **`npm audit`:** os 4 alertas moderados (`glob`/`minimatch` via `workbox-build`) ficam aceitos. Só rodam no build, e `--omit=dev` dá 0. O README avisa para não usar `audit fix --force`.
 - **Para a fase 2:**

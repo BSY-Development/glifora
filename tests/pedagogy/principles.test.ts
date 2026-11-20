@@ -27,9 +27,10 @@ describe("princípio 7 · recompensa só por esforço real (fase 1: nada concede
     const schema = read("src/data/schema/docs.ts");
     expect(schema).not.toMatch(/\b(xp|coins?|moedas?|streak)\b/i);
   });
-  it("a barra de XP da vila é enfeite escondido do leitor de tela e nada no código escreve XP", () => {
+  it("a barra de XP é só desenho (escondida do leitor de tela, com o número em texto) e nada no código escreve XP fora do motor", () => {
     const home = read("src/ui/screens/Home.tsx");
-    expect(home).toMatch(/className="xp"[^>]*aria-hidden="true"|aria-hidden="true"[^>]*className="xp"/);
+    expect(home).toMatch(/<progress[^>]*className="xp"[^>]*aria-hidden="true"|<progress[^>]*aria-hidden="true"[^>]*className="xp"/);
+    expect(home).toContain('t("hud.xp"');
     expect(prod.filter((f) => /\b(addXp|grantXp|awardXp|giveXp|earnXp|addCoins)\b/i.test(read(f)))).toEqual([]);
   });
 });

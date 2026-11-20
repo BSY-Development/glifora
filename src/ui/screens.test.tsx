@@ -4,7 +4,7 @@ import "fake-indexeddb/auto";
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createMemoryRouter, RouterProvider } from "react-router";
-import { avatarRepo, openDb, prefsRepo, profileRepo, type GliforaDb } from "../data";
+import { appendEvent, avatarRepo, openDb, prefsRepo, profileRepo, type GliforaDb } from "../data";
 import { initLocale, t } from "../i18n";
 import { setStorageForTest } from "../services/storage";
 import { applyDisplayPrefs } from "./display";
@@ -202,6 +202,27 @@ describe("a vila e os locais", () => {
     await screen.findByText(t("hud.level", { n: 1 }), { exact: false });
     expect(container.querySelectorAll("img, canvas, [style]").length).toBe(0);
     expect(container.querySelectorAll("svg[shape-rendering='crispEdges']").length).toBeGreaterThan(1);
+  });
+
+  it("a vila lê o nível, o título e a barra do livro-razão (W2-07)", async () => {
+    await withProfile();
+    // 500 XP no total: nível 5 (começa em 500), Viajante, barra vazia, faltam 250.
+    await appendEvent(db, { now: () => 5, uuid: () => "dev" }, { id: "run:a", kind: "mission_completed", xp: 300, coins: 0, rules: 1 });
+    await appendEvent(db, { now: () => 6, uuid: () => "dev" }, { id: "first:m", kind: "mission_first", xp: 200, coins: 5, rules: 1 });
+    const { container } = render(<RouterProvider router={createMemoryRouter(routes, { initialEntries: ["/"] })} />);
+    await screen.findByText(`${t("hud.level", { n: 5 })} · ${t("hud.title.traveler")}`);
+    expect(screen.getByText(t("hud.xp", { into: 0, total: 250 }))).toBeTruthy();
+    const bar = container.querySelector("progress.xp");
+    expect(bar?.getAttribute("aria-hidden")).toBe("true");
+    expect([bar?.getAttribute("value"), bar?.getAttribute("max")]).toEqual(["0", "250"]);
+  });
+
+  it("sem eventos a vila mostra nível 1, Aprendiz e a barra vazia", async () => {
+    await withProfile();
+    const { container } = render(<RouterProvider router={createMemoryRouter(routes, { initialEntries: ["/"] })} />);
+    await screen.findByText(`${t("hud.level", { n: 1 })} · ${t("hud.title.apprentice")}`);
+    expect(screen.getByText(t("hud.xp", { into: 0, total: 50 }))).toBeTruthy();
+    expect(container.querySelector("progress.xp")?.getAttribute("value")).toBe("0");
   });
 
   it("um local que não existe em locations.json cai no 404", async () => {

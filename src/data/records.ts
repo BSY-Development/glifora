@@ -28,6 +28,8 @@ export interface EventInput {
   target?: string;
   ref?: string;
   runId?: string;
+  /** Dia local do INÍCIO da rodada (D-49); sem ele, o dia de agora. */
+  day?: string;
 }
 
 /** Acrescenta ao livro-razão. Id já existente: devolve o que já estava lá, sem mudar nada. */
@@ -35,18 +37,19 @@ export async function appendEvent(db: GliforaDb, deps: Deps, input: EventInput):
   const device = await ensureMeta(db, deps);
   const at = deps.now();
   const event = check(
-    GameEvent.safeParse({ ...input, id: input.id ?? deps.uuid(), at, day: localDay(at), device, synced: 0 }),
+    GameEvent.safeParse({ ...input, id: input.id ?? deps.uuid(), at, day: input.day ?? localDay(at), device, synced: 0 }),
   );
   return db.transaction("rw", db.events, async () => (await db.events.get(event.id)) ?? (await db.events.add(event).then(() => event)));
 }
 
-export type RunInput = Omit<Run, "id" | "at" | "day" | "device" | "synced"> & { id?: string };
+/** `day`: o dia local do início da rodada; sem ele, o dia de agora. */
+export type RunInput = Omit<Run, "id" | "at" | "day" | "device" | "synced"> & { id?: string; day?: string };
 
 /** Guarda o resumo de uma rodada concluída. Mesmo id: a primeira gravação fica. */
 export async function appendRun(db: GliforaDb, deps: Deps, input: RunInput): Promise<Run> {
   const device = await ensureMeta(db, deps);
   const at = deps.now();
-  const run = check(Run.safeParse({ ...input, id: input.id ?? deps.uuid(), at, day: localDay(at), device, synced: 0 }));
+  const run = check(Run.safeParse({ ...input, id: input.id ?? deps.uuid(), at, day: input.day ?? localDay(at), device, synced: 0 }));
   return db.transaction("rw", db.runs, async () => (await db.runs.get(run.id)) ?? (await db.runs.add(run).then(() => run)));
 }
 

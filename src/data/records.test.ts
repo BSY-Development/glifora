@@ -6,7 +6,7 @@ import { openDb, type GliforaDb } from "./db";
 import type { Deps } from "./deps";
 import { appendEvent, appendRun, clearSession, InvalidRecordError, listEvents, listRuns, loadSession, saveSession, type RunInput } from "./records";
 import { profileRepo } from "./repos";
-import { EVENT_MAX_XP, MAX_EVENTS, MAX_RUNS, type EventFile, type RunFile } from "./schema/records";
+import { EVENT_MAX_COINS, EVENT_MAX_SPEND, EVENT_MAX_XP, MAX_EVENTS, MAX_RUNS, type EventFile, type RunFile } from "./schema/records";
 import { buildExport, importExport, parseExport, serializeExport, wipeLocalData } from "./transfer";
 
 let counter = 0;
@@ -38,7 +38,11 @@ const run: RunInput = {
   replies: { good: 4, flawed: 1, retry: 0 },
   recasts: [{ pattern: "article-a-an", count: 1 }],
   words: ["bread", "please"],
-  closing: { text: "I would like a bread, please.", accepted: true, usedModel: false },
+  answers: [
+    { node: "greet", input: "voice", scaffold: 0 },
+    { node: "order", input: "typed", scaffold: 1 },
+  ],
+  closing: { text: "I would like a bread, please.", input: "voice", accepted: true, usedModel: false },
 };
 
 describe("migração v1 → v2", () => {
@@ -75,7 +79,7 @@ describe("registros", () => {
     const first = await appendEvent(db, deps("dev-a"), { id: "ach:first_boss", kind: "achievement", xp: 50, coins: 5, rules: 1 });
     expect(first).toMatchObject({ id: "ach:first_boss", device: "dev-a", synced: 0, at: NOW });
     expect(first.day).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-    await appendEvent(db, deps("dev-a", NOW + 1000), { id: "ach:first_boss", kind: "achievement", xp: 999, coins: 0, rules: 1 });
+    await appendEvent(db, deps("dev-a", NOW + 1000), { id: "ach:first_boss", kind: "achievement", xp: 300, coins: 0, rules: 1 });
     const all = await listEvents(db);
     expect(all).toHaveLength(1);
     expect(all[0]?.xp).toBe(50);
@@ -167,7 +171,7 @@ describe("exportar e importar events e runs", () => {
 
     const dup = { ...(await buildExport(b, deps("dev-b"), "0.1.0")) };
     const first = dup.events[0] as EventFile;
-    dup.events = [first, { ...first, xp: 7_000 }];
+    dup.events = [first, { ...first, xp: 300 }];
     const c = await newDb();
     await importExport(c, serializeExport(dup));
     expect(await c.events.toArray()).toMatchObject([{ id: "e-b", xp: 20 }]);
@@ -182,17 +186,30 @@ describe("importação hostil de events e runs", () => {
   const rn = (over: Record<string, unknown> = {}): RunFile =>
     ({
       id: "r1", missionId: "bakery-01", at: NOW, day: "2026-11-20", level: 1, xp: 10, rules: 1, canDo: true,
-      replies: { good: 1, flawed: 0, retry: 0 }, recasts: [], words: [], device: "d", ...over,
+      replies: { good: 1, flawed: 0, retry: 0 }, recasts: [], words: [], answers: [], device: "d", ...over,
     }) as RunFile;
 
   it("um item bom passa", () => {
     expect(parseExport(JSON.stringify({ ...base, events: [ev()], runs: [rn()] }), NOW)).toMatchObject({ ok: true });
   });
 
+  it("os dois tipos de prêmio único e os limites exatos passam", () => {
+    const events = [
+      ev({ id: "first:bakery-01", kind: "mission_first", xp: 24, coins: 5 }),
+      ev({ id: "star:bakery-01:1", kind: "mission_star", xp: 40, coins: 5 }),
+      ev({ id: "e-max", xp: EVENT_MAX_XP, coins: EVENT_MAX_COINS }),
+      ev({ id: "buy", kind: "purchase", xp: 0, coins: -EVENT_MAX_SPEND }),
+    ];
+    expect(parseExport(JSON.stringify({ ...base, events }), NOW)).toMatchObject({ ok: true });
+  });
+
   it.each<[string, unknown, string]>([
     ["xp negativo", ev({ xp: -5 }), "events[0].xp"],
     ["xp acima do teto", ev({ xp: EVENT_MAX_XP + 1 }), "events[0].xp"],
     ["xp fracionado", ev({ xp: 1.5 }), "events[0].xp"],
+    ["xp acima de 400 (D-49)", ev({ xp: 401 }), "events[0].xp"],
+    ["moedas ganhas acima de 100 (D-49)", ev({ coins: 101 }), "events[0].coins"],
+    ["compra acima do teto de gasto", ev({ kind: "purchase", xp: 0, coins: -EVENT_MAX_SPEND - 1 }), "events[0].coins"],
     ["moeda negativa fora de purchase", ev({ coins: -1 }), "events[0].coins"],
     ["purchase que ganha moeda", ev({ kind: "purchase", coins: 5 }), "events[0].coins"],
     ["rules fracionado", ev({ rules: 1.5 }), "events[0].rules"],
@@ -215,10 +232,16 @@ describe("importação hostil de events e runs", () => {
     ["nível de domínio 4", rn({ level: 4 }), "runs[0].level"],
     ["xp negativo", rn({ xp: -1 }), "runs[0].xp"],
     ["palavra com HTML", rn({ words: ["<script>"] }), "runs[0].words[0]"],
-    ["frase do fecho com HTML", rn({ closing: { text: "<b>oi</b>", accepted: true, usedModel: false } }), "runs[0].closing.text"],
-    ["frase do fecho enorme", rn({ closing: { text: "a".repeat(301), accepted: true, usedModel: false } }), "runs[0].closing.text"],
+    ["frase do fecho com HTML", rn({ closing: { text: "<b>oi</b>", input: "typed", accepted: true, usedModel: false } }), "runs[0].closing.text"],
+    ["frase do fecho enorme", rn({ closing: { text: "a".repeat(301), input: "typed", accepted: true, usedModel: false } }), "runs[0].closing.text"],
     ["lista de recasts enorme", rn({ recasts: Array.from({ length: 21 }, (_, i) => ({ pattern: `p${i}`, count: 1 })) }), "runs[0].recasts"],
     ["campo extra", { ...rn(), extra: 1 }, "runs[0]"],
+    ["sem a lista de respostas", Object.fromEntries(Object.entries(rn()).filter(([k]) => k !== "answers")), "runs[0].answers"],
+    ["mais de 20 respostas", rn({ answers: Array.from({ length: 21 }, () => ({ node: "greet", input: "tap", scaffold: 3 })) }), "runs[0].answers"],
+    ["resposta com modo inventado", rn({ answers: [{ node: "greet", input: "gesture", scaffold: 0 }] }), "runs[0].answers[0].input"],
+    ["resposta com degrau 4", rn({ answers: [{ node: "greet", input: "voice", scaffold: 4 }] }), "runs[0].answers[0].scaffold"],
+    ["resposta com id de fala inseguro", rn({ answers: [{ node: "<b>", input: "voice", scaffold: 0 }] }), "runs[0].answers[0].node"],
+    ["fecho sem o modo", rn({ closing: { text: "oi", accepted: true, usedModel: false } }), "runs[0].closing.input"],
   ])("recusa rodada com %s", (_name, item, path) => {
     const result = parseExport(JSON.stringify({ ...base, runs: [item] }), NOW);
     expect(result).toMatchObject({ ok: false, error: { code: "invalid" } });
@@ -258,7 +281,7 @@ describe("limites", () => {
       day: "2026-11-20",
       kind: "mission_completed" as const,
       xp: EVENT_MAX_XP,
-      coins: 10_000,
+      coins: EVENT_MAX_COINS,
       rules: 10_000,
       target: "en",
       ref: "bakery-01",
@@ -275,7 +298,8 @@ describe("limites", () => {
       synced: 0 as const,
       recasts: Array.from({ length: 20 }, (_, n) => ({ pattern: `article-a-an-${n}`, count: 3 })),
       words: Array.from({ length: 30 }, (_, n) => `palavra${n}`),
-      closing: { text: "a".repeat(300), accepted: true, usedModel: true },
+      answers: Array.from({ length: 20 }, (_, n) => ({ node: `fala-${String(n).padStart(2, "0")}-${"x".repeat(20)}`, input: "voice" as const, scaffold: 0 as const })),
+      closing: { text: "a".repeat(300), input: "typed" as const, accepted: true, usedModel: true },
     });
     await db.events.bulkAdd(Array.from({ length: MAX_EVENTS }, (_, i) => event(i)));
     await db.runs.bulkAdd(Array.from({ length: MAX_RUNS }, (_, i) => fullRun(i)));

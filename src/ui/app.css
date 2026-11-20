@@ -474,18 +474,34 @@ html[data-motion="on"] *::after {
   font-size: 0.95rem;
 }
 
+/* `<progress>` nativo, sem atributo style (a CSP e os testes não aceitam); o desenho vem destes pseudo-elementos. */
 .xp {
+  display: block;
+  width: 100%;
   height: 0.75rem;
   border: 2px solid var(--border);
   border-radius: 0.25rem;
   background: var(--bg);
   overflow: hidden;
+  appearance: none;
 }
 
-.xp-fill {
-  width: 0;
-  height: 100%;
+.xp::-webkit-progress-bar {
+  background: var(--bg);
+}
+
+.xp::-webkit-progress-value {
   background: var(--accent);
+}
+
+.xp::-moz-progress-bar {
+  background: var(--accent);
+}
+
+.hud-xp {
+  margin: 0.3rem 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
 }
 
 /* Em tela baixa (360×640) o mapa encolhe até caber inteiro ao lado do cabeçalho; nunca fica menor que 15rem. */

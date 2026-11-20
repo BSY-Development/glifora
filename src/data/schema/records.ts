@@ -30,15 +30,22 @@ const PlainText = (max: number) =>
     .refine((s) => Array.from(s).length <= max, { message: `no máximo ${max} caracteres` })
     .refine((s) => !FORBIDDEN_TEXT.test(s), { message: "sem < nem >, e sem caracteres de controle ou invisíveis" });
 
-/** Teto de XP e de moedas de um único evento (o maior prêmio previsto cabe folgado). */
-export const EVENT_MAX_XP = 10_000;
-export const EVENT_MAX_COINS = 10_000;
+/**
+ * Teto de XP e de moedas GANHAS por um único evento (D-49). Nas regras v1, nenhum evento legítimo passa de
+ * 344 XP (rodada de 20 falas) nem de 50 moedas; o teto só barra o absurdo, não impede quem edita o próprio arquivo.
+ */
+export const EVENT_MAX_XP = 400;
+export const EVENT_MAX_COINS = 100;
+/** Quanto uma compra (`purchase`) pode gastar de uma vez. */
+export const EVENT_MAX_SPEND = 10_000;
 /** Versão das regras: inteiro pequeno. */
 const Rules = z.number().int().min(1).max(10_000);
 
 export const EVENT_KINDS = [
   "mission_completed",
   "boss_defeated",
+  "mission_first",
+  "mission_star",
   "daily_completed",
   "spell_cast",
   "achievement",
@@ -59,7 +66,7 @@ const EventBase = z.strictObject({
     /** ≥ 0, já calculado. */
     xp: z.number().int().min(0).max(EVENT_MAX_XP),
     /** ≥ 0; negativo só em `purchase`. */
-    coins: z.number().int().min(-EVENT_MAX_COINS).max(EVENT_MAX_COINS),
+    coins: z.number().int().min(-EVENT_MAX_SPEND).max(EVENT_MAX_COINS),
     rules: Rules,
     target: RecordId.optional(),
     ref: RecordId.optional(),
@@ -76,6 +83,19 @@ export type GameEvent = z.infer<typeof GameEvent>;
 
 /** Degrau de domínio da rodada (D-43): 1 frases à vista · 2 só a ideia no idioma base · 3 sem nada. */
 export const RUN_LEVELS = [1, 2, 3] as const;
+
+/** Como a resposta foi dada: falando, digitando ou tocando. */
+export const INPUT_MODES = ["voice", "typed", "tap"] as const;
+const InputMode = z.enum(INPUT_MODES);
+/** Uma missão tem no máximo 20 falas (`MISSION_LIMITS.nodes.max`). */
+export const MAX_RUN_ANSWERS = 20;
+const RunAnswer = z.strictObject({
+  /** Id da fala (`MissionNode.id`). */
+  node: z.string().regex(/^[a-z][a-z0-9_-]{0,31}$/, { message: "id de fala: minúsculas, números, - e _ (1 a 32)" }),
+  input: InputMode,
+  /** 0 sem ajuda · 1 ideia · 2 frase à vista · 3 tocou. */
+  scaffold: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3)]),
+});
 
 /** Linha de `runs`: o resumo de uma rodada concluída, o suficiente para o relatório. */
 export const Run = z.strictObject({
@@ -98,8 +118,13 @@ export const Run = z.strictObject({
   recasts: z.array(z.strictObject({ pattern: RecordId, count: z.number().int().min(1).max(500) })).max(20),
   /** Palavras novas da rodada. */
   words: z.array(PlainText(60)).max(30),
-  /** A frase do fecho ao lado da resposta-modelo (`usedModel`: a pessoa viu o modelo). */
-  closing: z.strictObject({ text: PlainText(300), accepted: z.boolean(), usedModel: z.boolean() }).optional(),
+  /**
+   * As respostas que casaram, na ordem em que vieram (`node` = id da fala). Delas saem o `repeat` e a estrela (D-49).
+   * `scaffold` é o degrau em vigor quando a resposta casou.
+   */
+  answers: z.array(RunAnswer).max(MAX_RUN_ANSWERS),
+  /** A frase do fecho ao lado da resposta-modelo (`usedModel`: a pessoa viu o modelo) e como foi dita. */
+  closing: z.strictObject({ text: PlainText(300), input: InputMode, accepted: z.boolean(), usedModel: z.boolean() }).optional(),
   device: Device,
   synced: Flag,
 });
