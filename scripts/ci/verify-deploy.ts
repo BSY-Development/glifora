@@ -4,7 +4,7 @@
 // Tenta de novo por até ~3 minutos (propagação) e falha alto, mostrando a diferença.
 // Uso: DEPLOY_URL=https://glifora.pages.dev EXPECTED_COMMIT=<sha> node scripts/ci/verify-deploy.ts
 import { readFileSync } from "node:fs";
-import { checkVersion, compareHeaders, describeMismatches, presentDetached } from "./verifyDeploy.ts";
+import { checkVersion, compareHeaders, describeMismatches, presentDetached, splitDetached } from "./verifyDeploy.ts";
 
 const base = (process.env["DEPLOY_URL"] ?? "").replace(/\/$/, "");
 const sha = process.env["EXPECTED_COMMIT"] ?? process.env["GITHUB_SHA"] ?? "";
@@ -14,8 +14,10 @@ if (!/^https:\/\//.test(base) || !/^[0-9a-f]{7,40}$/i.test(sha)) {
 }
 const expectedCommit = sha.slice(0, 7).toLowerCase(); // o mesmo formato do /about e do version.json
 const headersFile = readFileSync("public/_headers", "utf8");
-// D-46: Report-To, NEL e Access-Control-Allow-Origin têm "! Nome" no _headers. Enquanto não se sabe se o Cloudflare deixa
-// tirar, a conferência só avisa. Com STRICT_DETACHED=1 vira erro (ligar quando der certo na URL real).
+// D-46: Report-To, NEL e Access-Control-Allow-Origin têm "! Nome" no _headers.
+// - Access-Control-Allow-Origin saiu de verdade em produção: se voltar, é ERRO.
+// - Report-To e NEL são injetados pela borda do Cloudflare (o _headers não alcança): seguem como AVISO.
+//   Com STRICT_DETACHED=1 também viram erro (só faz sentido com domínio próprio e o NEL desligado na zona).
 const strictDetached = process.env["STRICT_DETACHED"] === "1";
 const DEADLINE = Date.now() + 3 * 60 * 1000;
 const WAIT_MS = 10_000;
@@ -30,9 +32,12 @@ async function attempt(): Promise<string[]> {
 
   const home = await get("/");
   if (home.status !== 200) problems.push(`GET / respondeu ${home.status}`);
-  const stillThere = presentDetached(headersFile, home.headers);
-  if (stillThere.length > 0) {
-    const text = `O Cloudflare ainda manda ${stillThere.join(", ")} em / (o _headers pede para tirar). Se persistir: domínio próprio (D-46).`;
+  const { errors, warnings } = splitDetached(presentDetached(headersFile, home.headers));
+  if (errors.length > 0) {
+    problems.push(`O Cloudflare voltou a mandar ${errors.join(", ")} em / (o _headers pede para tirar, e isso já funcionou: D-46).`);
+  }
+  if (warnings.length > 0) {
+    const text = `O Cloudflare ainda manda ${warnings.join(", ")} em / (injetado pela borda, o _headers não alcança). Se incomodar: domínio próprio (D-46).`;
     if (strictDetached) problems.push(text);
     else console.warn(`AVISO: ${text}`);
   }

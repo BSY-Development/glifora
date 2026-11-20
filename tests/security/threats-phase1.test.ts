@@ -18,6 +18,16 @@ const norm = (p: string) => p.replaceAll("\\", "/");
 const SRC = walk("src", (f) => /\.(ts|tsx)$/.test(f) && !/\.test\.tsx?$/.test(f) && !f.endsWith(".d.ts")).map(norm);
 const strip = (code: string) => code.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1"); // sem comentários
 
+/**
+ * Destinos de `to=` aceitos além de literais: só ids que o schema já validou (enum LocationId; slug ou `local:<uuid>` do
+ * MissionId, vindos de `parseMission` / `parseEntry`). Campo livre de JSON nunca entra aqui.
+ */
+const TO_OK: readonly RegExp[] = [
+  /^item\.to$/,
+  /^`\/place\/\$\{(location\.id|(mission|entry)\.location)\}`$/,
+  /^`\/play\/\$\{(mission|entry|next)\.id\}`$/,
+];
+
 describe("C1 · dependência npm comprometida", () => {
   const pkg = JSON.parse(read("package.json")) as { dependencies: Record<string, string>; devDependencies: Record<string, string>; license: string };
 
@@ -90,7 +100,7 @@ describe("C2 · XSS por conteúdo colado, importado ou digitado (HTML nunca vem 
       // `to=` do React Router: só literal ou o id do catálogo
       for (const m of code.matchAll(/\bto=\{(`[^`]*`|[^}]*)\}/g)) {
         const expr = (m[1] ?? "").trim();
-        if (!/^`\/place\/\$\{location\.id\}`$/.test(expr) && !/^item\.to$/.test(expr)) bad.push(`${f}: to={${expr}}`);
+        if (!TO_OK.some((re) => re.test(expr))) bad.push(`${f}: to={${expr}}`);
       }
     }
     expect(bad).toEqual([]);

@@ -1,0 +1,180 @@
+{
+  "schema": 1,
+  "id": "bakery-01",
+  "base": "pt-BR",
+  "target": "en",
+  "level": "A1",
+  "kind": "encounter",
+  "title": "Pão quentinho",
+  "theme": "Comprar pão na padaria",
+  "location": "bakery",
+  "can_do": "Consigo pedir comida e dizer quantos quero.",
+  "description": "De manhã cedo, na padaria da Tilda. O pão acabou de sair do forno e a fila anda rápido.",
+  "characters": [
+    { "id": "tilda", "name": "Tilda", "personality": "padeira calorosa e rápida, orgulhosa do próprio pão", "npc": "tilda" },
+    { "id": "ben", "name": "Ben", "personality": "freguês de sempre, com pressa" }
+  ],
+  "listen": [
+    { "speaker": "ben", "text": "Morning, Tilda! Can I have two rolls, please?", "translation": "Bom dia, Tilda! Pode me dar dois pãezinhos, por favor?" },
+    { "speaker": "tilda", "text": "Two rolls for Ben. Here you go!", "translation": "Dois pãezinhos para o Ben. Aqui está!" },
+    { "speaker": "ben", "text": "Thanks! See you tomorrow.", "translation": "Valeu! Até amanhã." }
+  ],
+  "nodes": [
+    {
+      "id": "greet",
+      "speaker": "tilda",
+      "emotion": "happy",
+      "text": "Good morning! Oh, a new face. Welcome to my bakery!",
+      "translation": "Bom dia! Ah, um rosto novo. Boas-vindas à minha padaria!",
+      "replies": [
+        {
+          "text": "Good morning!",
+          "translation": "Bom dia!",
+          "keywords": [["good morning"], ["morning"], ["hello"], ["hi"]],
+          "reaction": { "text": "Good morning! I'm Tilda.", "translation": "Bom dia! Eu sou a Tilda." }
+        },
+        {
+          "text": "Thank you! It smells so good in here.",
+          "translation": "Obrigado(a)! Que cheiro bom aqui dentro.",
+          "keywords": [["smells"], ["smell"]],
+          "reaction": { "text": "Oh, thank you! I'm Tilda.", "translation": "Ah, obrigada! Eu sou a Tilda.", "emotion": "proud" }
+        }
+      ]
+    },
+    {
+      "id": "order",
+      "speaker": "tilda",
+      "emotion": "happy",
+      "text": "What can I get you? The rolls are still warm.",
+      "translation": "O que vai ser? Os pãezinhos ainda estão quentinhos.",
+      "replies": [
+        {
+          "text": "Can I have a honey roll, please?",
+          "translation": "Pode me dar um pãozinho de mel, por favor?",
+          "keywords": [["honey"]],
+          "reaction": { "text": "Lovely! Those are new today.", "translation": "Que bom! Esses são novidade de hoje." }
+        },
+        {
+          "text": "I'd like a cheese roll, please.",
+          "translation": "Eu queria um pãozinho de queijo, por favor.",
+          "keywords": [["cheese"]],
+          "reaction": { "text": "Sure! Cheese rolls are my favorite.", "translation": "Claro! O de queijo é o meu preferido." }
+        },
+        {
+          "text": "A roll of honey, please.",
+          "translation": "Um pãozinho de mel, por favor.",
+          "flawed": true,
+          "keywords": [["roll of honey"], ["rolls of honey"]],
+          "recast": { "original": "A roll of honey", "corrected": "A honey roll" },
+          "reaction": { "text": "A honey roll? Good choice!", "translation": "Um pãozinho de mel? Boa escolha!" },
+          "pattern": "en.noun_modifier_order"
+        }
+      ]
+    },
+    {
+      "id": "how-many",
+      "speaker": "tilda",
+      "emotion": "curious",
+      "text": "And how many would you like?",
+      "translation": "E quantos você vai querer?",
+      "replies": [
+        {
+          "text": "Just one, please.",
+          "translation": "Só um, por favor.",
+          "keywords": [["one"], ["won"]],
+          "reaction": { "text": "Just one. Here you go!", "translation": "Só um. Aqui está!" }
+        },
+        {
+          "text": "Two, please.",
+          "translation": "Dois, por favor.",
+          "keywords": [["two"], ["to"], ["too"]],
+          "reaction": { "text": "Two. Here you go!", "translation": "Dois. Aqui está!" }
+        },
+        {
+          "text": "Two roll, please.",
+          "translation": "Dois pãezinhos, por favor.",
+          "flawed": true,
+          "keywords": [["two roll"], ["to roll"], ["too roll"]],
+          "recast": { "original": "Two roll", "corrected": "Two rolls" },
+          "reaction": { "text": "Two rolls, coming right up!", "translation": "Dois pãezinhos, saindo!" },
+          "pattern": "en.plural_s"
+        }
+      ]
+    },
+    {
+      "id": "anything-else",
+      "speaker": "tilda",
+      "emotion": "curious",
+      "text": "Anything else? The bread is fresh, too.",
+      "translation": "Mais alguma coisa? O pão também está fresquinho.",
+      "replies": [
+        {
+          "text": "Yes, a loaf of bread, please.",
+          "translation": "Sim, um pão inteiro, por favor.",
+          "keywords": [["loaf"], ["bread"]],
+          "reaction": { "text": "One loaf of bread. Lovely!", "translation": "Um pão inteiro. Que bom!" }
+        },
+        {
+          "text": "No, that's all, thanks.",
+          "translation": "Não, é só isso, obrigado(a).",
+          "keywords": [["that is all"], ["no"], ["nothing"]],
+          "reaction": { "text": "That's all? No problem.", "translation": "Só isso? Sem problema." }
+        },
+        {
+          "text": "Two breads, please.",
+          "translation": "Dois pães inteiros, por favor.",
+          "flawed": true,
+          "keywords": [["breads"]],
+          "recast": { "original": "Two breads", "corrected": "two loaves of bread" },
+          "reaction": { "text": "Oh, two loaves of bread? Sure!", "translation": "Ah, dois pães inteiros? Claro!" },
+          "pattern": "en.uncountable_noun"
+        }
+      ]
+    },
+    {
+      "id": "pay",
+      "speaker": "tilda",
+      "emotion": "happy",
+      "text": "That's three coins, dear.",
+      "translation": "São três moedas, meu bem.",
+      "replies": [
+        {
+          "text": "Here you go.",
+          "translation": "Aqui está.",
+          "keywords": [["here you go"], ["here you are"], ["here"]],
+          "reaction": { "text": "Thank you, dear. Enjoy!", "translation": "Obrigada, meu bem. Bom apetite!" }
+        },
+        {
+          "text": "Thank you so much!",
+          "translation": "Muito obrigado(a)!",
+          "keywords": [["thank you"], ["thanks"]],
+          "reaction": { "text": "You're welcome, dear. Enjoy!", "translation": "De nada, meu bem. Bom apetite!" }
+        },
+        {
+          "text": "Thanks you!",
+          "translation": "Obrigado(a)!",
+          "flawed": true,
+          "keywords": [["thanks you"]],
+          "recast": { "original": "Thanks you", "corrected": "Thank you" },
+          "reaction": { "text": "Thank you, dear! Enjoy!", "translation": "Obrigada, meu bem! Bom apetite!" },
+          "pattern": "en.thank_you"
+        }
+      ]
+    }
+  ],
+  "closing": {
+    "question": { "text": "Oh, one more thing! What would you like tomorrow?", "translation": "Ah, mais uma coisa! O que você vai querer amanhã?" },
+    "target_words": ["honey", "cheese", "roll", "bread", "loaf", "loaves", "pie", "apple"],
+    "hint": "Diga algo da padaria, por exemplo com \"Can I have...?\" ou \"I'd like...\".",
+    "model_answer": { "text": "Can I have two cheese rolls, please?", "translation": "Pode me dar dois pãezinhos de queijo, por favor?" },
+    "success": { "text": "Lovely! See you tomorrow, dear!", "translation": "Que bom! Até amanhã, meu bem!" }
+  },
+  "vocabulary": [
+    { "term": "Can I have...?", "translation": "Pode me dar...?", "example": "Can I have a honey roll, please?" },
+    { "term": "I'd like...", "translation": "Eu queria...", "example": "I'd like a cheese roll, please." },
+    { "term": "a honey roll", "translation": "um pãozinho de mel", "example": "Two honey rolls, please." },
+    { "term": "a loaf of bread", "translation": "um pão inteiro", "example": "A loaf of bread, please." },
+    { "term": "That's all.", "translation": "É só isso.", "example": "No, that's all, thanks." },
+    { "term": "Here you go.", "translation": "Aqui está.", "example": "Here you go. Enjoy!" }
+  ]
+}

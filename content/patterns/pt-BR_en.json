@@ -1,0 +1,169 @@
+{
+  "schema": 1,
+  "base": "pt-BR",
+  "target": "en",
+  "patterns": [
+    {
+      "id": "en.request_form",
+      "cefr": "A1",
+      "title": "Pedidos: Can I have...? / I'd like...",
+      "explanation": "Para pedir, use \"Can I have...?\" ou \"I'd like...\" seguido direto do que você quer, sem \"of\": I'd like a roll.",
+      "example": {
+        "wrong": "I would like of a roll.",
+        "right": "I'd like a roll."
+      }
+    },
+    {
+      "id": "en.do_you_have",
+      "cefr": "A1",
+      "title": "\"Tem...?\" vira \"Do you have...?\"",
+      "explanation": "Para perguntar se a loja tem algo, comece com \"Do you have...?\". Só \"Have...?\" fica incompleto.",
+      "example": {
+        "wrong": "Have cheese rolls?",
+        "right": "Do you have cheese rolls?"
+      }
+    },
+    {
+      "id": "en.how_much",
+      "cefr": "A1",
+      "title": "Perguntar o preço",
+      "explanation": "\"Quanto custa?\" é \"How much is it?\" ou \"How much does it cost?\". \"How much cost?\" fica sem o verbo certo.",
+      "example": {
+        "wrong": "How much cost?",
+        "right": "How much is it?"
+      }
+    },
+    {
+      "id": "en.plural_s",
+      "cefr": "A1",
+      "title": "Plural com -s",
+      "explanation": "Com dois ou mais, a palavra ganha -s: two rolls, three coins.",
+      "example": {
+        "wrong": "two roll",
+        "right": "two rolls"
+      }
+    },
+    {
+      "id": "en.uncountable_noun",
+      "cefr": "A1",
+      "title": "\"Bread\" não tem plural",
+      "explanation": "\"Bread\" é o pão como alimento e não se conta. Um pão inteiro é \"a loaf of bread\"; pãozinho é \"a roll\". Para pedir pão, não diga \"a bread\" nem \"two breads\".",
+      "example": {
+        "wrong": "two breads",
+        "right": "two loaves of bread"
+      }
+    },
+    {
+      "id": "en.noun_modifier_order",
+      "cefr": "A1",
+      "title": "O tipo vem antes: honey roll",
+      "explanation": "Em inglês, o \"de quê\" vem antes do nome e sem \"of\": honey roll (pão de mel), apple pie (torta de maçã).",
+      "example": {
+        "wrong": "a roll of honey",
+        "right": "a honey roll"
+      }
+    },
+    {
+      "id": "en.subject_omission",
+      "cefr": "A1",
+      "title": "O sujeito não pode sumir",
+      "explanation": "Em português dá para dizer só \"É muito bom\". Em inglês o sujeito é obrigatório: \"It's very good\".",
+      "example": {
+        "wrong": "Is very good.",
+        "right": "It's very good."
+      }
+    },
+    {
+      "id": "en.verb_be",
+      "cefr": "A1",
+      "title": "Verbo \"be\" sobrando ou faltando",
+      "explanation": "Com outro verbo, não use \"am/is/are\": \"I want\", não \"I am want\". Com adjetivo, ele é obrigatório: \"I'm hungry\".",
+      "example": {
+        "wrong": "I am want a roll.",
+        "right": "I want a roll."
+      }
+    },
+    {
+      "id": "en.article_a_an",
+      "cefr": "A1",
+      "title": "\"A\" ou \"an\"",
+      "explanation": "Antes de som de vogal, use \"an\": an apple pie, an egg.",
+      "example": {
+        "wrong": "a apple pie",
+        "right": "an apple pie"
+      }
+    },
+    {
+      "id": "en.thank_you",
+      "cefr": "A1",
+      "title": "\"Thank you\" ou \"Thanks\"",
+      "explanation": "Escolha um: \"Thank you\" ou \"Thanks\". \"Thanks you\" mistura os dois.",
+      "example": {
+        "wrong": "Thanks you!",
+        "right": "Thank you!"
+      }
+    },
+    {
+      "id": "en.greeting_time",
+      "cefr": "A1",
+      "title": "Cumprimento pela hora do dia",
+      "explanation": "\"Good night\" é só para ir embora ou dormir. Ao chegar de noite, diga \"Good evening\".",
+      "example": {
+        "wrong": "Good night! (chegando)",
+        "right": "Good evening!"
+      }
+    },
+    {
+      "id": "en.false_friend",
+      "cefr": "A1",
+      "title": "Falso cognato",
+      "explanation": "Palavra parecida com o português, mas com outro sentido em inglês.",
+      "example": {
+        "wrong": "I pretend to buy bread.",
+        "right": "I want to buy bread."
+      }
+    },
+    {
+      "id": "en.word_choice",
+      "cefr": "A1",
+      "title": "Escolha de palavra",
+      "explanation": "A palavra existe, mas não é a que um nativo usaria aqui."
+    },
+    {
+      "id": "en.what_time",
+      "cefr": "A1",
+      "title": "Perguntar a hora: What time...?",
+      "explanation": "Para perguntar o horário de alguma coisa, use \"What time...?\", e não \"What hour...?\". \"Hour\" é a duração de uma hora (60 minutos). Ex.: What time is breakfast?",
+      "example": {
+        "wrong": "What hour is breakfast?",
+        "right": "What time is breakfast?"
+      }
+    },
+    {
+      "id": "en.prep_time",
+      "cefr": "A1",
+      "title": "At, in, on com horário e parte do dia",
+      "explanation": "Horário leva \"at\" (at seven, at eight o'clock). Parte do dia leva \"in\" (in the morning, in the evening), mas \"at night\". Dia da semana leva \"on\" (on Monday).",
+      "example": {
+        "wrong": "in seven o'clock / on the morning",
+        "right": "at seven o'clock / in the morning"
+      }
+    },
+    {
+      "id": "en.past_simple",
+      "cefr": "A2",
+      "title": "Passado: ate, had, went, was",
+      "explanation": "Para contar o que já aconteceu, o verbo vai para o passado: eat → ate, have → had, go → went, sleep → slept, is → was. Muitos verbos só ganham -ed: walk → walked, like → liked.",
+      "example": {
+        "wrong": "This morning I eat a honey roll.",
+        "right": "This morning I ate a honey roll."
+      }
+    },
+    {
+      "id": "other",
+      "cefr": "A1",
+      "title": "Outro ponto",
+      "explanation": "Um ponto que não entra nos padrões da lista."
+    }
+  ]
+}

@@ -1,5 +1,7 @@
 // Um local da vila (W1-11): quem mora ali e "missões em breve". Id que não existe em content/world/locations.json → 404.
 import { Link, useParams } from "react-router";
+import { useLiveQuery } from "dexie-react-hooks";
+import { listPlace } from "../../services/play";
 import { getLocation } from "../../services/world";
 import { PixelArt } from "../art/PixelArt";
 import { PageTitle } from "../PageTitle";
@@ -11,6 +13,8 @@ export function Place() {
   const t = useT();
   const { id = "" } = useParams();
   const location = getLocation(id);
+  // As rodadas e a língua base mudam o que a lista mostra (estrelas, "XP cheio hoje"): a consulta reage sozinha.
+  const missions = useLiveQuery(() => (location ? listPlace(location.id) : Promise.resolve([])), [location?.id]);
   if (!location) return <NotFound />;
 
   const art = PLACE_ART[location.id];
@@ -39,7 +43,34 @@ export function Place() {
         </section>
       )}
 
-      <p className="notice">{t("place.soon")}</p>
+      <section aria-labelledby="missions-title">
+        <h2 id="missions-title">{t("place.missions")}</h2>
+        {missions === undefined ? null : missions.length === 0 ? (
+          <p className="notice">{t("place.soon")}</p>
+        ) : (
+          <ul className="missions">
+            {missions.map(({ entry, stars, fullToday }) => (
+              <li key={entry.id} className="mission-card">
+                <Link to={`/play/${entry.id}`} className="mission-link">
+                  <span className="mission-title">
+                    {entry.title}
+                    {entry.kind === "boss" && <span className="badge badge-boss">{t("place.mission.boss")}</span>}
+                  </span>
+                  <span className="mission-cando">{entry.can_do}</span>
+                  <span className="mission-meta">
+                    <span className="stars" aria-hidden="true">
+                      {"★".repeat(stars)}
+                      {"☆".repeat(3 - stars)}
+                    </span>
+                    <span className="mission-stars-text">{t("place.mission.stars", { n: stars })}</span>
+                    {fullToday && <span className="badge">{t("place.mission.full")}</span>}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
       <p>
         <Link className="btn" to="/">
           {t("place.back")}

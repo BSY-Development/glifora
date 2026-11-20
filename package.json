@@ -6,14 +6,17 @@
   "license": "AGPL-3.0-only",
   "type": "module",
   "engines": {
-    "node": ">=22.13"
+    "node": ">=22.18"
   },
   "scripts": {
+    "predev": "node scripts/content/build-index.ts",
     "dev": "vite",
+    "prebuild": "node scripts/content/build-index.ts",
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.tests.json && tsc -p tsconfig.node.json && tsc -p tests/e2e/tsconfig.json && tsc -p tests/e2e-security/tsconfig.json",
     "lint": "eslint .",
+    "pretest": "node scripts/content/build-index.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",

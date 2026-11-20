@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { checkVersion, compareHeaders, describeMismatches, presentDetached } from "./verifyDeploy.ts";
+import { checkVersion, compareHeaders, describeMismatches, presentDetached, splitDetached } from "./verifyDeploy.ts";
 
 const FILE = "/*\n  X-Test: um\n  Content-Security-Policy: default-src 'none'\n\n/assets/*\n  Cache-Control: immutable\n";
 
@@ -43,5 +43,15 @@ describe("cabeçalhos que o _headers manda tirar (D-46)", () => {
   it("vazio quando nenhum chegou, e o ! não vira cabeçalho a exigir", () => {
     expect(presentDetached(FILE_DETACH, new Headers({ "x-test": "um" }))).toEqual([]);
     expect(compareHeaders(FILE_DETACH, new Headers({ "x-test": "um" }))).toEqual([]);
+  });
+});
+
+describe("erro ou aviso (D-46)", () => {
+  it("Access-Control-Allow-Origin voltar é erro; Report-To e NEL são aviso", () => {
+    expect(splitDetached(["access-control-allow-origin", "report-to", "nel"])).toEqual({
+      errors: ["access-control-allow-origin"],
+      warnings: ["report-to", "nel"],
+    });
+    expect(splitDetached([])).toEqual({ errors: [], warnings: [] });
   });
 });

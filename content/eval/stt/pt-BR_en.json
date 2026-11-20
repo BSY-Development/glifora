@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "base": "pt-BR",
+  "target": "en",
+  "phrases": [
+    { "id": "bakery-01-greet-morning", "text": "Good morning!", "expect": { "mission": "bakery-01", "node": "greet", "reply": 0 } },
+    { "id": "bakery-01-greet-smell", "text": "Wow, it smells really good in here.", "expect": { "mission": "bakery-01", "node": "greet", "reply": 1 } },
+    { "id": "bakery-01-order-honey", "text": "Can I have a honey roll, please?", "expect": { "mission": "bakery-01", "node": "order", "reply": 0 } },
+    { "id": "bakery-01-order-cheese", "text": "I'd like a cheese roll.", "expect": { "mission": "bakery-01", "node": "order", "reply": 1 } },
+    { "id": "bakery-01-order-flawed", "text": "A roll of honey, please.", "expect": { "mission": "bakery-01", "node": "order", "reply": 2 } },
+    { "id": "bakery-01-many-one", "text": "Just one, please.", "expect": { "mission": "bakery-01", "node": "how-many", "reply": 0 } },
+    { "id": "bakery-01-many-two", "text": "Two, please.", "expect": { "mission": "bakery-01", "node": "how-many", "reply": 1 } },
+    { "id": "bakery-01-many-flawed", "text": "Two roll, please.", "expect": { "mission": "bakery-01", "node": "how-many", "reply": 2 } },
+    { "id": "bakery-01-else-loaf", "text": "Yes, a loaf of bread, please.", "expect": { "mission": "bakery-01", "node": "anything-else", "reply": 0 } },
+    { "id": "bakery-01-else-all", "text": "No, that's all, thanks.", "expect": { "mission": "bakery-01", "node": "anything-else", "reply": 1 } },
+    { "id": "bakery-01-else-flawed", "text": "Two breads, please.", "expect": { "mission": "bakery-01", "node": "anything-else", "reply": 2 } },
+    { "id": "bakery-01-pay-here", "text": "Here you go.", "expect": { "mission": "bakery-01", "node": "pay", "reply": 0 } },
+    { "id": "bakery-01-pay-thanks", "text": "Thank you so much!", "expect": { "mission": "bakery-01", "node": "pay", "reply": 1 } },
+    { "id": "bakery-01-pay-flawed", "text": "Thanks you!", "expect": { "mission": "bakery-01", "node": "pay", "reply": 2 } }
+  ]
+}

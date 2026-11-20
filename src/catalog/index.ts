@@ -1,6 +1,6 @@
 // Conteúdo embutido (W0-03 §5.3): o mapa da vila, o índice e as missões (fase 2) e as frases do teste de voz (D-48).
 // Tudo que vem de content/ passa pelo schema antes de sair daqui.
-import { World, type Location, type Pair } from "../schemas";
+import { Npc, PatternCatalog, World, pairId, type Location, type Pair } from "../schemas";
 import { createMissionCatalog, type CatalogEntry, type CatalogQuery, type LoadResult } from "./missions";
 import { loadVoicePhrasesFrom, type VoicePhrasesResult } from "./voice";
 
@@ -49,4 +49,33 @@ export function load(id: string): Promise<LoadResult> {
 /** As frases do teste de voz do par. Só a tela /settings/voice chama. */
 export function loadVoicePhrases(pair: Pair): Promise<VoicePhrasesResult> {
   return loadVoicePhrasesFrom(voiceFiles, pair);
+}
+
+// Fichas de NPC e catálogo de erros do par: pedaços preguiçosos, validados na hora de abrir.
+const npcFiles = import.meta.glob("/content/npcs/*.json", { import: "default" });
+const patternFiles = import.meta.glob("/content/patterns/*.json", { import: "default" });
+
+/** A ficha da NPC (voz, `lines.<alvo>.retry`), ou `undefined` se não existe ou não passa no schema. */
+export async function loadNpc(id: string): Promise<Npc | undefined> {
+  if (!/^[a-z][a-z0-9-]{1,39}$/.test(id)) return undefined;
+  const open = npcFiles[`/content/npcs/${id}.json`];
+  if (open === undefined) return undefined;
+  try {
+    const parsed = Npc.safeParse(await open());
+    return parsed.success && parsed.data.id === id ? parsed.data : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** O catálogo de erros do par (explicação de cada padrão, só no relatório), ou `undefined`. */
+export async function loadPatterns(pair: Pair): Promise<PatternCatalog | undefined> {
+  const open = patternFiles[`/content/patterns/${pairId(pair)}.json`];
+  if (open === undefined) return undefined;
+  try {
+    const parsed = PatternCatalog.safeParse(await open());
+    return parsed.success ? parsed.data : undefined;
+  } catch {
+    return undefined;
+  }
 }

@@ -193,7 +193,7 @@ describe("a vila e os locais", () => {
     await screen.findByRole("heading", { level: 1, name: t("place.bakery") });
     expect(router.state.location.pathname).toBe("/place/bakery");
     expect(screen.getByText(t("npc.tilda.name"))).toBeTruthy();
-    expect(screen.getByText(t("place.soon"))).toBeTruthy();
+    expect(await screen.findByText(t("place.soon"))).toBeTruthy(); // sem missões neste par (idioma base = alvo)
   });
 
   it("a vila mostra o nível 1 e o avatar escolhido, sem imagem de fora", async () => {

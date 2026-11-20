@@ -34,3 +34,13 @@ export function checkVersion(body: unknown, expectedCommit: string): string | nu
 export function presentDetached(headersFileText: string, received: Headers): string[] {
   return detachedHeaders(headersFileText).filter((name) => received.has(name));
 }
+
+/**
+ * D-46: o `Access-Control-Allow-Origin` saiu de verdade em produção com o "! Nome" do `_headers`, então a volta dele é
+ * erro. `Report-To` e `NEL` são injetados pela borda do Cloudflare, que o `_headers` não alcança: seguem como aviso.
+ */
+export const MUST_BE_GONE: readonly string[] = ["access-control-allow-origin"];
+
+export function splitDetached(present: readonly string[]): { errors: string[]; warnings: string[] } {
+  return { errors: present.filter((name) => MUST_BE_GONE.includes(name)), warnings: present.filter((name) => !MUST_BE_GONE.includes(name)) };
+}
