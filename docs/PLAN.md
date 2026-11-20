@@ -10,6 +10,8 @@ IDs: `W<fase>-<nº>` (W de web), para não confundir com as tarefas `F…` da ve
 
 ## Fase atual: 2 — Núcleo jogável sem IA
 
+**Estado (2026-11-20):** fechamento técnico concluído e no ar (`b4c34d0`; o verify-deploy passou, e o STRICT_DETACHED só falha pelos Report-To e NEL do Cloudflare, aviso aceito na D-46). **Aguardando o portão do dono**, pelo roteiro `docs/roteiros/fase-2-celular.md`, e a W2-12 (taxa da voz real).
+
 Portão da fase (SPEC, D-49): o dono joga **5 sessões em dias diferentes, dentro de 7 dias**, no celular (Android + Chrome). Passa se ele sentir vontade de voltar **e** conseguir lembrar das frases das missões anteriores sem ver. Se não, ajustar o núcleo antes de seguir. Antes do portão, o QA Tester ataca a fase (D-47).
 
 **O que entra:**
