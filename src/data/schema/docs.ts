@@ -32,9 +32,18 @@ export type MetaRow = z.infer<typeof MetaRow>;
 
 export const NICKNAME_MAX = 30;
 
+/** Nada de `<` nem `>` (HTML), caracteres de controle ou marcas que invertem o sentido do texto (bidi). */
+const chr = String.fromCharCode;
+const NICKNAME_FORBIDDEN = new RegExp(`[<>\\p{Cc}${chr(0x202a)}-${chr(0x202e)}${chr(0x2066)}-${chr(0x2069)}]`, "u");
+
+/** Apelido opcional ("" = sem apelido). Texto puro, até NICKNAME_MAX caracteres (emoji conta como um). */
+export const Nickname = z
+  .string()
+  .refine((s) => Array.from(s).length <= NICKNAME_MAX, { message: `no máximo ${NICKNAME_MAX} caracteres` })
+  .refine((s) => !NICKNAME_FORBIDDEN.test(s), { message: "sem < nem >, e sem caracteres de controle" });
+
 export const ProfileV1 = z.strictObject({
-  /** Apelido opcional ("" = sem apelido). Texto puro. */
-  nickname: z.string().refine((s) => Array.from(s).length <= NICKNAME_MAX, { message: `no máximo ${NICKNAME_MAX} caracteres` }),
+  nickname: Nickname,
   createdAt: z.number().int().nonnegative(),
 });
 export type Profile = z.infer<typeof ProfileV1>;

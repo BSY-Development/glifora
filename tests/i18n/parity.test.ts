@@ -54,7 +54,7 @@ describe("i18n: valores", () => {
   });
 
   it("texto não copiado entre idiomas (fora o que é igual por natureza)", () => {
-    const SAME_OK = new Set(["app.name", "lang.name.en", "lang.name.pt-BR"]);
+    const SAME_OK = new Set(["app.name", "lang.name.en", "lang.name.pt-BR", "npc.tilda.name", "settings.textsize.normal"]);
     for (const key of Object.keys(base)) {
       if (SAME_OK.has(key)) continue;
       expect(JSON.stringify(langs["en.json"]?.[key]), `${key} igual nos dois idiomas (esqueceu de traduzir?)`).not.toBe(JSON.stringify(base[key]));

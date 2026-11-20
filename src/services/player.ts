@@ -4,6 +4,7 @@ import {
   DEFAULT_AVATAR,
   DEFAULT_PREFS,
   NICKNAME_MAX,
+  Nickname,
   avatarRepo,
   prefsRepo,
   profileRepo,
@@ -13,19 +14,32 @@ import {
 } from "../data";
 import { getDb, getDeps } from "./storage";
 
+// A interface importa estes valores e tipos daqui, não de data/.
+export { AVATAR_FIGURES, DEFAULT_AVATAR, DEFAULT_PREFS, NICKNAME_MAX, REDUCE_MOTION, TEXT_SIZES, type Avatar, type Prefs, type Profile } from "../data";
+
 /** `null` na primeira visita (ainda não há perfil). */
 export function loadProfile(): Promise<Profile | null> {
   return profileRepo.get(getDb());
 }
 
-/** Cria o perfil (primeira visita) ou troca o apelido. Apelido opcional: vazio vale. */
+export type NicknameCheck = { ok: true; value: string } | { ok: false; reason: "long" | "chars" };
+
+/** Confere o apelido pelo schema: sem espaços nas pontas, até NICKNAME_MAX caracteres, sem < > nem caracteres de controle. Vazio vale. */
+export function checkNickname(raw: string): NicknameCheck {
+  const value = raw.trim();
+  if (Array.from(value).length > NICKNAME_MAX) return { ok: false, reason: "long" };
+  return Nickname.safeParse(value).success ? { ok: true, value } : { ok: false, reason: "chars" };
+}
+
+/** Cria o perfil (primeira visita) ou troca o apelido. Apelido opcional: vazio vale. Recusa o que o schema recusa. */
 export async function saveNickname(nickname: string): Promise<void> {
+  const check = checkNickname(nickname);
+  if (!check.ok) throw new Error(`Apelido inválido (${check.reason}).`);
   const db = getDb();
   const deps = getDeps();
-  const clean = Array.from(nickname.trim()).slice(0, NICKNAME_MAX).join(""); // por caractere, não corta emoji ao meio
   await db.transaction("rw", db.docs, async () => {
     const current = await profileRepo.get(db);
-    await profileRepo.save(db, { createdAt: current?.createdAt ?? deps.now(), nickname: clean }, deps);
+    await profileRepo.save(db, { createdAt: current?.createdAt ?? deps.now(), nickname: check.value }, deps);
   });
 }
 

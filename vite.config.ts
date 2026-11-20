@@ -25,6 +25,16 @@ export default defineConfig({
   build: {
     // CSP sem `data:` em img/font: nenhum ativo vira data URI (W0-03 §2.8).
     assetsInlineLimit: 0,
+    rolldownOptions: {
+      output: {
+        // O zod e o z.config({ jitless }) (src/zod-config.ts) ficam no MESMO bloco. Sem isto o empacotador pode pôr o zod
+        // junto dos schemas do app, que seriam construídos antes do jitless: o zod tentaria `new Function`, a CSP
+        // barraria e o console mostraria erro de TrustedScript.
+        codeSplitting: {
+          groups: [{ name: "zod", test: /[/\\]node_modules[/\\]zod[/\\]|[/\\]src[/\\]zod-config\.ts$/ }],
+        },
+      },
+    },
   },
   preview: {
     headers: previewHeaders(readFileSync("public/_headers", "utf8")),

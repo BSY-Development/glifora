@@ -2,6 +2,7 @@
 import { useEffect, useRef, type MouseEvent } from "react";
 import { NavLink, Outlet, useLocation } from "react-router";
 import type { MessageKey } from "../i18n";
+import { useDisplayPrefs } from "./display";
 import { LanguageSelector } from "./LanguageSelector";
 import { useT } from "./useT";
 
@@ -12,10 +13,14 @@ const NAV: ReadonlyArray<{ to: string; label: MessageKey; end?: boolean }> = [
   { to: "/about", label: "nav.about" },
 ];
 
+// Nestas telas o idioma já é uma escolha da própria tela; o seletor da barra ficaria repetido.
+const OWN_LANGUAGE_CHOICE = new Set(["/welcome", "/profile"]);
+
 export function Layout() {
   const t = useT();
   const { pathname } = useLocation();
   const lastPath = useRef(pathname);
+  useDisplayPrefs(); // tamanho do texto e movimento, na hora
 
   // Ao trocar de rota, o foco vai para o título da tela nova (não na primeira carga).
   useEffect(() => {
@@ -37,7 +42,7 @@ export function Layout() {
       </a>
       <header className="top-bar">
         <span className="brand">{t("app.name")}</span>
-        <LanguageSelector />
+        {!OWN_LANGUAGE_CHOICE.has((pathname.length > 1 && pathname.endsWith("/") ? pathname.slice(0, -1) : pathname)) && <LanguageSelector />}
       </header>
       <main id="main" tabIndex={-1} className="page">
         <Outlet />

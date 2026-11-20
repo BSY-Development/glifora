@@ -143,13 +143,14 @@ a {
 
 .bottom-nav ul {
   display: flex;
+  flex-wrap: wrap;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .bottom-nav li {
-  flex: 1 1 0;
+  flex: 1 1 5.5rem; /* com texto grande a navegação passa para duas linhas em vez de quebrar palavras */
   min-width: 0;
 }
 
@@ -263,12 +264,342 @@ dialog.confirm::backdrop {
   padding: 2rem 1rem;
 }
 
+/* ---------- Texto e movimento (preferências de /settings; ui/display.ts põe os atributos no <html>) ---------- */
+/* Tudo usa rem: mudar o tamanho-base escala a tela inteira. */
+html[data-text-size="large"] {
+  font-size: 125%;
+}
+
+html[data-text-size="xlarge"] {
+  font-size: 150%;
+}
+
+html[data-text-size="xlarge"] .bottom-nav {
+  position: static; /* duas linhas de navegação colando embaixo comeriam a tela */
+}
+
+/* "Reduzir movimento": "on" sempre reduz; "off" nunca; sem escolha (system) vale o que o aparelho pede. */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  html:not([data-motion="off"]) *,
+  html:not([data-motion="off"]) *::before,
+  html:not([data-motion="off"]) *::after {
     animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+html[data-motion="on"] *,
+html[data-motion="on"] *::before,
+html[data-motion="on"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* ---------- Formulários ---------- */
+.field {
+  min-width: 0;
+  margin: 0 0 1.25rem;
+  padding: 0;
+  border: 0;
+}
+
+.field legend,
+.field > label {
+  display: block;
+  margin: 0 0 0.5rem;
+  padding: 0;
+  font-weight: 700;
+}
+
+.input {
+  display: block;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+.input[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+
+.field-error {
+  margin: 0.25rem 0 0;
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.field .hint {
+  margin: 0.25rem 0 0;
+}
+
+/* Cartões de escolha: o rádio (ou caixa) nativo cobre o cartão, invisível, e continua valendo para teclado e leitor de tela. */
+.choices {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.choices-row {
+  grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+}
+
+.choice {
+  position: relative;
+  display: block;
+  cursor: pointer;
+}
+
+.choice input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.choice-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface);
+}
+
+.choice input:checked + .choice-card {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+.choice input:checked + .choice-card::after {
+  content: "✓";
+  margin-left: auto;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.choice input:focus-visible + .choice-card {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.choices-row .choice-card {
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Nos cartões lado a lado o visto vai para o canto, para não aumentar só o cartão marcado. */
+.choices-row .choice-card {
+  position: relative;
+}
+
+.choices-row .choice input:checked + .choice-card::after {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.5rem;
+  margin: 0;
+}
+
+.choice-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.choice-hint {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.avatar-art {
+  display: block;
+  width: 4rem;
+  height: auto;
+}
+
+/* ---------- Vila (W1-11) ---------- */
+.hud {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 0 0.75rem;
+  padding: 0.75rem;
+  border: 2px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--surface);
+}
+
+.hud-avatar {
+  flex: none;
+  width: 3.25rem;
+  height: auto;
+}
+
+.hud-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.hud-name {
+  margin: 0;
+  font-weight: 700;
+}
+
+.hud-level {
+  margin: 0 0 0.35rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.xp {
+  height: 0.75rem;
+  border: 2px solid var(--border);
+  border-radius: 0.25rem;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.xp-fill {
+  width: 0;
+  height: 100%;
+  background: var(--accent);
+}
+
+/* Em tela baixa (360×640) o mapa encolhe até caber inteiro ao lado do cabeçalho; nunca fica menor que 15rem. */
+.village {
+  position: relative;
+  width: min(100%, max(15rem, calc(100dvh - 23rem)));
+  max-width: 28rem;
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  border: 3px solid var(--text);
+  border-radius: 0.5rem;
+  background: #78bf68;
+  overflow: hidden;
+}
+
+.village-art {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.places {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.spot {
+  position: absolute;
+}
+
+/* A padaria ocupa 24 dos 32 quadradinhos da cena: 75% da largura, no mesmo tamanho de pixel do fundo. */
+.spot-bakery {
+  top: 12.5%;
+  left: 12.5%;
+  width: 75%;
+}
+
+.place-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.place-art {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition: transform 0.15s;
+}
+
+.place-label {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  min-height: 2.75rem;
+  margin: 0.25rem auto 0;
+  padding: 0.5rem 1rem;
+  border: 2px solid var(--text);
+  border-radius: 0.5rem;
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 700;
+  text-align: center;
+}
+
+.place-link:hover .place-art {
+  transform: translateY(-2px);
+}
+
+.place-link:hover .place-label {
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+.place-hero {
+  display: block;
+  width: min(100%, 18rem);
+  height: auto;
+  margin: 0 auto 1rem;
+}
+
+.npcs {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0 0 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.npc-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  border: 2px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--surface);
+}
+
+.npc-art {
+  flex: none;
+  width: 4.5rem;
+  height: auto;
+}
+
+.npc-name {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.npc-card .hint {
+  margin: 0;
+}
+
+/* A caixa "Sons do jogo" é um label dentro de .field: não herda o negrito dos rótulos de campo. */
+.field > label.choice {
+  margin: 0;
+  font-weight: 400;
+}
+
+.choice-label {
+  font-weight: 600;
 }

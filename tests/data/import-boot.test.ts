@@ -60,11 +60,12 @@ describe("arquivos hostis", () => {
     }
   });
 
-  it("nickname com HTML fica como texto e acima do limite é recusado", () => {
-    const ok = parseExport(withDoc({ id: "profile", v: 1, data: { nickname: "<img src=x onerror=1>", createdAt: 1 }, updatedAt: 1, deleted: 0 }));
-    expect(ok.ok).toBe(true);
-    const big = parseExport(withDoc({ id: "profile", v: 1, data: { nickname: "x".repeat(31), createdAt: 1 }, updatedAt: 1, deleted: 0 }));
-    expect(big.ok).toBe(false);
+  it("nickname com HTML, controle ou bidi é recusado; acima do limite também; texto comum passa", () => {
+    const mk = (nickname: string) => parseExport(withDoc({ id: "profile", v: 1, data: { nickname, createdAt: 1 }, updatedAt: 1, deleted: 0 }));
+    for (const bad of ["<img src=x onerror=1>", "a>b", "a\u0000b", "a\nb", "a" + String.fromCharCode(0x202e) + "b", "a" + String.fromCharCode(0x2066) + "b", "x".repeat(31)]) {
+      expect(mk(bad).ok, JSON.stringify(bad)).toBe(false);
+    }
+    for (const good of ["", "Ana", "José 🎉", "x".repeat(30), "a&b \"q\""]) expect(mk(good).ok, good).toBe(true);
   });
 
   it("versão futura do arquivo é recusada sem gravar nada", async () => {

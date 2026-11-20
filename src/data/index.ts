@@ -10,6 +10,7 @@ export {
   DEFAULT_AVATAR,
   DEFAULT_PREFS,
   NICKNAME_MAX,
+  Nickname,
   REDUCE_MOTION,
   TEXT_SIZES,
   type Avatar,
