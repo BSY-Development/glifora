@@ -8,7 +8,41 @@ Antes de qualquer tarefa, leia: `docs/SPEC.md`, `docs/DECISIONS.md` e a sua tare
 
 IDs: `W<fase>-<nº>` (W de web), para não confundir com as tarefas `F…` da versão comercial (arquivo privado, D-38).
 
-## Fase atual: 1 — Fundação
+## Fase atual: 2 — Núcleo jogável sem IA
+
+Portão da fase (SPEC): o dono joga **5 sessões seguidas** no celular (Android + Chrome) e quer voltar no dia seguinte. Se não, ajustar o núcleo antes de seguir. Antes do portão, o QA Tester ataca a fase (D-47).
+
+**O que entra:**
+- player de missões v1 (D-43) com níveis de domínio;
+- 5 missões demo em inglês A1–A2, com base pt-BR (D-40);
+- voz do navegador e teste da taxa de casamento da voz no celular;
+- XP, nível do personagem, level up e relatório da sessão;
+- as pendências aceitas na D-46.
+
+**Fica para a fase 3:** a missão do dia com 3 encontros mais o chefe, Grimório, ofensiva, conquistas, moedas, desbloqueio de locais.
+
+**Ordem:** (W2-01, W2-03 → W2-02, W2-05, W2-06 em paralelo) → W2-04 → W2-07 → W2-08 → W2-09 → W2-10 → W2-11 → W2-12 → W2-13 → W2-14. Detalhes: W0-03 §2.5, §4.1, §5.1–5.5, §6 e D-43.
+
+| ID | Dono | Tarefa | Pronto quando | Testes | Status |
+| --- | --- | --- | --- | --- | --- |
+| W2-01 | Fable (chamada nº 2) | **Regras de jogo v1.** Números para as interfaces de W0-03 §6: XP por fonte (resposta por modo e ajuda, fecho, missão, níveis de domínio), curva de nível, títulos, desbloqueios. Também moedas, ofensiva e conquistas iniciais, já para a fase 3. Proposta em `docs/propostas/W2-01-regras.md`; o Arquiteto decide (D-48) | Os números passam nas 6 guardas de W0-03 §6, com justificativa de equilíbrio (dopamina × aprendizado) | Simulação de 5, 30 e 90 sessões na proposta | em andamento |
+| W2-02 | Conteúdo | **Schemas e casamento.** `mission.ts` (v1, D-43, com `closing.target_words`), `mission.check.ts` (as 6 conferências), `npc.ts`, `vocab.ts` e `pattern.ts`. `match.ts` com a comparação tolerante da D-43 e o fecho por palavras-alvo. Portar do arquivo comercial (W0-03 §5.5). Um `parseMission` só | A tabela de testes da D-43 passa | Unidade ao lado do código | em andamento |
+| W2-03 | Conteúdo | **Plano de conteúdo da fase 2.** As 5 missões EN A1–A2: local, NPC, `can_do`, padrões de erro, ordem e qual é `boss` (se houver). Se precisar de local novo, dizer. O Arquiteto aprova antes de escrever | Plano aprovado | — | em andamento |
+| W2-04 | Conteúdo | **Conteúdo.** `content/npcs/` (Tilda e as novas), `content/patterns/pt-BR_en.json` e as 5 missões. `scripts/content/build-index.ts` valida tudo e gera o índice. Frases do teste de voz em `content/eval/` | Tudo passa no schema e nas conferências; amostra revisada pelo dono | Unidade do script; validação no CI | a fazer |
+| W2-05 | App | **Dados v2.** Tabelas `events`, `runs` e `session` (W0-03 §4.1). Exportar e importar passam a incluir `events` e `runs` (registros por união de id, com os limites da W1-17) | A migração v1 → v2 não perde nada; os arquivos v1 continuam importando | `fake-indexeddb`; fixture v1 | em andamento |
+| W2-06 | App | **Voz.** `speech/` com `Tts` e `Stt` (W0-03 §2.5), aviso de privacidade antes do 1º microfone e `/settings/voice` (diagnóstico com alternativas e confiança) | Fala e escuta no Chrome do Android; sem suporte, o microfone some e o texto vira o caminho | Dublês no e2e (Revisor) | em andamento |
+| W2-07 | App | **Motor e catálogo.** `engine/` com as regras v1 (D-48): `xpFor`, `levelAt`, `masteryOf`, `deriveProgress`. `catalog/` com `list` e `load`, carregando pelo `parseMission` | As guardas de `tests/pedagogy/` passam | Unidade e guardas do Revisor | a fazer |
+| W2-08 | App | **Player de missão.** Escuta → falas → resposta por voz, digitada ou toque → reação com o recast destacado → `retry` → fecho (duas tentativas e resposta-modelo). Níveis de domínio (frase à vista / ideia em pt-BR / nada). Sessão retomável. XP e level up com animação (respeita reduzir movimento). HUD de XP real | `bakery-01` jogável do começo ao fim no celular, por voz e por texto | Componente e e2e com dublês | a fazer |
+| W2-09 | App | **Relatório da sessão.** O que a pessoa conseguiu (`can_do`), recasts com a explicação do padrão, palavras novas, XP, a frase do fecho ao lado do modelo e convite para jogar de novo com menos ajuda | Relatório correto para uma rodada real | Componente | a fazer |
+| W2-10 | App | **Pendências da D-46.** Tentar tirar `NEL`/`Report-To` e `Access-Control-Allow-Origin` pelo `_headers` (e conferir no `verify-deploy`). Atualização automática na abertura quando a pessoa está na vila. Aviso para iPhone (instalar e exportar). `navigator.storage.persist()` depois da 1ª missão | Conferido na URL real | `verify-deploy` e e2e | a fazer |
+| W2-11 | Revisor | **Guardas e e2e da fase.** `tests/pedagogy/` com as 6 guardas sobre as regras v1, e2e do player com dublês de voz, a11y das telas novas, teste da atualização com 2 builds (D-46) | Tudo no CI | — | a fazer |
+| W2-12 | Dono + Conteúdo | **Taxa de casamento da voz.** O dono lê as frases de `content/eval/` em `/settings/voice` no celular; o Conteúdo ajusta as `keywords` | Taxa registrada; `keywords` ajustadas | — | a fazer |
+| W2-13 | QA Tester | **Ataque à fase 2.** Sem microfone, permissão negada, offline no meio da missão, troca de idioma no meio da missão, duas abas na mesma missão, importação com `events`/`runs` hostis, XP forjado | Sem crítico ou alto em aberto | `tests/e2e-security/` | a fazer |
+| W2-14 | Revisor | **Revisão da fase e roteiro do celular** (5 sessões seguidas) | Lista zerada ou aceita pelo Arquiteto | `tests/a11y/` e o roteiro | a fazer |
+
+### Notas de passagem (fase 2)
+
+## Fase 1 — Fundação (fechada em 2026-11-20; portão aprovado pelo dono)
 
 Portão da fase: no celular do dono (Android + Chrome), o site publicado pelo GitHub Actions abre, instala na tela inicial e funciona em modo avião depois da primeira visita. O DevTools mostra a CSP do `public/_headers`. O dono troca o idioma, cria o perfil, vê a vila com a padaria, e exporta e importa o perfil.
 
