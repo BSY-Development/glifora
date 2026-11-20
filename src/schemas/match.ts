@@ -17,6 +17,9 @@
 //   5. Vence quem tem mais pontos. Empate entre boa e com erro → a boa. Empate entre boas (ou entre
 //      respostas com erro) ou nada → null: a NPC pede para repetir.
 //   6. Voz: as alternativas do reconhecedor são testadas em ordem; fica a primeira que casar.
+//   7. Resposta livre (`free: "name"`, D-51): só quando nenhuma resposta casa (nem boa, nem com erro, nem
+//      empate) em nenhuma alternativa, a resposta livre aceita fala de 1 a 3 palavras normalizadas, desde
+//      que nenhuma delas mostre que a pessoa não entendeu ("sorry", "what", "repeat"...).
 //
 // "1 letra de distância" conta inserção, remoção, troca ou inversão de duas letras vizinhas
 // (distância de Damerau-Levenshtein restrita): "rols", "rollls", "rplls" e "rlols" ficam a 1 de "rolls".
@@ -208,9 +211,37 @@ export interface MatchableReply {
   readonly text: string;
   readonly keywords?: readonly (readonly string[])[] | undefined;
   readonly flawed?: boolean | undefined;
+  /** Resposta livre (D-51): aceita fala curta quando nada mais casa. */
+  readonly free?: "name" | undefined;
 }
 
-export type MatchPass = "exact" | "fuzzy";
+/** Passe de comparação de palavras. */
+export type ScorePass = "exact" | "fuzzy";
+/** Como a resposta casou: passe exato, tolerante ou pela resposta livre (D-51). */
+export type MatchPass = ScorePass | "free";
+
+/** Até quantas palavras (normalizadas) a resposta livre aceita. */
+export const FREE_MAX_WORDS = 3;
+
+/**
+ * Palavras que mostram que a fala curta não é um nome: quem não entendeu a pergunta diz "Sorry?",
+ * "What?", "Repeat, please". Com qualquer uma delas, a resposta livre não aceita e a NPC pede para repetir.
+ * Já normalizadas (sem acento; contrações expandidas). Ficam de fora palavras que também são nomes
+ * comuns (Will, Grace, Hope, Joy, May).
+ */
+const NOT_A_NAME: Record<ContentLang, ReadonlySet<string>> = {
+  en: new Set(("yes yeah yep no nope not sorry what pardon excuse repeat again help hello hi hey thanks thank please " +
+    "um uh huh hm hmm ok okay maybe know understand the a an").split(" ")),
+  es: new Set(("si no perdon perdona disculpa que como repite repetir otra vez ayuda hola gracias por favor " +
+    "eh hm vale quizas se entiendo el la un una").split(" ")),
+  "pt-BR": new Set(("sim nao desculpa desculpe perdao que como repete repetir de novo ajuda oi ola obrigado obrigada " +
+    "por favor hum ahn ne ta talvez sei entendi o a um uma").split(" ")),
+};
+
+/** A fala (já normalizada) pode ser um nome para a resposta livre? 1 a 3 palavras e nenhuma da lista acima. */
+export function couldBeName(said: readonly string[], lang: ContentLang): boolean {
+  return said.length >= 1 && said.length <= FREE_MAX_WORDS && !said.some((w) => NOT_A_NAME[lang].has(w));
+}
 
 export interface ReplyMatch<R extends MatchableReply> {
   /** Posição da resposta em `replies`. */
@@ -226,7 +257,7 @@ export interface ReplyMatch<R extends MatchableReply> {
 export const CONTENT_WORDS_MIN = 0.6;
 
 /** Pontos da resposta para a fala já em palavras normalizadas (0 = não casou). */
-export function scoreReply(reply: MatchableReply, said: readonly string[], lang: ContentLang, pass: MatchPass): number {
+export function scoreReply(reply: MatchableReply, said: readonly string[], lang: ContentLang, pass: ScorePass): number {
   const fuzzy = pass === "fuzzy";
   if (reply.keywords && reply.keywords.length > 0) {
     let best = 0;
@@ -243,7 +274,7 @@ export function scoreReply(reply: MatchableReply, said: readonly string[], lang:
   return found / content.length >= CONTENT_WORDS_MIN ? found : 0;
 }
 
-function pick<R extends MatchableReply>(replies: readonly R[], said: readonly string[], lang: ContentLang, pass: MatchPass): { index: number } | null | "none" {
+function pick<R extends MatchableReply>(replies: readonly R[], said: readonly string[], lang: ContentLang, pass: ScorePass): { index: number } | null | "none" {
   const scores = replies.map((r, i) => (pass === "fuzzy" && r.flawed ? 0 : scoreReply(replies[i]!, said, lang, pass)));
   const top = Math.max(0, ...scores);
   if (top === 0) return "none";
@@ -254,13 +285,14 @@ function pick<R extends MatchableReply>(replies: readonly R[], said: readonly st
   return good.length === 1 ? { index: good[0]! } : null;
 }
 
-function matchOne<R extends MatchableReply>(replies: readonly R[], utterance: string, lang: ContentLang): { index: number; pass: MatchPass } | null {
-  const said = words(utterance, lang);
-  if (said.length === 0) return null;
+/** Casamento normal de uma fala: a resposta, null (empate) ou "none" (nada casou). */
+function matchOne<R extends MatchableReply>(replies: readonly R[], said: readonly string[], lang: ContentLang): { index: number; pass: ScorePass } | null | "none" {
+  if (said.length === 0) return "none";
   const exact = pick(replies, said, lang, "exact");
   if (exact !== "none") return exact && { index: exact.index, pass: "exact" };
   const fuzzy = pick(replies, said, lang, "fuzzy");
-  return fuzzy !== "none" && fuzzy ? { index: fuzzy.index, pass: "fuzzy" } : null;
+  if (fuzzy === "none") return "none";
+  return fuzzy && { index: fuzzy.index, pass: "fuzzy" };
 }
 
 /**
@@ -272,12 +304,17 @@ export function matchReply<R extends MatchableReply>(
   utterance: string | readonly string[],
   lang: ContentLang,
 ): ReplyMatch<R> | null {
-  const alternatives = typeof utterance === "string" ? [utterance] : utterance;
-  for (let a = 0; a < alternatives.length; a++) {
-    const m = matchOne(replies, alternatives[a]!, lang);
-    if (m) return { index: m.index, reply: replies[m.index]!, pass: m.pass, alternative: a };
+  const alternatives = (typeof utterance === "string" ? [utterance] : utterance).map((u) => words(u, lang));
+  const results = alternatives.map((said) => matchOne(replies, said, lang));
+  for (let a = 0; a < results.length; a++) {
+    const m = results[a];
+    if (m && m !== "none") return { index: m.index, reply: replies[m.index]!, pass: m.pass, alternative: a };
   }
-  return null;
+  // D-51: a resposta livre só entra se nenhuma alternativa casou nem empatou.
+  const free = replies.findIndex((r) => r.free && !r.flawed);
+  if (free < 0 || results.some((m) => m !== "none")) return null;
+  const a = alternatives.findIndex((said) => couldBeName(said, lang));
+  return a < 0 ? null : { index: free, reply: replies[free]!, pass: "free", alternative: a };
 }
 
 // ---------------------------------------------------------------- fecho (D-43, garantia 2)
@@ -286,7 +323,7 @@ export interface ClosingCheck {
   readonly accepted: boolean;
   /** A palavra-alvo encontrada, como está na lista; null se nenhuma. */
   readonly matched: string | null;
-  readonly pass: MatchPass | null;
+  readonly pass: ScorePass | null;
   /** Qual alternativa do reconhecedor foi aceita (0 no texto digitado); null se nenhuma. */
   readonly alternative: number | null;
 }

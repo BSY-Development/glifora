@@ -255,3 +255,16 @@ Proposta do dono. Muda a fase 7 e acrescenta itens às fases 4, 5 e 8. Nada é i
 - tentar publicar ou enviar conteúdo `personal` por todas as camadas: interface, chamada direta, arquivo exportado editado e sincronização;
 - mandar JSON malicioso pelo fluxo de contribuição.
 
+### D-51 — Resposta livre curta para nome (2026-11-20) · aceita (Arquiteto)
+- **Problema:** nas falas em que a NPC pergunta o nome (bakery-02, tavern-02), quem responde só "Maria" ouve "repete". Nenhuma palavra-chave casa com um nome qualquer. É a pessoa acertar e o jogo dizer que errou, o que a garantia 1 da D-43 proíbe.
+- **Decisão:** a resposta ganha um campo opcional `free: "name"`.
+  - **Quando aceita:** quando nenhuma outra resposta da fala casa (nem as boas, nem a com erro), aceita qualquer fala de **1 a 3 palavras** depois da normalização. Casa como uma resposta boa.
+  - **Ordem:** o casamento normal vem antes. "My name is Maria" casa com a resposta que tiver essas palavras, e "I am call Maria" continua indo para a resposta com erro, se existir.
+- **Regras do campo:**
+  - no máximo uma resposta livre por fala, e nunca com `flawed`;
+  - o `text` dela é o modelo mostrado na ajuda (ex.: "I'm Maria.");
+  - a reação da NPC é fixa: nada do que a pessoa disse entra na fala da NPC (sem modelo de texto).
+- **Onde mora:** o schema e o casamento em `src/schemas/` (`mission.ts` e `match.ts`), do Conteúdo. O player só usa o resultado do `matchReply`.
+- **Versão:** campo opcional novo, então não sobe `schema` (W0-03 §5.1).
+- **Fábrica (fase 4):** o prompt não pede esse campo. Se vier, é validado igual.
+

@@ -358,3 +358,87 @@ describe("closingTargets", () => {
     expect(closingTargets(m)).toEqual(["loaf", "bread", "hot", "chocolate"]);
   });
 });
+
+// ---------------------------------------------------------------- resposta livre (D-51)
+
+describe("matchReply: resposta livre para nome (D-51)", () => {
+  const name = [
+    { text: "I'm Alex.", keywords: [["i am"]], free: "name" as const },
+    { text: "My name is Alex. Nice to meet you!", keywords: [["my name"], ["name is"], ["nice to meet"], ["call me"]] },
+    { text: "I am call Alex.", keywords: [["i am call"]], flawed: true },
+  ];
+  const at = (said: string | readonly string[]) => matchReply(name, said, "en");
+
+  it.each([
+    ["Maria", 0, "free"],
+    ["Ana Clara", 0, "free"],
+    ["Maria da Silva", 0, "free"],
+    ["Sou o João", 0, "free"], // 3 palavras: aceita (o jogo não confere idioma num nome)
+    ["I'm Maria", 0, "exact"], // o casamento normal vem antes
+    ["My name is Maria", 1, "exact"],
+    ["Call me Bia", 1, "exact"],
+    ["I am call Maria", 2, "exact"], // a com erro continua valendo
+  ])("%j → %i (%s)", (said, idx, pass) => {
+    expect(at(said)?.index).toBe(idx);
+    expect(at(said)?.pass).toBe(pass);
+  });
+
+  it.each([
+    ["Maria Clara da Silva", "4 palavras"],
+    ["I would really like a cheese roll", "frase longa sem keyword"],
+    ["", "vazio"],
+    ["?!", "só pontuação"],
+  ])("%j → null (%s)", (said) => expect(at(said)).toBeNull());
+
+  it.each([
+    ["Sorry?", "não entendeu"],
+    ["What?", "não entendeu"],
+    ["Pardon me", "não entendeu"],
+    ["Repeat, please", "pede para repetir"],
+    ["Sorry, what?", "não entendeu"],
+    ["Yes", "não é nome"],
+    ["No", "não é nome"],
+    ["Hello", "cumprimento"],
+    ["Thank you", "agradecimento"],
+    ["Um, uh huh", "hesitação"],
+    ["Don't know", "não sabe"],
+  ])("%j não vira nome (%s)", (said) => expect(at(said)).toBeNull());
+
+  it("nomes que parecem palavras comuns continuam aceitos", () => {
+    for (const n of ["Will", "Grace", "Hope", "Joy", "May", "Rosa Maria"]) expect(at(n)?.pass, n).toBe("free");
+  });
+
+  it("voz: alternativa que não é nome é pulada na resposta livre", () => {
+    expect(at(["the", "Maria"])).toMatchObject({ index: 0, pass: "free", alternative: 1 });
+    expect(at(["sorry", "what"])).toBeNull();
+  });
+
+  it("conta palavras depois da normalização: contração expande, dígito vira palavra", () => {
+    expect(at("Mary-Jo")?.pass).toBe("free"); // "mary jo": 2
+    expect(at("Bob's cat")?.pass).toBe("free"); // "bobs cat": 2
+    expect(at("Bob 21")?.pass).toBe("free"); // "bob twenty one": 3
+    expect(at("Bob 22 Lee")).toBeNull(); // "bob twenty two lee": 4
+  });
+
+  it("empate no casamento normal não abre a resposta livre", () => {
+    const tied = [
+      { text: "I'm Alex.", keywords: [["alex"]], free: "name" as const },
+      { text: "Alex here.", keywords: [["here"]] },
+    ];
+    expect(matchReply(tied, "Alex here", "en")).toBeNull(); // empate entre boas
+  });
+
+  it("voz: o casamento normal de qualquer alternativa vem antes da resposta livre", () => {
+    expect(at(["Maria", "my name is Maria"])).toMatchObject({ index: 1, pass: "exact", alternative: 1 });
+    expect(at(["Maria Clara da Silva", "Maria"])).toMatchObject({ index: 0, pass: "free", alternative: 1 });
+  });
+
+  it("sem resposta livre na fala, fala curta que não casa continua null", () => {
+    expect(matchReply(name.slice(1), "Maria", "en")).toBeNull();
+  });
+
+  it("resposta livre marcada como flawed é ignorada (o schema recusa)", () => {
+    const bad = [{ text: "X.", keywords: [["zzz"]], flawed: true, free: "name" as const }, { text: "Hi.", keywords: [["hi"]] }];
+    expect(matchReply(bad, "Maria", "en")).toBeNull();
+  });
+});

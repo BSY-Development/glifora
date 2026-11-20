@@ -97,6 +97,11 @@ export const Reply = z
     pattern: PatternId.optional(),
     /** Id de uma fala posterior, para ramificar. Sem ele, segue para a próxima fala da lista. */
     next: LocalId.optional(),
+    /**
+     * Resposta livre (D-51): se nada mais casar, aceita fala de 1 a 3 palavras ("Maria"). O `text` é o
+     * modelo da ajuda, e a reação da NPC não repete nada do que a pessoa disse.
+     */
+    free: z.enum(["name"]).optional(),
   })
   .superRefine((r, ctx) => {
     if (r.flawed) {

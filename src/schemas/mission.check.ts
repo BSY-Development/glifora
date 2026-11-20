@@ -8,6 +8,7 @@
 //   4. Com `flawed`: `recast.original` está no texto da resposta e `recast.corrected` está em `reaction.text`.
 //   5. `model_answer` contém uma das palavras-alvo (`closing.target_words` ou, se faltar, o vocabulário).
 //   6. Todo `speaker` (escuta e falas) existe em `characters`.
+//   7. Resposta livre (D-51): no máximo uma por fala, e nunca com `flawed`.
 //
 // Só na embutida: toda resposta tem `keywords`, A1–A2 tem escuta de pelo menos 2 falas e o id é slug.
 // Com o catálogo de erros em mãos, `pattern` precisa existir nele.
@@ -141,6 +142,17 @@ export function checkMission(m: Mission, options: MissionCheckOptions = {}): Mis
   });
   m.nodes.forEach((node, i) => {
     if (!speakers.has(node.speaker)) add(["nodes", i, "speaker"], `"${node.speaker}" não está em characters`);
+  });
+
+  // 7. Resposta livre.
+  m.nodes.forEach((node, i) => {
+    let seen = false;
+    node.replies.forEach((r, j) => {
+      if (!r.free) return;
+      if (r.flawed) add(["nodes", i, "replies", j, "free"], "resposta livre (free) não pode ter erro previsto (flawed)");
+      if (seen) add(["nodes", i, "replies", j, "free"], "no máximo uma resposta livre (free) por fala");
+      seen = true;
+    });
   });
 
   // Catálogo de erros.

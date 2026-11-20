@@ -39,3 +39,4 @@ checkClosingAnswer(closingTargets(mission), said, mission.target).accepted;
 3. Empate boa × com erro → a boa; empate entre boas ou nada → `null`.
 4. Sem `keywords`: 60% das palavras de conteúdo do texto da resposta.
 5. Voz: alternativas do reconhecedor em ordem; fica a primeira que casa.
+6. Resposta livre (`free: "name"`, D-51): se nenhuma resposta casar (nem empatar) em nenhuma alternativa, a resposta livre aceita fala de 1 a 3 palavras normalizadas ("Maria"); `pass: "free"`. No máximo uma por fala, nunca com `flawed`, e a reação da NPC não repete o que a pessoa disse.

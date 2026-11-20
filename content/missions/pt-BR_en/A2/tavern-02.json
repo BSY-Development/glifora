@@ -1,0 +1,203 @@
+{
+  "schema": 1,
+  "id": "tavern-02",
+  "base": "pt-BR",
+  "target": "en",
+  "level": "A2",
+  "kind": "encounter",
+  "title": "Um quarto lá em cima",
+  "theme": "Pedir um quarto na taverna",
+  "location": "tavern",
+  "can_do": "Consigo pedir um quarto, dizer por quantas noites e perguntar horários.",
+  "description": "Já é noite e está tarde para procurar outro lugar. O Bram tem quatro quartinhos no andar de cima.",
+  "characters": [
+    { "id": "bram", "name": "Bram", "personality": "dono da taverna, calmo, de humor seco", "npc": "bram" },
+    { "id": "rosa", "name": "Rosa", "personality": "viajante hospedada na taverna, animada" }
+  ],
+  "listen": [
+    { "speaker": "rosa", "text": "Bram, what time is breakfast tomorrow?", "translation": "Bram, que horas é o café da manhã amanhã?" },
+    { "speaker": "bram", "text": "At seven, like every day, Rosa.", "translation": "Às sete, como todo dia, Rosa." },
+    { "speaker": "rosa", "text": "Perfect. Good night!", "translation": "Perfeito. Boa noite!" },
+    { "speaker": "bram", "text": "Good night. Pepper, don't snore tonight.", "translation": "Boa noite. Pepper, não ronca hoje, hein." }
+  ],
+  "nodes": [
+    {
+      "id": "room",
+      "speaker": "bram",
+      "emotion": "curious",
+      "text": "Still here, friend? It's late. Do you need a room?",
+      "translation": "Ainda por aqui? Está tarde. Precisa de um quarto?",
+      "replies": [
+        {
+          "text": "Yes, can I have a room, please?",
+          "translation": "Sim, pode me dar um quarto, por favor?",
+          "keywords": [["room"], ["yes"]],
+          "reaction": { "text": "Sure. I have a quiet one upstairs.", "translation": "Claro. Tenho um quietinho lá em cima." }
+        },
+        {
+          "text": "Do you have a small, cheap one?",
+          "translation": "Tem um pequeno e baratinho?",
+          "keywords": [["small"], ["cheap"], ["small room"], ["cheap room"]],
+          "reaction": { "text": "I have just the thing.", "translation": "Tenho o lugar certo." }
+        }
+      ]
+    },
+    {
+      "id": "name",
+      "speaker": "bram",
+      "emotion": "neutral",
+      "text": "Good. What's your name? For my book.",
+      "translation": "Ótimo. Qual é o seu nome? Para o meu caderno.",
+      "replies": [
+        {
+          "text": "My name is Alex.",
+          "translation": "Meu nome é Alex. (diga o seu nome)",
+          "keywords": [["my name"], ["name is"], ["i am"]],
+          "free": "name",
+          "reaction": { "text": "Written in the book. Nice and neat.", "translation": "Anotado no caderno. Bem caprichado." }
+        },
+        {
+          "text": "Just call me Alex.",
+          "translation": "Pode me chamar de Alex. (diga o seu nome)",
+          "keywords": [["call me"]],
+          "reaction": { "text": "Easy to remember. Good.", "translation": "Fácil de lembrar. Ótimo." }
+        }
+      ]
+    },
+    {
+      "id": "nights",
+      "speaker": "bram",
+      "emotion": "curious",
+      "text": "How many nights are you staying?",
+      "translation": "Quantas noites você vai ficar?",
+      "replies": [
+        {
+          "text": "Just one night.",
+          "translation": "Só uma noite.",
+          "keywords": [["one"], ["won"]],
+          "reaction": { "text": "One night. Easy.", "translation": "Uma noite. Fácil." }
+        },
+        {
+          "text": "Two nights, please.",
+          "translation": "Duas noites, por favor.",
+          "keywords": [["two"], ["to night"], ["to nights"], ["too night"], ["too nights"], ["three"], ["four"], ["five"], ["week"]],
+          "reaction": { "text": "Good. I'll write that down.", "translation": "Ótimo. Vou anotar." }
+        },
+        {
+          "text": "Three night, please.",
+          "translation": "Três noites, por favor.",
+          "flawed": true,
+          "keywords": [["three night"], ["tree night"]],
+          "recast": { "original": "Three night", "corrected": "Three nights" },
+          "reaction": { "text": "Three nights? No problem.", "translation": "Três noites? Sem problema." },
+          "pattern": "en.plural_s"
+        }
+      ]
+    },
+    {
+      "id": "questions",
+      "speaker": "bram",
+      "emotion": "neutral",
+      "text": "Anything you want to know?",
+      "translation": "Quer saber mais alguma coisa?",
+      "replies": [
+        {
+          "text": "How much is it?",
+          "translation": "Quanto é?",
+          "keywords": [["how much"], ["price"], ["cost"]],
+          "reaction": { "text": "Five coins a night. And breakfast is free.", "translation": "Cinco moedas por noite. E o café da manhã é de graça." }
+        },
+        {
+          "text": "Is the room quiet?",
+          "translation": "O quarto é silencioso?",
+          "keywords": [["quiet"], ["noisy"]],
+          "reaction": { "text": "Very quiet. Only Pepper snores. And breakfast is free.", "translation": "Bem silencioso. Só a Pepper ronca. E o café da manhã é de graça." }
+        },
+        {
+          "text": "How much cost?",
+          "translation": "Quanto custa?",
+          "flawed": true,
+          "keywords": [["how much cost"], ["how much costs"]],
+          "recast": { "original": "How much cost", "corrected": "How much is it" },
+          "reaction": { "text": "How much is it? Five coins a night. And breakfast is free.", "translation": "Quanto é? Cinco moedas por noite. E o café da manhã é de graça." },
+          "pattern": "en.how_much"
+        }
+      ]
+    },
+    {
+      "id": "breakfast",
+      "speaker": "bram",
+      "emotion": "happy",
+      "text": "My pancakes go fast, so don't sleep too late.",
+      "translation": "As minhas panquecas acabam rápido, então não durma demais.",
+      "replies": [
+        {
+          "text": "Pancakes! What time is breakfast?",
+          "translation": "Panquecas! Que horas é o café da manhã?",
+          "keywords": [["what time"]],
+          "reaction": { "text": "At seven. Pepper wakes up everyone anyway.", "translation": "Às sete. A Pepper acorda todo mundo mesmo." }
+        },
+        {
+          "text": "Don't worry, I always get up early.",
+          "translation": "Pode deixar, eu sempre acordo cedo.",
+          "keywords": [["early"], ["worry"]],
+          "reaction": { "text": "An early bird. I like that. Breakfast is at seven.", "translation": "Madrugador. Gosto disso. O café da manhã é às sete." }
+        },
+        {
+          "text": "What hour is breakfast?",
+          "translation": "Que horas é o café da manhã?",
+          "flawed": true,
+          "keywords": [["what hour"]],
+          "recast": { "original": "What hour", "corrected": "What time" },
+          "reaction": { "text": "What time? At seven. Pepper wakes up everyone anyway.", "translation": "Que horas? Às sete. A Pepper acorda todo mundo mesmo." },
+          "pattern": "en.what_time"
+        }
+      ]
+    },
+    {
+      "id": "wake",
+      "speaker": "bram",
+      "emotion": "curious",
+      "text": "Do you want me to knock on your door in the morning?",
+      "translation": "Quer que eu bata na sua porta de manhã?",
+      "replies": [
+        {
+          "text": "Yes, at seven o'clock, please.",
+          "translation": "Sim, às sete horas, por favor.",
+          "keywords": [["yes"], ["seven"], ["six"], ["eight"], ["nine"]],
+          "reaction": { "text": "Right. I'll knock. Twice, if I have to.", "translation": "Certo. Eu bato. Duas vezes, se precisar." }
+        },
+        {
+          "text": "No, thanks. I have an alarm.",
+          "translation": "Não, obrigado(a). Eu tenho despertador.",
+          "keywords": [["alarm"], ["no"], ["no thanks"], ["get up"]],
+          "reaction": { "text": "Fine. But Pepper is louder than any alarm.", "translation": "Tudo bem. Mas a Pepper é mais barulhenta que qualquer despertador." }
+        },
+        {
+          "text": "Yes, in seven o'clock.",
+          "translation": "Sim, às sete horas.",
+          "flawed": true,
+          "keywords": [["in seven"], ["on seven"]],
+          "recast": { "original": "in seven o'clock", "corrected": "At seven o'clock" },
+          "reaction": { "text": "At seven o'clock? Right. I'll knock.", "translation": "Às sete horas? Certo. Eu bato." },
+          "pattern": "en.prep_time"
+        }
+      ]
+    }
+  ],
+  "closing": {
+    "question": { "text": "One last thing. What do you want for breakfast tomorrow?", "translation": "Uma última coisa. O que você quer no café da manhã amanhã?" },
+    "target_words": ["pancakes", "pancake", "honey", "cheese", "roll", "bread", "pie", "eggs", "egg", "juice", "tea", "milk", "chocolate", "soup"],
+    "hint": "Diga o que você quer comer ou beber, por exemplo com \"Can I have...?\" ou \"I'd like...\".",
+    "model_answer": { "text": "Can I have two pancakes and an orange juice, please?", "translation": "Pode me dar duas panquecas e um suco de laranja, por favor?" },
+    "success": { "text": "Done. I'll get it ready. Sleep well, friend!", "translation": "Combinado. Vou deixar pronto. Durma bem!" }
+  },
+  "vocabulary": [
+    { "term": "a room", "translation": "um quarto", "example": "Can I have a room, please?" },
+    { "term": "for two nights", "translation": "por duas noites", "example": "A room for two nights, please." },
+    { "term": "How much is it?", "translation": "Quanto é?", "example": "How much is it for one night?" },
+    { "term": "What time is...?", "translation": "Que horas é...?", "example": "What time is breakfast?" },
+    { "term": "at seven o'clock", "translation": "às sete horas", "example": "Breakfast is at seven o'clock." },
+    { "term": "to get up early", "translation": "acordar cedo", "example": "I always get up early." }
+  ]
+}

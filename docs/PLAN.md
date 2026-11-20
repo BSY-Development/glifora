@@ -28,7 +28,7 @@ Portão da fase (SPEC, D-49): o dono joga **5 sessões em dias diferentes, dentr
 | W2-01 | Fable (chamada nº 2) | **Regras de jogo v1.** Números para as interfaces de W0-03 §6: XP por fonte (resposta por modo e ajuda, fecho, missão, níveis de domínio), curva de nível, títulos, desbloqueios. Também moedas, ofensiva e conquistas iniciais, já para a fase 3. Proposta em `docs/propostas/W2-01-regras.md`; o Arquiteto decide (D-49) | Os números passam nas 6 guardas de W0-03 §6, com justificativa de equilíbrio (dopamina × aprendizado) | Simulação de 5, 30 e 90 sessões na proposta | aprovada |
 | W2-02 | Conteúdo | **Schemas e casamento.** `mission.ts` (v1, D-43, com `closing.target_words`), `mission.check.ts` (as 6 conferências), `npc.ts`, `vocab.ts` e `pattern.ts`. `match.ts` com a comparação tolerante da D-43 e o fecho por palavras-alvo. Portar do arquivo comercial (W0-03 §5.5). Um `parseMission` só | A tabela de testes da D-43 passa | Unidade ao lado do código | aprovada |
 | W2-03 | Conteúdo | **Plano de conteúdo da fase 2.** As 5 missões EN A1–A2: local, NPC, `can_do`, padrões de erro, ordem e qual é `boss` (se houver). Se precisar de local novo, dizer. O Arquiteto aprova antes de escrever | Plano aprovado | — | aprovada |
-| W2-04 | Conteúdo | **Conteúdo.** `content/npcs/` (Tilda e as novas), `content/patterns/pt-BR_en.json` e as 5 missões. `scripts/content/build-index.ts` valida tudo e gera o índice. Frases do teste de voz em `content/eval/` | Tudo passa no schema e nas conferências; amostra revisada pelo dono | Unidade do script; validação no CI | em andamento |
+| W2-04 | Conteúdo | **Conteúdo.** `content/npcs/` (Tilda e as novas), `content/patterns/pt-BR_en.json` e as 5 missões. `scripts/content/build-index.ts` valida tudo e gera o índice. Frases do teste de voz em `content/eval/` | Tudo passa no schema e nas conferências; amostra revisada pelo dono | Unidade do script; validação no CI | aprovada |
 | W2-05 | App | **Dados v2.** Tabelas `events`, `runs` e `session` (W0-03 §4.1). Exportar e importar passam a incluir `events` e `runs` (registros por união de id, com os limites da W1-17) | A migração v1 → v2 não perde nada; os arquivos v1 continuam importando | `fake-indexeddb`; fixture v1 | aprovada |
 | W2-06 | App | **Voz.** `speech/` com `Tts` e `Stt` (W0-03 §2.5), aviso de privacidade antes do 1º microfone e `/settings/voice` (diagnóstico com alternativas e confiança) | Fala e escuta no Chrome do Android; sem suporte, o microfone some e o texto vira o caminho | Dublês no e2e (Revisor) | aprovada |
 | W2-07 | App | **Motor e catálogo.** `engine/` com as regras v1 (D-49): `xpFor`, `levelAt`, `masteryOf`, `deriveProgress`. `catalog/` com `list` e `load`, carregando pelo `parseMission` | As guardas de `tests/pedagogy/` passam | Unidade e guardas do Revisor | aprovada |
@@ -110,7 +110,47 @@ Portão da fase (SPEC, D-49): o dono joga **5 sessões em dias diferentes, dentr
 - **Formato combinado com o App:** os tipos acima; `Reply.translation` é a ideia em pt-BR do 2º degrau de ajuda; o `recast.corrected` aparece literal em `reaction.text` (é o trecho que o app destaca).
 - **Na W2-04:** o `content/eval/pt-BR_en.json` sai com `{ schema, base, target, phrases: [{ id, text, expect: { mission, node, reply } }] }`, e o `EvalSet`/`parseEvalSet` entram em `src/schemas/`. Evitar keywords curtas que viram outra palavra com duas letras trocadas (`three`/`there`, `form`/`from`); nota do Revisor.
 - **Enums da taverna (W2-15):** `tavern` e `bram` entraram em `world.ts` e em `content/world/locations.json` (order 1) quando a arte do App ficou pronta.
-- **Pendência para o Arquiteto:** o App propõe que `content/eval/` entre no bundle num chunk separado, carregado por `import()` só em `/settings/voice` (via `src/catalog/`), para o dono medir no site publicado e offline. A W0-03 §5.3 diz que `eval/` nunca entra no bundle.
+- **Pendência para o Arquiteto:** o App propõe que `content/eval/` entre no bundle num chunk separado, carregado por `import()` só em `/settings/voice` (via `src/catalog/`), para o dono medir no site publicado e offline. A W0-03 §5.3 diz que `eval/` nunca entra no bundle. (Decidida na D-48: só `content/eval/stt/`.)
+
+**W2-04 (Conteúdo; parte 1 aprovada e no commit `53dc4bb`; parte 2 aprovada pelo Revisor em 2026-11-20):**
+- **Fichas:** `content/npcs/tilda.json` (do arquivo comercial, sem a voz Azure) e `bram.json` (novo: dono da taverna, calmo, humor seco, com a cachorra Pepper).
+- **Catálogo de erros:** `content/patterns/pt-BR_en.json`, com os 14 padrões do arquivo comercial e mais `en.what_time`, `en.prep_time` e `en.past_simple`.
+- **Missões, na ordem do índice:**
+  - `bakery-01` e `bakery-02` (A1, padaria);
+  - `tavern-01` (A1);
+  - `tavern-02` (A2);
+  - `tavern-03` (A2, **chefe**, Tilda e Bram).
+  - Todas têm escuta, uma resposta com erro e recast em quase toda fala, e fecho com palavras-alvo.
+- **Retomada (pedido do dono para o portão):**
+  - "Can I have...?", os números e "Here you go"/"That's all" voltam na bakery-02, na tavern-01 e na tavern-02;
+  - "I'm from..." volta na tavern-01 e no chefe;
+  - o chefe pede um pouco de tudo, e o fecho dele aceita palavras das 5.
+- **Teste de voz (D-48):** `content/eval/stt/pt-BR_en.json`, com 44 frases. Cada uma aponta para `mission/node/reply` e casa com a resposta esperada; o `build-index` confere.
+- **`scripts/content/`:**
+  - **`build-index.ts` (CLI) e `lib.ts`:** validam `world`, `npcs`, `patterns`, `missions` e `eval/stt`, e gravam `src/catalog/generated/index.json`. Além do schema e do `parseMission`, conferem:
+    - pasta, nível e nome do arquivo;
+    - ficha da NPC, com `lines` do alvo e o local da vila;
+    - teto da fala por nível (A1 80, A2 120);
+    - fala sem dígito nem símbolo, com pontuação no fim;
+    - nenhuma bebida alcoólica (inglês, português e espanhol), no JSON cru de todo arquivo.
+  - **Gancho:** `module.registerHooks` resolve os imports sem extensão de `src/schemas/` no Node.
+  - **`missions.test.ts`:** 147 falas naturais (certas, com erro e ambíguas) com a resposta esperada. É a proteção para mexer nas keywords na W2-12.
+- **Regras de escrita que ficaram:**
+  - a resposta com erro casa só com a forma que a reação repete ("I from Brazil", "Three night"), e as keywords dela nunca aparecem na frase certa;
+  - reações neutras quanto a nome, país, número e comida;
+  - preço fixo só quando não depende do pedido;
+  - traduções sem marcar gênero;
+  - `translation` como a ideia em pt-BR.
+- **Pendências:**
+  - **Para o Arquiteto:** o nome sozinho ("Maria") nos nós de nome (bakery-02, tavern-02) faz a NPC pedir para repetir. Uma saída é o player aceitar qualquer fala de 1–2 palavras num nó marcado como "nome", mas isso pede um campo novo na missão.
+  - **Para o Arquiteto (nota do Revisor):** `engines.node` em `>=22.18`.
+  - O ajuste que o dono pedir depois de jogar a bakery-01 vale para as 5.
+
+**D-51 (Conteúdo, aprovada pelo Revisor em 2026-11-20):**
+- **Schema e casamento:** `Reply.free: "name"` (opcional, sem subir `schema`); conferência 7 no `mission.check.ts` (no máximo uma por fala, nunca com `flawed`). No `match.ts`, a resposta livre só entra quando nenhuma alternativa casou nem empatou. Aceita fala de 1 a 3 palavras normalizadas (`FREE_MAX_WORDS`), com `pass: "free"`. O fecho continua só com `exact`/`fuzzy` (`ScorePass`).
+- **Não-nomes (pedido do Revisor):** `couldBeName` recusa fala com palavra que mostra que a pessoa não entendeu ou não disse o nome ("Sorry?", "What?", "Repeat, please", "Yes", "Hello"...). Há uma lista curta por idioma-alvo, sem nomes comuns (Will, Grace, Hope, Joy, May).
+- **Conteúdo:** a resposta livre está na 1ª resposta da fala de nome da bakery-02 e da tavern-02; as reações não repetem o nome.
+- **Player:** não muda; ele usa só o `index`/`reply` do `matchReply`.
 
 ## Fase 1 — Fundação (fechada em 2026-11-20; portão aprovado pelo dono)
 

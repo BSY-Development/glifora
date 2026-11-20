@@ -1,0 +1,180 @@
+{
+  "schema": 1,
+  "id": "tavern-01",
+  "base": "pt-BR",
+  "target": "en",
+  "level": "A1",
+  "kind": "encounter",
+  "title": "Perto da lareira",
+  "theme": "Pedir bebida e comida na taverna",
+  "location": "tavern",
+  "can_do": "Consigo perguntar se tem algo e pedir uma bebida.",
+  "description": "Fim de tarde. A Tilda não vende bebida e mandou você para a taverna do Bram, do outro lado da praça. O fogo está aceso e a Pepper dorme perto dele.",
+  "characters": [
+    { "id": "bram", "name": "Bram", "personality": "dono da taverna, calmo, de humor seco", "npc": "bram" },
+    { "id": "ben", "name": "Ben", "personality": "freguês de sempre, simpático" }
+  ],
+  "listen": [
+    { "speaker": "ben", "text": "Evening, Bram! Do you have hot chocolate today?", "translation": "Boa noite, Bram! Tem chocolate quente hoje?" },
+    { "speaker": "bram", "text": "Always. One hot chocolate, coming up.", "translation": "Sempre. Um chocolate quente, saindo." },
+    { "speaker": "ben", "text": "Great. And can I have some soup, too?", "translation": "Ótimo. E pode me dar uma sopa também?" },
+    { "speaker": "bram", "text": "Sure, friend. There you go.", "translation": "Claro. Aqui está." }
+  ],
+  "nodes": [
+    {
+      "id": "greet",
+      "speaker": "bram",
+      "emotion": "happy",
+      "text": "Good evening! Come in, sit by the fire.",
+      "translation": "Boa noite! Entre, sente perto da lareira.",
+      "replies": [
+        {
+          "text": "Good evening!",
+          "translation": "Boa noite!",
+          "keywords": [["good evening"], ["evening"], ["hello"], ["hi"]],
+          "reaction": { "text": "Welcome to my tavern. I'm Bram.", "translation": "Boas-vindas à minha taverna. Eu sou o Bram." }
+        },
+        {
+          "text": "Thanks! It's so cozy in here.",
+          "translation": "Obrigado(a)! Aqui dentro é tão aconchegante.",
+          "keywords": [["cozy"], ["cosy"], ["warm"]],
+          "reaction": { "text": "That's the fire. And the soup. I'm Bram.", "translation": "É a lareira. E a sopa. Eu sou o Bram.", "emotion": "proud" }
+        },
+        {
+          "text": "Good night!",
+          "translation": "Boa noite! (chegando)",
+          "flawed": true,
+          "keywords": [["good night"], ["goodnight"], ["good morning"], ["good afternoon"]],
+          "recast": { "original": "Good night", "corrected": "good evening" },
+          "reaction": { "text": "Ha, good evening! It's night already, friend.", "translation": "Rá, boa noite! Já é noite." },
+          "pattern": "en.greeting_time"
+        }
+      ]
+    },
+    {
+      "id": "from",
+      "speaker": "bram",
+      "emotion": "curious",
+      "text": "You're new here. Where are you from?",
+      "translation": "Você chegou agora. De onde você é?",
+      "replies": [
+        {
+          "text": "I'm from Brazil.",
+          "translation": "Eu sou do Brasil.",
+          "keywords": [["i am from"], ["from"], ["brazil"]],
+          "reaction": { "text": "Long way. Welcome, friend.", "translation": "Que viagem longa. Boas-vindas." }
+        },
+        {
+          "text": "I'm Brazilian. I'm staying in the village.",
+          "translation": "Sou brasileiro(a). Estou passando uns dias na vila.",
+          "keywords": [["brazilian"], ["staying"]],
+          "reaction": { "text": "Good. Then you'll see me a lot.", "translation": "Ótimo. Então vai me ver bastante." }
+        },
+        {
+          "text": "I from Brazil.",
+          "translation": "Eu sou do Brasil.",
+          "flawed": true,
+          "keywords": [["i from brazil"]],
+          "recast": { "original": "I from Brazil", "corrected": "You're from Brazil" },
+          "reaction": { "text": "You're from Brazil? Long way. Welcome, friend.", "translation": "Você é do Brasil? Que viagem longa. Boas-vindas." },
+          "pattern": "en.verb_be"
+        }
+      ]
+    },
+    {
+      "id": "drink",
+      "speaker": "bram",
+      "emotion": "neutral",
+      "text": "What can I get you to drink?",
+      "translation": "O que vai beber?",
+      "replies": [
+        {
+          "text": "Do you have orange juice?",
+          "translation": "Tem suco de laranja?",
+          "keywords": [["juice"], ["tea"], ["milk"], ["water"], ["lemonade"], ["coffee"]],
+          "reaction": { "text": "Yes, we do. Coming right up.", "translation": "Tem, sim. Saindo já." }
+        },
+        {
+          "text": "Can I have a hot chocolate, please?",
+          "translation": "Pode me dar um chocolate quente, por favor?",
+          "keywords": [["chocolate"]],
+          "reaction": { "text": "Good choice. Best in the village.", "translation": "Boa escolha. O melhor da vila." }
+        },
+        {
+          "text": "A orange juice, please.",
+          "translation": "Um suco de laranja, por favor.",
+          "flawed": true,
+          "keywords": [["a orange"]],
+          "recast": { "original": "A orange juice", "corrected": "An orange juice" },
+          "reaction": { "text": "An orange juice? Sure thing.", "translation": "Um suco de laranja? Claro." },
+          "pattern": "en.article_a_an"
+        }
+      ]
+    },
+    {
+      "id": "food",
+      "speaker": "bram",
+      "emotion": "neutral",
+      "text": "Hungry? The soup is hot.",
+      "translation": "Com fome? A sopa está quente.",
+      "replies": [
+        {
+          "text": "Yes! Can I have some soup, please?",
+          "translation": "Sim! Pode me dar uma sopa, por favor?",
+          "keywords": [["soup"]],
+          "reaction": { "text": "One soup. You won't be sorry.", "translation": "Uma sopa. Você não vai se arrepender." }
+        },
+        {
+          "text": "Do you have any bread?",
+          "translation": "Tem pão?",
+          "keywords": [["bread"]],
+          "reaction": { "text": "Always. Tilda's rolls, from this morning.", "translation": "Sempre. Os pãezinhos da Tilda, de hoje cedo." }
+        },
+        {
+          "text": "Has bread?",
+          "translation": "Tem pão?",
+          "flawed": true,
+          "keywords": [["has bread"], ["has any bread"]],
+          "recast": { "original": "Has bread", "corrected": "Do you have bread" },
+          "reaction": { "text": "Do you have bread? Always, friend. Tilda's rolls.", "translation": "Se eu tenho pão? Sempre. Os pãezinhos da Tilda." },
+          "pattern": "en.do_you_have"
+        }
+      ]
+    },
+    {
+      "id": "pay",
+      "speaker": "bram",
+      "emotion": "neutral",
+      "text": "Anything else, or is that all?",
+      "translation": "Mais alguma coisa, ou é só isso?",
+      "replies": [
+        {
+          "text": "That's all, thanks.",
+          "translation": "É só isso, obrigado(a).",
+          "keywords": [["that is all"], ["no"], ["nothing"]],
+          "reaction": { "text": "Right. You can pay when you leave. Enjoy.", "translation": "Certo. Pode pagar na saída. Bom apetite." }
+        },
+        {
+          "text": "Can I have a cup of tea, too?",
+          "translation": "Pode me dar uma xícara de chá também?",
+          "keywords": [["tea"]],
+          "reaction": { "text": "One tea, too. Coming right up.", "translation": "Um chá também. Saindo já." }
+        }
+      ]
+    }
+  ],
+  "closing": {
+    "question": { "text": "Come back tomorrow. What can I get you then?", "translation": "Volte amanhã. O que vai querer, então?" },
+    "target_words": ["juice", "tea", "milk", "chocolate", "water", "lemonade", "soup", "bread", "roll", "honey", "cheese", "pie"],
+    "hint": "Peça uma bebida ou comida, por exemplo com \"Can I have...?\" ou \"Do you have...?\".",
+    "model_answer": { "text": "Can I have a hot chocolate and some soup, please?", "translation": "Pode me dar um chocolate quente e uma sopa, por favor?" },
+    "success": { "text": "Good. I'll be here. Good night, friend!", "translation": "Ótimo. Vou estar aqui. Boa noite!" }
+  },
+  "vocabulary": [
+    { "term": "Good evening!", "translation": "Boa noite! (ao chegar)", "example": "Good evening, Bram!" },
+    { "term": "Do you have...?", "translation": "Tem...? / Você tem...?", "example": "Do you have orange juice?" },
+    { "term": "an orange juice", "translation": "um suco de laranja", "example": "An orange juice, please." },
+    { "term": "hot chocolate", "translation": "chocolate quente", "example": "Can I have a hot chocolate, please?" },
+    { "term": "some soup", "translation": "uma sopa", "example": "Can I have some soup, too?" }
+  ]
+}

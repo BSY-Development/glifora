@@ -1,0 +1,236 @@
+{
+  "schema": 1,
+  "id": "tavern-03",
+  "base": "pt-BR",
+  "target": "en",
+  "level": "A2",
+  "kind": "boss",
+  "title": "Noite na taverna",
+  "theme": "Contar como foi o dia",
+  "location": "tavern",
+  "can_do": "Consigo contar como foi o meu dia e dizer do que gostei.",
+  "description": "A Tilda veio jantar na taverna e está implicando com o Bram, como sempre. Os dois chamam você para a mesa perto da lareira e querem saber tudo do seu dia.",
+  "characters": [
+    { "id": "tilda", "name": "Tilda", "personality": "padeira calorosa, curiosa e brincalhona", "npc": "tilda" },
+    { "id": "bram", "name": "Bram", "personality": "dono da taverna, calmo, de humor seco", "npc": "bram" }
+  ],
+  "listen": [
+    { "speaker": "tilda", "text": "Bram, your soup is good, but my bread is better.", "translation": "Bram, a sua sopa é boa, mas o meu pão é melhor." },
+    { "speaker": "bram", "text": "Your bread is only good with my soup, Tilda.", "translation": "O seu pão só é bom com a minha sopa, Tilda." },
+    { "speaker": "tilda", "text": "Ha! Oh, look who's here. Come and sit with us!", "translation": "Rá! Ah, olha quem chegou. Vem sentar com a gente!" }
+  ],
+  "nodes": [
+    {
+      "id": "day",
+      "speaker": "tilda",
+      "emotion": "curious",
+      "text": "So, how was your day in the village?",
+      "translation": "E aí, como foi o seu dia na vila?",
+      "replies": [
+        {
+          "text": "It was great, thanks!",
+          "translation": "Foi ótimo, obrigado(a)!",
+          "keywords": [["great"], ["good"], ["nice"], ["amazing"], ["wonderful"]],
+          "reaction": { "text": "Oh, I'm so happy to hear that!", "translation": "Ah, que bom ouvir isso!" }
+        },
+        {
+          "text": "Busy, but really fun.",
+          "translation": "Corrido, mas bem divertido.",
+          "keywords": [["busy"], ["fun"], ["tired"]],
+          "reaction": { "text": "Ha! New places, new faces. That's a lot.", "translation": "Rá! Lugar novo, gente nova. É muita coisa." }
+        },
+        {
+          "text": "Oh, was a great day!",
+          "translation": "Ah, foi um ótimo dia!",
+          "flawed": true,
+          "keywords": [["oh was a great day"], ["oh was great"], ["yes was a great day"], ["yes was great"]],
+          "recast": { "original": "was a great day", "corrected": "It was a great day" },
+          "reaction": { "text": "It was a great day? Oh, I'm so happy to hear that!", "translation": "Foi um ótimo dia? Ah, que bom ouvir isso!" },
+          "pattern": "en.subject_omission"
+        }
+      ]
+    },
+    {
+      "id": "eat",
+      "speaker": "bram",
+      "emotion": "curious",
+      "text": "And what did you eat today? Be honest.",
+      "translation": "E o que você comeu hoje? Pode falar a verdade.",
+      "replies": [
+        {
+          "text": "I had a honey roll this morning.",
+          "translation": "Comi um pãozinho de mel de manhã.",
+          "keywords": [["had"], ["ate"]],
+          "reaction": { "text": "Good. But tonight, you try my soup.", "translation": "Ótimo. Mas hoje você prova a minha sopa." }
+        },
+        {
+          "text": "Nothing yet. I'm really hungry!",
+          "translation": "Nada ainda. Estou morrendo de fome!",
+          "keywords": [["nothing"], ["hungry"]],
+          "reaction": { "text": "Then you need my soup. Right now.", "translation": "Então você precisa da minha sopa. Agora mesmo." }
+        },
+        {
+          "text": "I eat a honey roll this morning.",
+          "translation": "Comi um pãozinho de mel de manhã.",
+          "flawed": true,
+          "keywords": [["i eat"], ["i eated"]],
+          "recast": { "original": "I eat", "corrected": "You ate" },
+          "reaction": { "text": "Oh, you ate already? Good. But tonight, you try my soup.", "translation": "Ah, já comeu? Ótimo. Mas hoje você prova a minha sopa." },
+          "pattern": "en.past_simple"
+        }
+      ]
+    },
+    {
+      "id": "from",
+      "speaker": "tilda",
+      "emotion": "happy",
+      "text": "Bram doesn't know where you're from. Tell him, dear!",
+      "translation": "O Bram não sabe de onde você é. Conta para ele, meu bem!",
+      "replies": [
+        {
+          "text": "I'm from Brazil.",
+          "translation": "Eu sou do Brasil.",
+          "keywords": [["i am from"], ["from"], ["brazil"]],
+          "reaction": { "text": "I knew it. You're too nice to be from around here.", "translation": "Eu sabia. Você é gente boa demais para ser daqui." }
+        },
+        {
+          "text": "I'm Brazilian. It's very far away.",
+          "translation": "Sou brasileiro(a). É bem longe.",
+          "keywords": [["brazilian"], ["far away"]],
+          "reaction": { "text": "Far away. And still you found the best soup. Smart.", "translation": "Bem longe. E mesmo assim achou a melhor sopa. Boa escolha." }
+        },
+        {
+          "text": "I from Brazil.",
+          "translation": "Eu sou do Brasil.",
+          "flawed": true,
+          "keywords": [["i from brazil"]],
+          "recast": { "original": "I from Brazil", "corrected": "You're from Brazil" },
+          "reaction": { "text": "You're from Brazil? I knew it. Welcome, friend.", "translation": "Você é do Brasil? Eu sabia. Boas-vindas." },
+          "pattern": "en.verb_be"
+        }
+      ]
+    },
+    {
+      "id": "drink",
+      "speaker": "bram",
+      "emotion": "neutral",
+      "text": "What can I get you tonight?",
+      "translation": "O que vai querer hoje à noite?",
+      "replies": [
+        {
+          "text": "Can I have a hot chocolate, please?",
+          "translation": "Pode me dar um chocolate quente, por favor?",
+          "keywords": [["chocolate"]],
+          "reaction": { "text": "The usual. You're a regular now.", "translation": "O de sempre. Agora você já é de casa." }
+        },
+        {
+          "text": "Do you have any milk?",
+          "translation": "Tem leite?",
+          "keywords": [["milk"], ["juice"], ["tea"]],
+          "reaction": { "text": "Of course. Coming right up.", "translation": "Claro. Saindo já." }
+        }
+      ]
+    },
+    {
+      "id": "bread",
+      "speaker": "tilda",
+      "emotion": "happy",
+      "text": "I brought bread from my bakery. Do you want some?",
+      "translation": "Eu trouxe pão da minha padaria. Quer um pouco?",
+      "replies": [
+        {
+          "text": "Yes, please! I love your bread.",
+          "translation": "Quero, sim! Eu adoro o seu pão.",
+          "keywords": [["love"], ["yes"], ["pieces"], ["piece"], ["some"]],
+          "reaction": { "text": "Oh, you're so sweet! Did you hear that, Bram?", "translation": "Ah, que fofura! Ouviu isso, Bram?", "emotion": "proud" }
+        },
+        {
+          "text": "No, thanks. I'm full.",
+          "translation": "Não, obrigado(a). Estou satisfeito(a).",
+          "keywords": [["full"], ["no"]],
+          "reaction": { "text": "Full already? Bram's soup is too big.", "translation": "Já encheu? A sopa do Bram é grande demais." }
+        },
+        {
+          "text": "Yes, two breads, please!",
+          "translation": "Quero, sim, dois pedaços de pão, por favor!",
+          "flawed": true,
+          "keywords": [["two breads"], ["breads"]],
+          "recast": { "original": "two breads", "corrected": "Two pieces of bread" },
+          "reaction": { "text": "Two pieces of bread? Here you go, dear.", "translation": "Dois pedaços de pão? Aqui está, meu bem." },
+          "pattern": "en.uncountable_noun"
+        }
+      ]
+    },
+    {
+      "id": "favorite",
+      "speaker": "tilda",
+      "emotion": "curious",
+      "text": "Tell us, what did you like best in the village?",
+      "translation": "Conta para a gente, do que você mais gostou na vila?",
+      "replies": [
+        {
+          "text": "I liked the bakery, of course!",
+          "translation": "Gostei da padaria, é claro!",
+          "keywords": [["bakery"], ["roll"], ["rolls"]],
+          "reaction": { "text": "Oh, I knew it! Ha!", "translation": "Ah, eu sabia! Rá!", "emotion": "proud" }
+        },
+        {
+          "text": "The tavern! The hot chocolate is amazing.",
+          "translation": "A taverna! O chocolate quente é incrível.",
+          "keywords": [["tavern"], ["hot chocolate"], ["soup"]],
+          "reaction": { "text": "Oh no, don't tell Bram! He's so proud already.", "translation": "Ah, não, não fala isso para o Bram! Ele já é todo convencido." }
+        },
+        {
+          "text": "I liked everything. The people are so nice.",
+          "translation": "Gostei de tudo. O pessoal é muito legal.",
+          "keywords": [["everything"], ["people"], ["everyone"]],
+          "reaction": { "text": "Oh, that's lovely. We like you too, dear.", "translation": "Ah, que lindo. A gente também gosta de você, meu bem." }
+        }
+      ]
+    },
+    {
+      "id": "night",
+      "speaker": "bram",
+      "emotion": "neutral",
+      "text": "It's getting late. Any questions before bed?",
+      "translation": "Está ficando tarde. Alguma pergunta antes de dormir?",
+      "replies": [
+        {
+          "text": "What time is breakfast?",
+          "translation": "Que horas é o café da manhã?",
+          "keywords": [["what time"]],
+          "reaction": { "text": "At seven. Same as yesterday. Same as always.", "translation": "Às sete. Igual a ontem. Igual a sempre." }
+        },
+        {
+          "text": "No, I'm fine. Good night, everyone!",
+          "translation": "Não, tudo certo. Boa noite, pessoal!",
+          "keywords": [["good night"], ["fine"], ["no"]],
+          "reaction": { "text": "Good night, friend. Sleep well.", "translation": "Boa noite. Durma bem." }
+        },
+        {
+          "text": "What hour is breakfast?",
+          "translation": "Que horas é o café da manhã?",
+          "flawed": true,
+          "keywords": [["what hour"]],
+          "recast": { "original": "What hour", "corrected": "What time" },
+          "reaction": { "text": "What time? At seven. Same as always.", "translation": "Que horas? Às sete. Igual a sempre." },
+          "pattern": "en.what_time"
+        }
+      ]
+    }
+  ],
+  "closing": {
+    "question": { "text": "Before you go, tell us about your day in one sentence.", "translation": "Antes de ir, conta como foi o seu dia numa frase." },
+    "target_words": ["roll", "bread", "honey", "cheese", "soup", "juice", "chocolate", "tea", "milk", "pancakes", "room", "bakery", "tavern", "village", "friend", "friends", "ate", "had", "was", "liked", "loved", "met", "from", "great", "fun"],
+    "hint": "Conte o que você comeu, do que gostou ou quem conheceu, por exemplo com \"I had...\", \"I liked...\" ou \"It was...\".",
+    "model_answer": { "text": "I had a honey roll, and I liked the village.", "translation": "Comi um pãozinho de mel e gostei da vila." },
+    "success": { "text": "What a lovely day! Welcome to the village, friend.", "translation": "Que dia lindo! Boas-vindas à vila." }
+  },
+  "vocabulary": [
+    { "term": "It was...", "translation": "Foi...", "example": "It was a great day!" },
+    { "term": "I had...", "translation": "Eu comi... / Eu tomei...", "example": "I had a honey roll this morning." },
+    { "term": "I liked...", "translation": "Eu gostei de...", "example": "I liked the bakery." },
+    { "term": "two pieces of bread", "translation": "dois pedaços de pão", "example": "Two pieces of bread, please." },
+    { "term": "I'm full.", "translation": "Estou satisfeito(a).", "example": "No, thanks. I'm full." }
+  ]
+}

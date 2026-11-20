@@ -1,0 +1,172 @@
+{
+  "schema": 1,
+  "id": "bakery-02",
+  "base": "pt-BR",
+  "target": "en",
+  "level": "A1",
+  "kind": "encounter",
+  "title": "Prazer, Tilda",
+  "theme": "Apresentar-se na padaria",
+  "location": "bakery",
+  "can_do": "Consigo me apresentar e dizer de onde sou.",
+  "description": "No dia seguinte, a Tilda já lembra do seu pedido e quer saber mais sobre você. A Rosa, que também chegou há pouco, está na fila.",
+  "characters": [
+    { "id": "tilda", "name": "Tilda", "personality": "padeira calorosa e curiosa, adora gente nova", "npc": "tilda" },
+    { "id": "ben", "name": "Ben", "personality": "freguês de sempre, simpático" },
+    { "id": "rosa", "name": "Rosa", "personality": "viajante que chegou há pouco na vila, animada" }
+  ],
+  "listen": [
+    { "speaker": "rosa", "text": "Hi, I'm Rosa. I'm from Milltown.", "translation": "Oi, eu sou a Rosa. Sou de Milltown." },
+    { "speaker": "ben", "text": "Nice to meet you, Rosa! I'm Ben.", "translation": "Prazer, Rosa! Eu sou o Ben." },
+    { "speaker": "rosa", "text": "Nice to meet you, too!", "translation": "O prazer é meu!" }
+  ],
+  "nodes": [
+    {
+      "id": "usual",
+      "speaker": "tilda",
+      "emotion": "happy",
+      "text": "Good morning! The usual? Two honey rolls?",
+      "translation": "Bom dia! O de sempre? Dois pãezinhos de mel?",
+      "replies": [
+        {
+          "text": "Yes, please! Two honey rolls.",
+          "translation": "Sim, por favor! Dois pãezinhos de mel.",
+          "keywords": [["yes"], ["two honey"]],
+          "reaction": { "text": "Two honey rolls. Here you go!", "translation": "Dois pãezinhos de mel. Aqui está!" }
+        },
+        {
+          "text": "Can I have a cheese roll today?",
+          "translation": "Pode me dar um pãozinho de queijo hoje?",
+          "keywords": [["cheese"]],
+          "reaction": { "text": "Something new today? Lovely!", "translation": "Novidade hoje? Que bom!" }
+        },
+        {
+          "text": "Yes, two honey roll.",
+          "translation": "Sim, dois pãezinhos de mel.",
+          "flawed": true,
+          "keywords": [["two honey roll"], ["to honey roll"]],
+          "recast": { "original": "two honey roll", "corrected": "Two honey rolls" },
+          "reaction": { "text": "Two honey rolls, coming right up!", "translation": "Dois pãezinhos de mel, saindo!" },
+          "pattern": "en.plural_s"
+        }
+      ]
+    },
+    {
+      "id": "name",
+      "speaker": "tilda",
+      "emotion": "curious",
+      "text": "I don't know your name yet. What's your name?",
+      "translation": "Ainda não sei o seu nome. Como você se chama?",
+      "replies": [
+        {
+          "text": "I'm Alex.",
+          "translation": "Eu sou o Alex. (diga o seu nome)",
+          "keywords": [["i am"]],
+          "free": "name",
+          "reaction": { "text": "Nice to meet you, dear!", "translation": "Prazer, meu bem!" }
+        },
+        {
+          "text": "My name is Alex. Nice to meet you!",
+          "translation": "Meu nome é Alex. Prazer! (diga o seu nome)",
+          "keywords": [["my name"], ["name is"], ["nice to meet"], ["call me"]],
+          "reaction": { "text": "Nice to meet you, too, dear!", "translation": "O prazer é meu, meu bem!" }
+        }
+      ]
+    },
+    {
+      "id": "from",
+      "speaker": "tilda",
+      "emotion": "curious",
+      "text": "And where are you from?",
+      "translation": "E de onde você é?",
+      "replies": [
+        {
+          "text": "I'm from Brazil.",
+          "translation": "Eu sou do Brasil.",
+          "keywords": [["i am from"], ["from"], ["brazil"]],
+          "reaction": { "text": "Oh, that's far away! Welcome to the village.", "translation": "Nossa, que longe! Boas-vindas à vila." }
+        },
+        {
+          "text": "I'm Brazilian.",
+          "translation": "Sou brasileiro(a).",
+          "keywords": [["brazilian"]],
+          "reaction": { "text": "How lovely! Welcome to the village.", "translation": "Que lindo! Boas-vindas à vila." }
+        },
+        {
+          "text": "I from Brazil.",
+          "translation": "Eu sou do Brasil.",
+          "flawed": true,
+          "keywords": [["i from brazil"]],
+          "recast": { "original": "I from Brazil", "corrected": "you're from Brazil" },
+          "reaction": { "text": "Oh, you're from Brazil? Welcome to the village!", "translation": "Ah, você é do Brasil? Boas-vindas à vila!" },
+          "pattern": "en.verb_be"
+        }
+      ]
+    },
+    {
+      "id": "like",
+      "speaker": "tilda",
+      "emotion": "curious",
+      "text": "So, do you like it here?",
+      "translation": "E aí, está gostando daqui?",
+      "replies": [
+        {
+          "text": "Yes, I love it here!",
+          "translation": "Sim, estou adorando!",
+          "keywords": [["love"], ["like"], ["yes"], ["yes it is"]],
+          "reaction": { "text": "Oh, I'm so glad!", "translation": "Ah, que alegria!" }
+        },
+        {
+          "text": "It's very nice. And your bread is great!",
+          "translation": "É muito legal. E o seu pão é ótimo!",
+          "keywords": [["nice"], ["great"], ["beautiful"], ["is nice"], ["is great"], ["is beautiful"]],
+          "reaction": { "text": "Ha! Thank you, dear.", "translation": "Rá! Obrigada, meu bem.", "emotion": "proud" }
+        },
+        {
+          "text": "Yes! Is very beautiful.",
+          "translation": "Sim! É muito bonito.",
+          "flawed": true,
+          "keywords": [["yes is very beautiful"], ["yes is beautiful"]],
+          "recast": { "original": "Is very beautiful", "corrected": "It's very beautiful" },
+          "reaction": { "text": "It's very beautiful, yes! I love it, too.", "translation": "É muito bonito, sim! Eu também adoro." },
+          "pattern": "en.subject_omission"
+        }
+      ]
+    },
+    {
+      "id": "bye",
+      "speaker": "tilda",
+      "emotion": "happy",
+      "text": "Here are your rolls. See you tomorrow?",
+      "translation": "Aqui estão os seus pães. Até amanhã?",
+      "replies": [
+        {
+          "text": "Yes! See you tomorrow, Tilda.",
+          "translation": "Sim! Até amanhã, Tilda.",
+          "keywords": [["see you", "tomorrow"], ["see you"], ["tomorrow"]],
+          "reaction": { "text": "See you tomorrow, dear!", "translation": "Até amanhã, meu bem!" }
+        },
+        {
+          "text": "Thank you! Bye!",
+          "translation": "Obrigado(a)! Tchau!",
+          "keywords": [["bye"], ["thank you"], ["thanks"]],
+          "reaction": { "text": "Bye, dear! Have a lovely day!", "translation": "Tchau, meu bem! Tenha um ótimo dia!" }
+        }
+      ]
+    }
+  ],
+  "closing": {
+    "question": { "text": "Oh, wait! Rosa is new here, too. Say hi and tell her who you are!", "translation": "Ah, espera! A Rosa também é nova aqui. Diga oi e conte quem você é!" },
+    "target_words": ["i am", "my name", "from", "nice to meet", "brazil", "brazilian"],
+    "hint": "Diga o seu nome e de onde você é, por exemplo com \"I'm...\" e \"I'm from...\".",
+    "model_answer": { "text": "Hi, Rosa! I'm Alex. I'm from Brazil.", "translation": "Oi, Rosa! Eu sou o Alex. Sou do Brasil." },
+    "success": { "text": "Lovely! Now you two are friends. See you tomorrow!", "translation": "Que bom! Agora vocês são amigos. Até amanhã!" }
+  },
+  "vocabulary": [
+    { "term": "I'm...", "translation": "Eu sou... / Meu nome é...", "example": "Hi, I'm Alex." },
+    { "term": "I'm from...", "translation": "Eu sou de...", "example": "I'm from Brazil." },
+    { "term": "Nice to meet you.", "translation": "Prazer em conhecer você.", "example": "Nice to meet you, Rosa!" },
+    { "term": "Where are you from?", "translation": "De onde você é?", "example": "And where are you from?" },
+    { "term": "See you tomorrow!", "translation": "Até amanhã!", "example": "Thanks, Tilda! See you tomorrow!" }
+  ]
+}

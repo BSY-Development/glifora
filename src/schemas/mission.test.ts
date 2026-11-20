@@ -317,6 +317,22 @@ describe("checkMission: as 6 conferências (W0-03 §5.1, D-43)", () => {
     expect(hasIssue(issuesOf(node), "nodes[1].speaker", "characters")).toBe(true);
   });
 
+  it("7. resposta livre (D-51): aceita uma por fala; recusa duas e recusa com flawed", () => {
+    const ok = loose(valid());
+    ok.nodes[1].replies[0].free = "name";
+    expect(issuesOf(ok)).toEqual([]);
+    const two = loose(valid());
+    two.nodes[1].replies[0].free = "name";
+    two.nodes[1].replies[1].free = "name";
+    expect(hasIssue(issuesOf(two), "nodes[1].replies[1].free", "no máximo uma")).toBe(true);
+    const flawed = loose(valid());
+    flawed.nodes[0].replies[1].free = "name";
+    expect(hasIssue(issuesOf(flawed), "nodes[0].replies[1].free", "flawed")).toBe(true);
+    const other = loose(valid());
+    other.nodes[1].replies[0].free = "anything";
+    expect(issuesOf(other).map((i) => i.path)).toContain("nodes[1].replies[0].free");
+  });
+
   it("pattern fora do catálogo, quando o catálogo vem junto", () => {
     expect(issuesOf(valid(), { patterns: new Set(["en.uncountable_noun", "other"]) })).toEqual([]);
     expect(hasIssue(issuesOf(valid(), { patterns: new Set(["other"]) }), "nodes[0].replies[1].pattern", "catálogo")).toBe(true);
