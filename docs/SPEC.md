@@ -41,9 +41,12 @@ O app precisa dar a dopamina de evoluir, sem trair os princípios acima.
 3. Revisão do Grimório.
 4. Relatório da sessão: o que a pessoa conseguiu fazer, recasts recebidos, palavras novas, XP ganho.
 
+Cada **missão** é uma conversa curta (1–3 min) com um NPC. A "missão do dia" é a lista que o motor monta, e o **chefe** é uma missão do tipo `boss`, que começa sem ajuda (D-43).
+
 ### Progressão
 - **Nível do personagem** (XP): sobe com missões, chefes e feitiços do Grimório. Barra de XP sempre visível, animação de level up, título novo a cada faixa de níveis (Aprendiz, Viajante, Mercador, Diplomata...).
-- **Nível CEFR adaptativo por idioma** (A1–C2): começa no nivelamento. Se o jogador for entendido em mais de 80% dos turnos durante 3 sessões, sobe; abaixo de 50%, desce. Mostrado separado do nível do personagem.
+- **Nível CEFR adaptativo por idioma** (A1–C2): começa no nivelamento. Se o jogador for entendido em mais de 80% dos turnos durante 3 sessões, sobe; abaixo de 50%, desce. Mostrado separado do nível do personagem. No modo demo, sem IA, o nível CEFR é o do nivelamento mais o avanço nas unidades; o ajuste pelos turnos entendidos só existe no modo completo (D-41).
+- **Níveis de domínio por missão** (D-43): rejogar a mesma conversa com menos ajuda. Na 1ª vez as frases ficam à vista, na 2ª só a ideia no idioma base, na 3ª nada. Menos ajuda dá mais XP.
 - **Metas "consigo..."** por unidade, marcadas como conquistadas, com tela de lista estilo "livro de conquistas".
 - **Moedas** para itens cosméticos: roupas e acessórios do avatar, decoração da casa do jogador na vila. Nada que dê vantagem no aprendizado.
 - **Conquistas** (ex.: primeiro chefe derrotado, 100 feitiços conjurados, conversou com todos os NPCs da vila).
@@ -67,8 +70,10 @@ O app precisa dar a dopamina de evoluir, sem trair os princípios acima.
 ## Os três modos de IA
 
 ### 1. Modo demo (sem key, sem IA)
-- Missões pré-geradas embutidas no projeto (`content/<par>/<nivel>/*.json`), geradas com IA pelo autor e revisadas.
-- Diálogos em árvore: cada fala do NPC oferece 2–3 respostas, com feedback e recast por resposta.
+- Missões pré-geradas embutidas no projeto (`content/missions/<base>_<alvo>/<nível>/*.json`), geradas com IA pelo autor e revisadas.
+- Conversas no formato da missão v1 (abaixo): cada fala do NPC oferece 1–3 respostas. O jogador **fala ou digita** a resposta (tocar na opção é ajuda e vale menos XP). A NPC reage a cada resposta, com recast quando a pessoa produz um erro previsto; a explicação fica para o relatório.
+- **Comparação tolerante** (D-43): maiúsculas, acentos, pontuação, contrações ("I'm" = "I am", também sem apóstrofo) e pequenos erros de digitação não fazem a pessoa "errar". Na dúvida, vale a resposta boa.
+- **Fecho sem IA** (D-43): a frase própria do fim é aceita se usar pelo menos uma das palavras-alvo da missão, e nada além disso é exigido. São duas tentativas; depois o jogo mostra uma resposta-modelo para repetir, sem travar nem tirar XP.
 - Dá XP e progressão normalmente. Disponível na primeira tela, sem cadastro.
 - Ao final da missão, convite para os outros modos.
 
@@ -84,18 +89,20 @@ O app precisa dar a dopamina de evoluir, sem trair os princípios acima.
 - Conversa livre por voz ou texto com NPCs, no papel de personagem, com recast e progresso da missão.
 - Geração de missões na hora (mesmo schema e mesma validação da fábrica).
 - Feitiços do Grimório avaliados pela IA.
-- Provedores por adaptadores com interface comum: começar por **OpenRouter** (aceita chamada direta do navegador e tem modelos gratuitos), depois OpenAI e Gemini. Verificar o CORS de cada um.
+- Provedores por adaptadores com interface comum: começar por **OpenRouter** (aceita chamada direta do navegador e tem modelos gratuitos), depois **Anthropic** (D-41), OpenAI e Gemini. Verificar o CORS de cada um.
 - Mandar para a IA só: prompt de sistema do NPC, resumo curto do encontro e as últimas 6 mensagens.
-- Contrato de resposta da conversa (sempre JSON validado; 1 retentativa; depois fallback amigável):
+- Contrato de resposta da conversa (D-41; detalhes em `docs/propostas/W0-03-arquitetura.md` §2.6 e §5.4). É sempre JSON validado, e **a ordem das chaves faz parte do contrato**. Se o JSON vier inválido antes da fala, há 1 retentativa. Se a fala vier completa e o resto quebrado, a fala vale sem avaliação. Se falhar de novo, entra a fala de contingência do NPC.
 ```json
 {
-  "npc_reply": "fala do NPC no idioma-alvo, curta, no nível do jogador",
   "understood": true,
-  "recast": "versão correta da frase do jogador, ou null",
-  "goal_progress": 0,
-  "emotion": "neutral",
-  "new_vocab": [{ "term": "...", "translation": "...", "example": "..." }],
-  "hint_base": "dica no idioma base se o jogador travar, ou null"
+  "recast": { "original": "two breads", "corrected": "two loaves of bread" },
+  "npc_reply": "Two loaves of bread? Sure! Anything else?",
+  "emotion": "happy",
+  "goals_met": ["order"],
+  "errors": [{ "type": "grammar", "pattern": "en.uncountable_noun", "original": "two breads", "corrected": "two loaves of bread", "explanation": "explicação no idioma base", "severity": 1 }],
+  "new_vocab": [{ "term": "a loaf of bread", "translation": "um pão", "example": "A loaf of bread, please." }],
+  "hint": null,
+  "flag": "none"
 }
 ```
 - Prompt de sistema do NPC: personalidade, objetivo do encontro, nível do jogador, frases curtas um pouco acima do nível, corrigir só por recast, nunca sair do personagem.
@@ -146,49 +153,62 @@ Simulados no formato de exames de proficiência, para quem estuda para uma prova
 - Avisar que o conteúdo ficará público e não deve conter dados pessoais. Botão de denunciar cenário.
 - Nada é publicado sem ação explícita do usuário.
 
-## Schema de missão (rascunho)
+## Schema de missão (v1, D-43)
+Formato completo, limites e conferências: `docs/propostas/W0-03-arquitetura.md` §5.1. Resumo:
+- Chaves em inglês; par completo (`base` + `target`); `"schema": 1`; objeto estrito.
+- **Escuta antes** (`listen`, princípio 1): 2 a 6 falas curtas que a pessoa ouve antes de falar (obrigatória nas missões embutidas de A1–A2).
+- **Sequência linear** de falas (`nodes`); `next` é opcional e só serve para ramificar para a frente. Assim a IA grátis não erra referência.
+- Cada fala tem 1–3 respostas (`replies`), cada uma com `keywords` para casar a fala ou o texto digitado e uma `reaction` curta da NPC. A resposta `flawed` traz um erro previsto: só casa quando a pessoa produz aquele erro, e a reação da NPC traz o recast (`recast: { original, corrected }`). `note`/`pattern` vão só para o relatório.
+- **Fecho obrigatório** (`closing`, princípio 2): pergunta da NPC, palavras-alvo, dica, resposta-modelo e fala de despedida.
+- `kind`: `encounter` ou `boss`. `romanization` opcional (japonês e chinês).
+
 ```json
 {
-  "schema": 1,
-  "idioma": "es",
-  "nivel": "A2",
-  "tema": "Pedir comida num restaurante",
-  "local": "taverna",
-  "meta": "Consigo pedir comida e bebida num restaurante",
-  "descricao": "Você está numa taverna e vai fazer seu pedido.",
-  "personagens": [{ "id": "garcom", "nome": "Carlos", "personalidade": "simpático e apressado" }],
-  "inicio": "f1",
-  "falas": [
-    {
-      "id": "f1",
-      "personagem": "garcom",
-      "texto": "¡Buenas noches! ¿Qué desea tomar?",
-      "traducao": "Boa noite! O que deseja beber?",
-      "opcoes": [
-        { "texto": "Un agua, por favor.", "correta": true, "feedback": "Perfeito e educado.", "proxima": "f2" },
-        { "texto": "Yo quiero agua ahora.", "correta": false, "feedback": "Compreensível, mas soa rude.", "recast": "Quisiera un agua, por favor.", "proxima": "f2" }
-      ]
-    }
-  ],
-  "vocabulario": [{ "termo": "la cuenta", "significado": "a conta", "exemplo": "La cuenta, por favor." }]
+  "schema": 1, "id": "bakery-01", "base": "pt-BR", "target": "en", "level": "A1", "kind": "encounter",
+  "title": "Pão quentinho", "theme": "Comprar pão na padaria", "location": "bakery",
+  "can_do": "Consigo pedir comida e dizer quantos quero.",
+  "description": "De manhã cedo, na padaria da Tilda. O pão acabou de sair do forno.",
+  "characters": [{ "id": "tilda", "name": "Tilda", "personality": "calorosa, rápida", "npc": "tilda" }, { "id": "ben", "name": "Ben", "personality": "freguês apressado" }],
+  "listen": [{ "speaker": "ben", "text": "Can I have two rolls, please?", "translation": "Pode me dar dois pãezinhos, por favor?" }],
+  "nodes": [{
+    "id": "order", "speaker": "tilda", "emotion": "happy",
+    "text": "Good morning! Fresh bread today. What would you like?",
+    "translation": "Bom dia! Pão fresquinho hoje. O que você vai querer?",
+    "replies": [
+      { "text": "A honey roll, please.", "translation": "Um pão de mel, por favor.", "keywords": [["honey"]],
+        "reaction": { "text": "Lovely! My new honey rolls.", "translation": "Que bom! Meus pães de mel novos." } },
+      { "text": "I want two breads.", "translation": "Quero dois pães.", "flawed": true, "keywords": [["breads"]],
+        "recast": { "original": "two breads", "corrected": "Two loaves of bread" },
+        "reaction": { "text": "Two loaves of bread? Sure!", "translation": "Dois pães? Claro!" }, "pattern": "en.uncountable_noun" }
+    ]
+  }],
+  "closing": {
+    "question": { "text": "Oh, one more thing, dear! What would you like tomorrow?", "translation": "Ah, mais uma coisa! O que você vai querer amanhã?" },
+    "target_words": ["honey", "cheese", "roll", "bread", "loaf", "pie"],
+    "hint": "Diga algo do cardápio, por exemplo com \"I'd like...\".",
+    "model_answer": { "text": "I'd like two cheese rolls, please.", "translation": "Eu queria dois pães de queijo, por favor." },
+    "success": { "text": "Lovely! See you tomorrow, dear!", "translation": "Que bom! Até amanhã!" }
+  },
+  "vocabulary": [{ "term": "a loaf of bread", "translation": "um pão inteiro", "example": "A loaf of bread, please." }]
 }
 ```
-Para japonês/chinês, campo opcional `romanizacao` em falas, opções e vocabulário.
 
 ## Tecnologia
 - Vite + React + TypeScript, PWA (manifest + service worker), mobile-first.
 - Zod para schemas; IndexedDB (Dexie) para dados locais; Supabase (Auth + Postgres) só para conta, sincronização e cenários públicos.
 - Hospedagem estática no **Cloudflare Pages** via GitHub Actions, com a CSP em cabeçalho HTTP (D-39).
+- Arquitetura detalhada (camadas, CSP exata, dados, adaptadores, testes): `docs/propostas/W0-03-arquitetura.md` (D-41). Quando divergir de `DECISIONS.md`, vale `DECISIONS.md`.
+- **Aparelho-alvo** dos testes de fim de fase: Android + Chrome. No iPhone o jogo funciona com texto, convida a instalar e lembra de exportar (D-44).
 - Acessibilidade: texto escalável, bom contraste, sem animações piscantes, opção de reduzir movimento e de desligar sons.
 - Testes para schemas, parser do JSON colado, cálculo de XP/nível e algoritmo de repetição espaçada.
 - Licença MIT. README caprichado: o que é, os três modos, como rodar local, segurança da key, como contribuir com missões.
 
 ## Fases (parar ao fim de cada uma para eu testar no celular)
-1. **Fundação:** estrutura, CSP, deploy automático, mapa da vila com 1 local, perfil local.
-2. **Núcleo jogável sem IA:** player de missões em árvore, 5 missões demo em inglês A1–A2 (base pt-BR, D-40), XP, nível do personagem, level up, relatório da sessão, voz do navegador.
+1. **Fundação:** estrutura, CSP, deploy automático, i18n, mapa da vila com 1 local, perfil local, exportar/importar (D-41).
+2. **Núcleo jogável sem IA:** player de missões (v1, D-43) com níveis de domínio, 5 missões demo em inglês A1–A2 (base pt-BR, D-40), teste da taxa de casamento da voz no celular, XP, nível do personagem, level up, relatório da sessão, voz do navegador.
 3. **Progressão completa:** missão diária com 3 encontros + chefe, Grimório com feitiços (SM-2), ofensiva, conquistas, metas "consigo...", moedas e avatar básico, desbloqueio de locais.
 4. **Fábrica de cenários:** tema escolhido/aleatório → copiar prompt → colar → validar → jogar, com erros copiáveis.
-5. **Conta:** login opcional com Supabase, sincronização, exportar/importar, apagar conta.
+5. **Conta:** login opcional com Supabase, sincronização, apagar conta.
 6. **Modo completo com key:** adaptadores de provedor, conversa livre com recast, nível CEFR adaptativo, feitiços avaliados por IA, voz do provedor.
 7. **Comunidade:** cenários públicos com moderação e catálogo.
 8. **Preparação para exames:** formato IELTS primeiro (leitura e escuta pré-geradas; escrita e fala corrigidas pela IA com os critérios públicos), histórico de notas, depois DELE/SIELE.
