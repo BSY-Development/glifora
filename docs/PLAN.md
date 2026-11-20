@@ -43,6 +43,7 @@ O deploy (W1-13) foi adiantado em 2026-11-20. O Cloudflare e o ambiente `product
 | W1-13 | App | **Deploy.** Job `deploy` (wrangler, ambiente `production`), `version.json` com o commit, conferência dos cabeçalhos na URL real. **Depende do dono:** repositório público no GitHub, conta no Cloudflare, projeto Direct Upload e token (D-39) | Push na `main` publica sozinho; a URL abre no celular; o DevTools mostra a CSP do arquivo | A conferência pós-deploy | aprovada |
 | W1-14 | Revisor | **Revisão da fase.** Acessibilidade em todas as rotas (axe), segurança contra [W0-03 §1.2 C], princípios da SPEC, README "como rodar", roteiro de teste no celular para o dono | Lista de problemas zerada ou aceita pelo Arquiteto | `tests/a11y/` e o roteiro manual | aprovada |
 | W1-15 | App | **Ajuste do teste do dono.** O aviso "Apelido salvo." aparece perto do botão; antes ficava no fim da tela, fora da área visível. Erros de salvar ficam junto do grupo que falhou | O dono vê o aviso no celular sem rolar | Componente e e2e do aviso visível no Pixel 7 | aprovada |
+| W1-16 | QA Tester | **Ataque à fase 1** (D-47). No build local: CSP e Trusted Types (script externo e inline, `eval`, `fetch` para fora), apelido e importação com payloads hostis, robustez (IndexedDB bloqueado ou cheio, modo anônimo, offline) | Relatório com severidade, reprodução e evidência; nenhum achado crítico ou alto em aberto | `tests/e2e-security/` e `tests/payloads/`, no CI | em andamento |
 
 ### Notas de passagem
 

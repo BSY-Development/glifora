@@ -22,6 +22,7 @@ Status: `aceita` · `provisória` · `proposta` · `ajustada por D-xx` · `subst
 | D-44 | Aparelho-alvo: Android + Chrome | aceita (dono) |
 | D-45 | Licenças: código AGPL-3.0, conteúdo CC BY-SA 4.0 (substitui a MIT) | aceita (dono) |
 | D-46 | Fechamento da fase 1: cabeçalhos que o Cloudflare acrescenta, manifesto em pt-BR e pendências aceitas | aceita (Arquiteto) |
+| D-47 | Terminal QA Tester: ataque ao app rodando no fim de cada fase | aceita (dono) |
 
 ---
 
@@ -155,3 +156,11 @@ Status: `aceita` · `provisória` · `proposta` · `ajustada por D-xx` · `subst
     - **Avaliar na fase 2:** se ela terminar de instalar nos primeiros segundos e a pessoa ainda estiver na vila, sem missão aberta, ativar e recarregar sozinha.
     - **No meio de missão:** continua o aviso.
 - **Configurações da fase 1 que não dá para testar no código:** token só de Pages, ambiente `production` só para a `main`, sem integração Git no Cloudflare. O dono configurou em 2026-11-20, e o Arquiteto conferiu o ambiente pela API do GitHub.
+
+### D-47 — Terminal QA Tester (2026-11-20) · aceita (dono)
+- **Decisão:** o dono pediu um sexto terminal, o QA Tester (prompt do dono, em `docs/EQUIPE.md`). Ele ataca o app rodando como usuário malicioso, no fim de cada fase ou quando o Arquiteto pedir. Não revisa código (isso é do Revisor) e não corrige.
+- **Pastas:** é dono de `tests/e2e-security/` e `tests/payloads/`. O Revisor segue dono do resto de `tests/` e do `playwright.config.ts`, e põe os testes do QA no CI quando ele pedir. O `ci.yml` continua do App.
+- **No fluxo:** o portão de cada fase passa a ter o ataque do QA **antes** do teste do dono. Os achados críticos e altos são corrigidos antes do portão; os médios e baixos, o Arquiteto aceita ou agenda.
+- **Limites:** ataque no build local (`vite preview`). Na produção, só conferência leve de leitura. Key real nunca: string falsa e provedor simulado.
+- **Modelo:** Sonnet 5.5, como o Revisor.
+- **Fase 1:** o portão espera o primeiro ataque do QA (W1-16). O dono já testou no celular, e tudo passou.

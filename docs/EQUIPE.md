@@ -4,9 +4,9 @@ Dono: Arquiteto. A organização e os prompts abaixo são os do dono do projeto 
 
 ## Como está montado (2026-11-20)
 
-- **Ativos agora:** Arquiteto (Opus 5.5, maestro), App (Sonnet 5.5), Revisor (Sonnet 5.5) e Fable (Fable 5.2, consultor do Arquiteto só nas chamadas marcadas abaixo; não é dono de pasta e não escreve código de produção).
+- **Ativos agora:** Arquiteto (Opus 5.5, maestro), App (Sonnet 5.5), Revisor (Sonnet 5.5), QA Tester (Sonnet 5.5, desde 2026-11-20, D-47) e Fable (Fable 5.2, consultor do Arquiteto só nas chamadas marcadas abaixo; não é dono de pasta e não escreve código de produção).
 - **Entram depois:** Conteúdo na fase 2 e Backend na fase 5. O Arquiteto cria o terminal nessa hora, com o papel do prompt correspondente.
-- **Ligações:** o Arquiteto fala com todos; App ↔ Revisor direto (revisão). Na fase 2, Conteúdo ↔ Revisor e Conteúdo ↔ App (formato dos schemas). Na fase 5, Backend ↔ Revisor e Backend ↔ App (contrato da sincronização).
+- **Ligações:** o Arquiteto fala com todos; App ↔ Revisor direto (revisão); QA Tester ↔ Revisor (os testes do QA no CI). Na fase 2, Conteúdo ↔ Revisor e Conteúdo ↔ App (formato dos schemas). Na fase 5, Backend ↔ Revisor e Backend ↔ App (contrato da sincronização).
 - **Papel de cada terminal:** é o *role* do Maestri com o mesmo nome (o prompt do dono + as regras de fluxo abaixo). Sobrevive ao `/clear`.
 - **Fluxo de uma tarefa:**
   1. O Arquiteto manda a tarefa (ID de `docs/PLAN.md`).
@@ -14,6 +14,10 @@ Dono: Arquiteto. A organização e os prompts abaixo são os do dono do projeto 
   3. O Revisor responde a quem pediu: aprovado, ou lista objetiva de problemas com arquivo e linha. O executor corrige até aprovar.
   4. O executor escreve as notas de passagem da tarefa em `docs/PLAN.md` (o status é do Arquiteto) e avisa: `maestri ask "Arquiteto" "<ID> aprovada. <telas/arquivos alterados, como testar no celular, pendências>"`.
   5. O Arquiteto confere contra a SPEC, faz o commit e limpa o terminal.
+- **QA Tester (D-47):** no fim de cada fase, antes do portão do dono, ou quando o Arquiteto pedir, ataca o app rodando como usuário malicioso.
+  - Entrega ao Arquiteto achados com severidade, reprodução e evidência.
+  - Cada achado vira teste em `tests/e2e-security/` (falha esperada até a correção).
+  - O Arquiteto manda a correção ao dono da pasta.
 - **Git:** só o Arquiteto faz commit. Ninguém instala software no sistema sem pedir; dependências npm do projeto podem.
 - **Versão comercial (D-38):** o código dela não está neste repositório. Fica no arquivo privado do autor (`C:\glifora-arquivo-comercial`, tag `comercial-expo-v0`). Só se lê de lá quando uma tarefa mandar aproveitar alguma peça.
 
@@ -27,7 +31,8 @@ Cinco terminais, com o Arquiteto no centro conectado a todos. Comece com **Arqui
 | 2. App | Sonnet 5.5 | Todo o front: jogo, telas, i18n, voz, IndexedDB, adaptadores de IA, segurança da key, PWA, deploy | `src/`, `public/`, `i18n/`, `.github/` | 1 |
 | 3. Conteúdo | Opus 5.5 | Schemas de conteúdo, missões demo, NPCs, temas aleatórios, prompt da fábrica, prompts de sistema dos NPCs, simulados e rubricas | `content/`, `scripts/content/`, `src/schemas/` | 2 |
 | 4. Backend | Sonnet 5.5 | Supabase: auth, sincronização, cenários públicos, moderação, RLS | `supabase/` | 5 |
-| 5. Revisor | Sonnet 5.5 | Testes, revisão contra a spec, segurança da key, CSP, XSS, injection, acessibilidade, i18n | `tests/` | 1 |
+| 5. Revisor | Sonnet 5.5 | Testes, revisão contra a spec, segurança da key, CSP, XSS, injection, acessibilidade, i18n | `tests/` (menos as duas pastas do QA), `playwright.config.ts` | 1 |
+| 6. QA Tester | Sonnet 5.5 | Ataca o app rodando como usuário malicioso (key, CSP, JSON colado, injection, Supabase, robustez); não revisa código nem corrige | `tests/e2e-security/`, `tests/payloads/` | 1 (fim) |
 
 **Quando usar o Fable (poucas chamadas, alto impacto)**
 1. Início: revisar esta SPEC e desenhar arquitetura, modelo de dados e estrutura de pastas.
@@ -119,3 +124,16 @@ Para cada entrega recebida:
 - Procure: key enviada para qualquer lugar além do provedor, CSP frouxa, script de terceiros, XSS por conteúdo colado, campo do JSON usado como URL ou HTML, injection no reenvio para a IA, falha de RLS, texto de interface fora do i18n ou chave faltando em algum idioma, problemas de acessibilidade, quebra dos princípios pedagógicos (vidas, punição por erro, recompensa sem esforço).
 - Responda ao Arquiteto: aprovado, ou lista objetiva de problemas com arquivo e linha.
 ```
+
+## Prompt 6 — QA Tester (acrescentado pelo dono em 2026-11-20)
+O texto do dono está no role "QA Tester" do Maestri, com as regras de fluxo do Arquiteto no fim. Resumo:
+- **Papel:** ataca o app rodando (build local ou preview) como usuário malicioso; não lê código para aprovar e não corrige.
+- **Dono de** `tests/e2e-security/` e `tests/payloads/`.
+- **O que testa:**
+  - key só para o provedor;
+  - CSP e Trusted Types;
+  - JSON malicioso na fábrica;
+  - injection na IA;
+  - Supabase (fase 5+);
+  - robustez: IndexedDB, modo anônimo, sem microfone, offline, troca de idioma no meio da missão.
+- **Entrega:** achados com severidade (crítico, alto, médio, baixo), reprodução e evidência. Cada falha vira teste no CI.
