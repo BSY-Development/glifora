@@ -87,6 +87,13 @@ describe.skipIf(!has)("CSP — build (dist/)", () => {
     }
   });
 
+  it("version.json (W1-13) só tem version e commit de 7 hex, sem data nem outro dado", () => {
+    const v = JSON.parse(readFileSync(join(DIST, "version.json"), "utf8")) as Record<string, unknown>;
+    expect(Object.keys(v).sort()).toEqual(["commit", "version"]);
+    expect(v["commit"]).toMatch(/^([0-9a-f]{7}|dev)$/);
+    if (process.env["GITHUB_SHA"]) expect(v["commit"]).toBe(process.env["GITHUB_SHA"].slice(0, 7).toLowerCase());
+  });
+
   it("_headers foi copiado para dist/ e é idêntico a public/_headers", () => {
     expect(readFileSync(join(DIST, "_headers"), "utf8")).toBe(readFileSync("public/_headers", "utf8"));
   });

@@ -95,5 +95,14 @@ describe("outros cabeçalhos de segurança", () => {
   it("cache: ativos com hash são imutáveis; sw.js nunca fica em cache", () => {
     expect(blocks["/assets/*"]?.["Cache-Control"]).toBe("public, max-age=31536000, immutable");
     expect(blocks["/sw.js"]?.["Cache-Control"]).toBe("no-cache");
+    expect(blocks["/version.json"]?.["Cache-Control"]).toBe("no-cache"); // W1-13: a conferência do deploy lê este arquivo
+  });
+
+  it("blocos extras só mudam cache: nada de CSP ou outro cabeçalho de segurança fora do /*", () => {
+    expect(Object.keys(blocks).sort()).toEqual(["/*", "/assets/*", "/sw.js", "/version.json"]);
+    for (const [path, headers] of Object.entries(blocks)) {
+      if (path !== "/*") expect(Object.keys(headers), path).toEqual(["Cache-Control"]);
+    }
+    expect(all["Cache-Control"], "Cache-Control em /* somaria com os blocos específicos").toBeUndefined();
   });
 });

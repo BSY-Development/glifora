@@ -26,3 +26,9 @@ export function resolveCommit(env: Record<string, string | undefined> = process.
 export function buildDefines(version: string, commit: string = resolveCommit()): Record<string, string> {
   return { __APP_VERSION__: JSON.stringify(version), __APP_COMMIT__: JSON.stringify(commit) };
 }
+
+/** Conteúdo de `version.json` (W1-13): o mesmo commit do /about e nenhuma data, para o build ser reprodutível. */
+export function versionJson(version: string, commit: string): string {
+  return `${JSON.stringify({ version, commit }, null, 2)}
+`;
+}

@@ -6,7 +6,7 @@ export default defineConfig({
   // Mesmos nomes que o vite.config.ts injeta no build (tela /about).
   define: { __APP_VERSION__: JSON.stringify("0.0.0-test"), __APP_COMMIT__: JSON.stringify("testing") },
   test: {
-    include: ["src/**/*.test.{ts,tsx}", "tests/**/*.test.ts", "config/**/*.test.ts"],
+    include: ["src/**/*.test.{ts,tsx}", "tests/**/*.test.ts", "config/**/*.test.ts", "scripts/**/*.test.ts"],
     exclude: ["tests/e2e/**", "node_modules/**", "dist/**"],
     environment: "node",
   },
