@@ -23,6 +23,7 @@ export const routes: RouteObject[] = [
               { path: "place/:id", lazy: () => import("./screens/Place").then((m) => ({ Component: m.Place })) },
               { path: "profile", lazy: () => import("./screens/Profile").then((m) => ({ Component: m.Profile })) },
               { path: "settings", lazy: () => import("./screens/Settings").then((m) => ({ Component: m.Settings })) },
+              { path: "settings/voice", lazy: () => import("./screens/VoiceCheck").then((m) => ({ Component: m.VoiceCheck })) },
               { path: "about", lazy: () => import("./screens/About").then((m) => ({ Component: m.About })) },
               { path: "*", lazy: () => import("./screens/NotFound").then((m) => ({ Component: m.NotFound })) },
             ],

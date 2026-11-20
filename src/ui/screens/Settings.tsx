@@ -2,6 +2,7 @@
 // Sons: só guarda; ainda não há som no jogo. Depois, "Seus dados" (exportar, importar, apagar: W1-09).
 import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
+import { Link } from "react-router";
 import { DEFAULT_PREFS, loadPrefs, updatePrefs, type Prefs } from "../../services/player";
 import { ChoiceGroup } from "../ChoiceGroup";
 import { PageTitle } from "../PageTitle";
@@ -75,6 +76,14 @@ export function Settings() {
           </p>
         )}
       </div>
+
+      <section aria-labelledby="voice-title">
+        <h2 id="voice-title">{t("settings.voice.title")}</h2>
+        <p>{t("settings.voice.text")}</p>
+        <Link className="btn" to="/settings/voice">
+          {t("settings.voice.link")}
+        </Link>
+      </section>
 
       <DataSection />
     </>

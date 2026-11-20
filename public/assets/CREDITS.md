@@ -1,6 +1,6 @@
 # Créditos da arte
 
-Todas as imagens do Glifora (avatares, Tilda, padaria, cena da vila) são **originais do projeto**, desenhadas em código (`src/ui/art/`) como SVG pixel art, sob a GNU AGPL-3.0 do repositório (D-45).
+Todas as imagens do Glifora (avatares, Tilda, Bram, padaria, taverna, cena da vila) são **originais do projeto**, desenhadas em código (`src/ui/art/`) como SVG pixel art, sob a GNU AGPL-3.0 do repositório (D-45).
 
 Nenhum recurso de terceiros foi usado. Se algum entrar, registre aqui: URL, autor e licença (somente CC0 ou equivalente).
 

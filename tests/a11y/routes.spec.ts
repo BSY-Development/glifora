@@ -9,8 +9,10 @@ const ROUTES = [
   { path: "/", name: "vila" },
   { path: "/welcome", name: "boas-vindas" }, // sem perfil; com perfil volta para "/"
   { path: "/place/bakery", name: "padaria" },
+  { path: "/place/tavern", name: "taverna" },
   { path: "/profile", name: "perfil" },
   { path: "/settings", name: "ajustes" },
+  { path: "/settings/voice", name: "voz" },
   { path: "/about", name: "sobre" },
   { path: "/rota-que-nao-existe", name: "404" },
   { path: "/place/padaria-falsa", name: "404 de local" },

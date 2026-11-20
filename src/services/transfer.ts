@@ -17,7 +17,7 @@ export type { ImportError, ImportResult, ImportStats } from "../data";
 export interface ExportedFile {
   filename: string;
   text: string;
-  /** Quantos documentos foram. */
+  /** Quantos itens foram (documentos, eventos e rodadas). */
   count: number;
 }
 
@@ -30,7 +30,7 @@ export async function exportData(): Promise<ExportedFile> {
   return {
     filename: `glifora-${file.exportedAt.slice(0, 10)}.json`,
     text: serializeExport(file),
-    count: file.docs.length,
+    count: file.docs.length + file.events.length + file.runs.length,
   };
 }
 

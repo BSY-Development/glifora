@@ -72,7 +72,7 @@ export function DataSection() {
         return fail({ code: "storage" });
       }
       if (!result.ok) return fail(result.error);
-      const changed = result.stats.inserted + result.stats.replaced;
+      const changed = result.stats.inserted + result.stats.replaced + result.stats.recordsAdded;
       const skipped = result.stats.unknownDocs > 0 || result.stats.futureTables.length > 0;
       const main = changed === 0 ? t("data.import.nothing") : t("data.import.done", { n: changed });
       setNotice({ tone: "ok", text: skipped ? `${main} ${t("data.import.skipped")}` : main });

@@ -254,6 +254,10 @@ dialog.confirm {
   color: var(--text);
 }
 
+dialog.confirm-calm {
+  border-color: var(--accent);
+}
+
 dialog.confirm::backdrop {
   background: rgb(0 0 0 / 0.6);
 }
@@ -509,11 +513,18 @@ html[data-motion="on"] *::after {
   position: absolute;
 }
 
-/* A padaria ocupa 24 dos 32 quadradinhos da cena: 75% da largura, no mesmo tamanho de pixel do fundo. */
+/* Dois locais lado a lado, cada um com 46% da largura, a taverna mais abaixo: o rótulo de um nunca cobre o outro,
+   nem no menor mapa (15 rem). */
 .spot-bakery {
-  top: 12.5%;
-  left: 12.5%;
-  width: 75%;
+  top: 4%;
+  left: 3%;
+  width: 46%;
+}
+
+.spot-tavern {
+  top: 38%;
+  left: 51%;
+  width: 46%;
 }
 
 .place-link {
@@ -615,4 +626,45 @@ html[data-motion="on"] *::after {
   border-bottom: 2px solid var(--accent);
   background: var(--surface);
   font-weight: 600;
+}
+
+/* ---------- Voz (/settings/voice e o botão de microfone do player) ---------- */
+.voice-status {
+  padding-left: 1.25rem;
+}
+
+.voice-phrase {
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.voice-interim {
+  min-height: 1.5rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.voice-alternatives {
+  padding-left: 1.5rem;
+}
+
+/* Botão grande de microfone: fácil de achar e de tocar. O estado "ouvindo" muda o texto e a cor, nunca depende de animação. */
+.mic-btn {
+  display: block;
+  width: 100%;
+  min-height: 4.5rem;
+  margin: 0.75rem 0;
+  border: 3px solid var(--accent);
+  border-radius: 2.25rem;
+  background: var(--surface);
+  color: var(--accent);
+  font: inherit;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.mic-btn-on {
+  background: var(--accent);
+  color: var(--accent-text);
 }

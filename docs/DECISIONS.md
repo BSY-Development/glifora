@@ -164,3 +164,11 @@ Status: `aceita` · `provisória` · `proposta` · `ajustada por D-xx` · `subst
 - **Limites:** ataque no build local (`vite preview`). Na produção, só conferência leve de leitura. Key real nunca: string falsa e provedor simulado.
 - **Modelo:** Sonnet 5.5, como o Revisor.
 - **Fase 1:** o portão espera o primeiro ataque do QA (W1-16). O dono já testou no celular, e tudo passou.
+
+### D-48 — Frases do teste de voz entram no bundle, num pedaço à parte (2026-11-20) · aceita (Arquiteto)
+- **O que muda:** a W0-03 §5.3 dizia que `content/eval/` nunca entra no bundle. Agora uma parte entra.
+- **O que entra:** só as frases do teste de voz (`content/eval/stt/`). Ficam num pedaço próprio, carregado por `import()` apenas em `/settings/voice` (pelo `src/catalog/`). Não vão para a tela inicial nem para o player.
+- **O que continua fora:** o conjunto-ouro e o resto de `content/eval/` (fase 6). O `build-index` não põe esses arquivos no índice.
+- **Por quê:** o teste da taxa de casamento (W2-12) é feito pelo dono no celular, no site publicado e também offline. São frases curtas, sem segredo, com o mesmo cuidado de conteúdo do resto de `content/`.
+- **Quem pediu:** o App, com a concordância do Conteúdo, na W2-02/W2-06.
+

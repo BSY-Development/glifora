@@ -8,11 +8,13 @@ interface Props {
   confirmLabel: string;
   cancelLabel: string;
   busy?: boolean;
+  /** "danger" (padrão) para apagar; "primary" para uma pergunta sem risco, como o aviso do microfone. */
+  variant?: "danger" | "primary";
   onConfirm: () => void;
   onCancel: () => void;
 }
 
-export function ConfirmDialog({ title, text, confirmLabel, cancelLabel, busy = false, onConfirm, onCancel }: Props) {
+export function ConfirmDialog({ title, text, confirmLabel, cancelLabel, busy = false, variant = "danger", onConfirm, onCancel }: Props) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const cancelRef = useRef<HTMLButtonElement>(null);
   const titleId = useId();
@@ -31,7 +33,7 @@ export function ConfirmDialog({ title, text, confirmLabel, cancelLabel, busy = f
   return (
     <dialog
       ref={dialogRef}
-      className="confirm"
+      className={variant === "danger" ? "confirm" : "confirm confirm-calm"}
       aria-labelledby={titleId}
       aria-describedby={textId}
       onCancel={(event) => {
@@ -45,7 +47,7 @@ export function ConfirmDialog({ title, text, confirmLabel, cancelLabel, busy = f
         <button ref={cancelRef} type="button" className="btn" onClick={onCancel} disabled={busy}>
           {cancelLabel}
         </button>
-        <button type="button" className="btn btn-danger btn-primary" onClick={onConfirm} disabled={busy}>
+        <button type="button" className={variant === "danger" ? "btn btn-danger btn-primary" : "btn btn-primary"} onClick={onConfirm} disabled={busy}>
           {confirmLabel}
         </button>
       </div>

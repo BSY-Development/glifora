@@ -53,6 +53,31 @@ export const TILDA: Art = {
   palette: { ...BASE_COLORS, w: "#fffaf0", h: "#8a5a3c", p: "#ef9a8a", d: "#b5443a", b: "#5a3a20" },
 };
 
+// ---------- Bram, o dono da taverna (12 × 17) ----------
+// Mais alto que a Tilda, de barba e avental escuros, com a caneca na mão: de longe é um vulto escuro e barbudo, não uma touca branca.
+export const BRAM: Art = {
+  rows: [
+    "...kkkkkk...",
+    "..khhhhhhk..",
+    "..kssssssk..",
+    "..ksessesk..",
+    ".knnssssnnk.",
+    ".knnnnnnnnk.",
+    "..knnnnnnk..",
+    "...knnnnk...",
+    "..kaaaaaak..",
+    ".kaaaaaaaak.",
+    ".ksaaaaaask.",
+    "kmmksaaaask.",
+    "kmmk.aaaak..",
+    "..kaaaaaak..",
+    "..kaaaaaak..",
+    "..kaa..aak..",
+    "..kbb..bbk..",
+  ],
+  palette: { ...BASE_COLORS, h: "#4a3a30", n: "#6b4a2b", a: "#3a3a48", m: "#e0a23a", b: "#2e2018" },
+};
+
 // ---------- A padaria (24 × 16) ----------
 const BAKERY_COLORS: Palette = {
   k: "#2a1d17",
@@ -107,6 +132,54 @@ function bakery(): Art {
   return { rows: g.rows(), palette: BAKERY_COLORS };
 }
 export const BAKERY: Art = bakery();
+
+// ---------- A taverna (24 × 16) ----------
+const TAVERN_COLORS: Palette = {
+  k: "#2a1d17",
+  c: "#8a7f77", // chaminé
+  r: "#7a4b2a", // telhado
+  R: "#5a341c",
+  t: "#b88a5a", // parede de tábuas
+  T: "#9a7048",
+  d: "#5a3418", // madeira
+  D: "#3e220f",
+  q: "#fbdc7a", // luz quente da janela
+  Y: "#e8a93a", // caneca e brilho
+  w: "#fffaf0",
+};
+
+function tavern(): Art {
+  const g = new Grid(24, 16);
+  // chaminé, do lado esquerdo (a padaria tem do direito)
+  g.box(5, 0, 3, 6, "k", "c");
+  for (let i = 0; i < 5; i += 1) {
+    const left = 8 - 2 * i;
+    const width = 8 + 4 * i;
+    g.rect(left, 2 + i, width, 1, "k");
+    if (i > 0 && i < 4) g.rect(left + 1, 2 + i, width - 2, 1, "r");
+    if (i === 4) g.rect(left + 1, 2 + i, width - 2, 1, "R");
+  }
+  for (let x = 8; x < 16; x += 1) g.put(x, 3, x % 2 === 0 ? "r" : "R");
+  // parede de tábuas
+  g.box(2, 7, 20, 9, "k", "t");
+  for (const x of [6, 10, 14, 18]) g.rect(x, 8, 1, 7, "T");
+  g.rect(3, 15, 18, 1, "T");
+  // placa pendurada com uma caneca
+  g.box(9, 8, 6, 4, "k", "d");
+  g.rect(11, 9, 2, 1, "w");
+  g.rect(11, 10, 2, 1, "Y");
+  g.put(13, 10, "Y");
+  // janelas com luz quente
+  for (const x of [4, 16]) {
+    g.box(x, 11, 4, 4, "d", "q");
+    g.rect(x + 1, 13, 2, 1, "Y");
+  }
+  // porta
+  g.box(10, 12, 4, 4, "D", "d");
+  g.put(12, 14, "Y");
+  return { rows: g.rows(), palette: TAVERN_COLORS };
+}
+export const TAVERN: Art = tavern();
 
 // ---------- A vila (32 × 32) ----------
 const VILLAGE_COLORS: Palette = {

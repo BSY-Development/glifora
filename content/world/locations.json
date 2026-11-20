@@ -1,4 +1,7 @@
 {
   "schema": 1,
-  "locations": [{ "id": "bakery", "order": 0, "npcs": ["tilda"] }]
+  "locations": [
+    { "id": "bakery", "order": 0, "npcs": ["tilda"] },
+    { "id": "tavern", "order": 1, "npcs": ["bram"] }
+  ]
 }

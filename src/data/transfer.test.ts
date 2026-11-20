@@ -40,7 +40,7 @@ describe("exportar", () => {
     await ensureMeta(db, deps("dev-a"));
     await profileRepo.save(db, { nickname: "Ana", createdAt: 1 }, deps("dev-a"));
     const file = JSON.parse(await exportText(db)) as Record<string, unknown>;
-    expect(Object.keys(file).sort()).toEqual(["app", "device", "docs", "exportedAt", "format", "version"]);
+    expect(Object.keys(file).sort()).toEqual(["app", "device", "docs", "events", "exportedAt", "format", "runs", "version"]);
     expect(file).toMatchObject({ format: "glifora-export", version: 1, device: "dev-a", app: "0.1.0", exportedAt: "2023-11-14T22:13:20.000Z" });
     const doc = (file["docs"] as Record<string, unknown>[])[0];
     expect(doc).toEqual({ id: "profile", v: 1, data: { nickname: "Ana", createdAt: 1 }, updatedAt: clock, deleted: 0 }); // sem dirty
@@ -128,7 +128,7 @@ describe("importar", () => {
   const doc = (over: Record<string, unknown>) => ({ id: "profile", v: 1, data: { nickname: "A", createdAt: 1 }, updatedAt: 1, deleted: 0, ...over });
 
   it("o arquivo mínimo válido passa", () => {
-    expect(parseExport(JSON.stringify(base))).toEqual({ ok: true, docs: [], unknownDocs: 0, futureTables: [] });
+    expect(parseExport(JSON.stringify(base))).toEqual({ ok: true, docs: [], events: [], runs: [], unknownDocs: 0, futureTables: [] });
   });
 
   it("validação estrita: campo extra, tipo errado e dado do documento fora do schema dão erros copiáveis", () => {
