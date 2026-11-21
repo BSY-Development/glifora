@@ -62,14 +62,27 @@ export function missionLine(text: string, max = LINE_MAX): string {
 
 const fold = (s: string): string => s.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
 
-/** Troca por [name] cada palavra inteira que seja parte do apelido (sem diferenciar maiúsculas nem acentos). */
+const escapeRe = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/**
+ * Troca por [name] cada palavra inteira que seja parte do apelido (sem diferenciar maiúsculas nem acentos),
+ * depois de normalizar a fala em NFKC (largura total e afins), e também a forma soletrada ("Z o r b a x", "Z-o-r-b-a-x").
+ * Letra a mais ou a menos ("Zorbaxx") é resíduo aceito: sem busca aproximada (D-56).
+ */
 export function maskName(text: string, nickname: string | null): string {
   if (!nickname) return text;
   const names = new Set<string>();
   for (const source of [nickname, spokenName(nickname) ?? ""]) for (const part of source.split(/[^\p{L}\p{M}]+/u)) if (Array.from(part).length >= 2) names.add(fold(part));
   if (names.size === 0) return text;
-  const masked = text.replace(/[\p{L}\p{M}]+/gu, (word) => (names.has(fold(word)) ? NAME_MARK : word));
-  return masked.replace(/\[name\](?: \[name\])+/g, NAME_MARK);
+  let masked = text.normalize("NFKC").replace(/[\p{L}\p{M}]+/gu, (word) => (names.has(fold(word)) ? NAME_MARK : word));
+  masked = masked.normalize("NFD");
+  for (const name of names) {
+    const letters = Array.from(name);
+    if (letters.length < 3) continue;
+    const spelled = new RegExp(`(^|[^\\p{L}\\p{M}])${letters.map((c) => `${escapeRe(c)}\\p{M}*`).join("[\\s\\-_.]+")}(?![\\p{L}\\p{M}])`, "giu");
+    masked = masked.replace(spelled, (_all, before: string) => `${before}${NAME_MARK}`);
+  }
+  return masked.normalize("NFC").replace(/\[name\](?: \[name\])+/g, NAME_MARK);
 }
 
 /** A fala da pessoa como vai à IA, na ordem: NFC, sem `<`/`>`/controle, apelido → [name], espaços juntos, 100 pontos de código. */

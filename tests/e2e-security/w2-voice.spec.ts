@@ -164,8 +164,13 @@ test.describe("microfone que trava", () => {
     test.setTimeout(60_000);
     const problems = await begin(page);
     await script(page, ...Array.from({ length: 40 }, () => ({ alts: ["Good morning!"] }) as SttStep));
-    for (let i = 0; i < 30; i += 1) await mic(page).click({ timeout: 2000, noWaitAfter: true }).catch(() => undefined);
-    await expect(page.getByRole("button", { name: "Continue", exact: true })).toBeVisible();
+    // Depois que a fala casa, o microfone some: cada toque restante esperaria 2 s à toa (30 × 2 s estourou os 60 s no CI).
+    const reacted = page.getByRole("button", { name: "Continue", exact: true });
+    for (let i = 0; i < 30; i += 1) {
+      if (await reacted.isVisible()) break;
+      await mic(page).click({ timeout: 300, noWaitAfter: true }).catch(() => undefined);
+    }
+    await expect(reacted).toBeVisible();
     const stats = await sttStats(page);
     expect(stats.maxLive, "mais de um reconhecedor aberto ao mesmo tempo").toBeLessThanOrEqual(1);
     const [row] = await idbAll(page, "session");

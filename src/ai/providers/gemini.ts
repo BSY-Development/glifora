@@ -85,13 +85,18 @@ export function classifyHttpError(status: number, body: unknown): AiErrorKind {
   return "unknown";
 }
 
-/** A mensagem do Google como texto puro de uma linha, até 200 caracteres, sem nenhum trecho igual à key. */
+/** Troca por [key] a key inteira (sem diferenciar maiúsculas) e qualquer trecho com cara de key do Google ('AIza' + 8 ou mais). */
+export function scrubKey(text: string, key: string | null): string {
+  let out = text;
+  if (key) out = out.replace(new RegExp(key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"), "[key]");
+  return out.replace(/aiza[A-Za-z0-9_-]{8,}/gi, "[key]");
+}
+
+/** A mensagem do Google como texto puro de uma linha, até 200 caracteres, sem nenhum trecho parecido com a key. */
 export function errorDetail(body: unknown, key: string): string | undefined {
   const message = typeof body === "object" && body !== null ? (body as ErrorBody).error?.message : undefined;
   if (typeof message !== "string") return undefined;
-  const cleaned = message
-    .normalize("NFC")
-    .replaceAll(key, "[key]")
+  const cleaned = scrubKey(message.normalize("NFC"), key)
     .replace(/[<>\p{Cc}\p{Cf}\p{Zl}\p{Zp}]/gu, " ")
     .replace(/\s+/g, " ")
     .trim();

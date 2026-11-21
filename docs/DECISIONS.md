@@ -353,6 +353,7 @@ Proposta do dono. Muda a fase 7 e acrescenta itens às fases 4, 5 e 8. Nada é i
   - **cofre:** memória por padrão; com "Lembrar neste aparelho", vai para o `localStorage` (`glifora.key.v1.gemini`);
   - **nunca** em Dexie, exportação, sincronização, log, URL, mensagem de erro ou relatório;
   - **tela:** campo de senha não controlado e "Apagar minha key".
+- **Apelido na fala (W2-25):** o `maskName` normaliza a fala em NFKC e troca por [name] a palavra inteira (sem diferenciar maiúsculas) e a forma soletrada com espaços ou hífens. **Resíduo aceito:** 'Zorbaxx' (letra a mais ou a menos) passa, porque não há busca aproximada: um apelido curto como 'Ana' mascararia palavras comuns.
 - **CSP:** `connect-src` ganha só `https://generativelanguage.googleapis.com/v1beta/models/` (prefixo com barra), com o teste da lista esperada.
 - **Erros:**
   - key inválida → "confira a key";

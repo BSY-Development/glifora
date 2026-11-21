@@ -4,6 +4,7 @@
 import { clearKey, hasKey, isRemembered, isValidKeyShape, maskedKey, setKey } from "../ai/keyVault";
 import { isAiError, toAiError, type AiErrorKind } from "../ai/errors";
 import { pingKey } from "../ai/structured";
+import { scrubKey } from "../ai/providers/gemini";
 import { NAME_MARK, reviewReport, type ReviewedTurn, type ReviewInput, type ReviewTurnInput, type Verdict } from "../ai/tasks/reviewReport";
 import { spokenName } from "../schemas";
 import type { Report } from "./play";
@@ -38,9 +39,14 @@ export function saveKey(key: string, remember: boolean): boolean {
   return ok;
 }
 
+/** Sobe a cada "Apagar minha key": o resultado de um pedido de antes do apagar é descartado. */
+let generation = 0;
+
 export function eraseKey(): void {
+  generation += 1;
   clearKey(PROVIDER);
   reviews.clear();
+  clearLastProblem();
 }
 
 // ---------- último problema ----------
@@ -54,7 +60,7 @@ export interface LastProblem {
 
 /** Releitura do que veio do localStorage: a mesma limpeza do `errorDetail` (texto de uma linha, sem `<`, `>` nem controle, até 200). */
 function cleanDetail(text: string): string {
-  return Array.from(text.replace(/[<>\p{Cc}\p{Cf}\p{Zl}\p{Zp}]/gu, " ").replace(/\s+/g, " ").trim()).slice(0, 200).join("").trim();
+  return Array.from(scrubKey(text, null).replace(/[<>\p{Cc}\p{Cf}\p{Zl}\p{Zp}]/gu, " ").replace(/\s+/g, " ").trim()).slice(0, 200).join("").trim();
 }
 
 export function loadLastProblem(): LastProblem | null {
@@ -104,7 +110,7 @@ async function guarded<T>(job: () => Promise<T>): Promise<AiResult<T>> {
     const kind = isAiError(error) ? error.kind : toAiError(error).kind;
     const problem: AiProblem = kind === "aborted" ? "unknown" : kind;
     const detail = problem === "unknown" ? (error as { detail?: unknown }).detail : undefined;
-    const text = typeof detail === "string" ? detail.slice(0, 200) : undefined;
+    const text = typeof detail === "string" ? scrubKey(detail, null).slice(0, 200) : undefined;
     saveLastProblem(problem, text);
     return { ok: false, problem, ...(text !== undefined ? { detail: text } : {}) };
   } finally {
@@ -175,7 +181,13 @@ export async function reviewRun(report: Report, uiLang: string): Promise<AiResul
   const nickname = profile?.nickname || null;
   const input = reviewInput(report, nickname);
   if (input.turns.length === 0) return { ok: false, problem: "unknown" };
+  const started = generation;
   const result = await guarded(() => reviewReport(input, uiLang));
+  if (started !== generation) {
+    // a key foi apagada com o pedido no ar: nada fica gravado, nem a revisão nem o último problema
+    clearLastProblem();
+    return { ok: false, problem: "no_key" };
+  }
   if (!result.ok) return result;
   reviews.set(report.run.id, { said: input.turns.map((t) => t.said), turns: result.value, nickname });
   return { ok: true, value: true };
