@@ -13,6 +13,10 @@ function walk(dir: string, keep: (f: string) => boolean): string[] {
   });
 }
 const norm = (p: string) => p.replaceAll("\\", "/");
+/** D-56: o único arquivo com `fetch`; sobe a exceção por arquivo prevista na FASE 5/6. */
+const AI_FETCH_FILE = "src/ai/providers/gemini.ts";
+/** D-56: onde "key" e "password" podem aparecer no código: o cofre, o adaptador e a tela da key (campo de senha). */
+const KEY_WORDS_OK = new Set(["src/ai/keyVault.ts", AI_FETCH_FILE, "src/ui/screens/AiSettings.tsx", "src/services/ai.ts"]);
 
 /** Código de produção de src/ (sem testes). */
 const SRC = walk("src", (f) => /\.(ts|tsx)$/.test(f) && !/\.test\.tsx?$/.test(f) && !f.endsWith(".d.ts")).map(norm);
@@ -113,7 +117,8 @@ describe("C2 · XSS por conteúdo colado, importado ou digitado (HTML nunca vem 
       for (const m of code.matchAll(/["'`](https?:\/\/[^"'`\s]+)["'`]/g)) external.push(`${f}: ${m[1]}`);
       for (const m of code.matchAll(/<a\b[^>]*target=["']_blank["'][^>]*>/g)) expect(m[0], f).toMatch(/rel=["'][^"']*noopener[^"']*["']/);
     }
-    expect(external).toEqual(["src/ui/screens/About.tsx: https://github.com/BSY-Development/glifora"]);
+    // Além do código-fonte, só o endereço da API do Gemini (D-56), que é exatamente o prefixo do connect-src.
+    expect(external.sort()).toEqual(["src/ai/providers/gemini.ts: https://generativelanguage.googleapis.com/v1beta/models/", "src/ui/screens/About.tsx: https://github.com/BSY-Development/glifora"]);
     expect(read("src/ui/screens/About.tsx")).toMatch(/<a href=\{SOURCE_URL\} rel="noopener noreferrer">/);
   });
 
@@ -133,6 +138,7 @@ describe("C3 · vazamento: nada sai do aparelho na fase 1", () => {
     for (const f of SRC) {
       const code = strip(read(f));
       for (const re of [/\bfetch\s*\(/, /XMLHttpRequest/, /sendBeacon/, /\bWebSocket\b/, /\bEventSource\b/, /importScripts/, /new\s+(Shared)?Worker\b/, /import\(\s*["'`]https?:/, /window\.open\s*\(/, /\bnavigator\.share\b/]) {
+        if (f === AI_FETCH_FILE && re.source === String.raw`\bfetch\s*\(`) continue; // D-56: o único fetch do app
         if (re.test(code)) bad.push(`${f}: ${re}`);
       }
     }
@@ -153,6 +159,7 @@ describe("C3 · vazamento: nada sai do aparelho na fase 1", () => {
   it("nenhum nome de key, token ou credencial no código da fase 1 (FASE 6: este teste muda quando o adaptador entrar)", () => {
     const bad: string[] = [];
     for (const f of SRC) {
+      if (KEY_WORDS_OK.has(f)) continue;
       const code = strip(read(f));
       if (/api[_-]?key|apikey|bearer|authorization|x-api-key|secret|password|senha/i.test(code)) bad.push(f);
     }
@@ -168,7 +175,7 @@ describe("C3 · vazamento: nada sai do aparelho na fase 1", () => {
     const args: string[] = [];
     for (const f of SRC) for (const m of strip(read(f)).matchAll(/(?:localStorage|sessionStorage)\.(?:getItem|setItem|removeItem)\(\s*([^,)]+)/g)) args.push(`${f}: ${(m[1] ?? "").trim()}`);
     expect(args.length).toBeGreaterThan(0);
-    for (const a of args) expect(a, "só a constante").toMatch(/: STORAGE_KEY$|: key$/);
+    for (const a of args) expect(a, "só a constante").toMatch(/: STORAGE_KEY$|: key$|: storageName\(provider$|: LAST_PROBLEM_KEY$/);
     expect(read("src/i18n/index.ts")).toMatch(/STORAGE_KEY\s*=\s*["']glifora\./);
     expect(read("src/services/transfer.ts")).toMatch(/startsWith\(["']glifora\.["']\)/);
   });

@@ -1,6 +1,6 @@
 // CSP — arquivo (W0-03 §7 e §2.8): compara public/_headers, diretiva por diretiva, com a lista esperada AQUI.
 // Mudar a CSP obriga a mudar este teste, e o Revisor vê. `connect-src` cresce por fase (§2.8): edite EXPECTED_CONNECT.
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { parseHeadersFile } from "../../config/headers";
 
@@ -9,7 +9,7 @@ const all = blocks["/*"] ?? {};
 const csp = all["Content-Security-Policy"] ?? "";
 
 /** Fase 1: nada além de 'self'. Fase 5 acrescenta o host exato do Supabase; fase 6, as APIs dos provedores (com caminho). */
-const EXPECTED_CONNECT = ["'self'"];
+const EXPECTED_CONNECT = ["'self'", "https://generativelanguage.googleapis.com/v1beta/models/"]; // D-56: Gemini, só o prefixo da API de modelos
 
 const EXPECTED: Record<string, string[]> = {
   "default-src": ["'none'"],
@@ -68,6 +68,16 @@ describe("CSP — arquivo", () => {
       expect(v, "connect-src").toMatch(/^https:\/\/[a-z0-9.-]+(\/\S*)?$/);
       expect(v, "connect-src").not.toContain("*");
     }
+  });
+
+  it("toda origem de src/ai/providers/* está no connect-src, sem sobra (D-56)", () => {
+    const dir = "src/ai/providers";
+    const used = new Set<string>();
+    for (const file of readdirSync(dir).filter((f) => /\.ts$/.test(f) && !/\.test\.ts$/.test(f))) {
+      for (const m of readFileSync(`${dir}/${file}`, "utf8").matchAll(/["'`](https:\/\/[^"'`${}\s]+)["'`]/g)) used.add(m[1] ?? "");
+    }
+    const external = (parsed["connect-src"] ?? []).filter((v) => !v.startsWith("'"));
+    expect([...used].sort()).toEqual([...external].sort());
   });
 
   it("não há CSP em <meta> no index.html", () => {

@@ -124,11 +124,14 @@ const IMPORTS = {
   ui: [P.layers(["data", "catalog", "speech", "ai"]), P.packages(["dexie"], "ui/ lê dados por services/ e dexie-react-hooks.")],
 };
 
+/** D-56: só `ai/providers/*` e `ai/structured.ts` pegam a key (`withKey`); o resto do app usa `setKey`, `hasKey`, `maskedKey` e `clearKey`. */
+const WITH_KEY = { regex: "(^|/)keyVault$", importNames: ["withKey"], message: "Só ai/providers/* e ai/structured.ts importam withKey (D-56, W0-03 §2.7)." };
+
 /** O conteúdo de content/ só entra pelo catálogo, que valida (W0-03 §5.3). */
 const CONTENT_OUTSIDE_CATALOG = { regex: "^(\\.\\./)+content(/|$)", message: "content/ só entra por src/catalog/, que valida (W0-03 §5.3)." };
 
-function restrictions(layer) {
-  const imports = [...(layer ? IMPORTS[layer] : []), ...PATH_TRICKS, ...(layer === "catalog" ? [] : [CONTENT_OUTSIDE_CATALOG])];
+function restrictions(layer, { withKey = false } = {}) {
+  const imports = [...(layer ? IMPORTS[layer] : []), ...(withKey ? [] : [WITH_KEY]), ...PATH_TRICKS, ...(layer === "catalog" ? [] : [CONTENT_OUTSIDE_CATALOG])];
   const pure = layer !== null && PURE.has(layer);
   const network = layer !== null && NETWORK_OK.has(layer);
   return {
@@ -154,6 +157,7 @@ function restrictions(layer) {
 }
 
 const TESTS = ["**/*.test.{ts,tsx}"];
+const AI_KEY_READERS = ["src/ai/providers/**/*.ts", "src/ai/structured.ts"];
 
 export default defineConfig(
   { ignores: ["dist/", "coverage/", "node_modules/", "src/catalog/generated/", ".maestri/", "test-results/", "playwright-report/"] },
@@ -174,7 +178,9 @@ export default defineConfig(
   // Arquivos da raiz de src/ (main.tsx, sw-register.ts): só as regras gerais.
   { files: ["src/*.{ts,tsx}"], ignores: TESTS, rules: restrictions(null) },
   // Uma camada, um bloco.
-  ...LAYERS.map((layer) => ({ files: [`src/${layer}/**/*.{ts,tsx}`], ignores: TESTS, rules: restrictions(layer) })),
+  ...LAYERS.map((layer) => ({ files: [`src/${layer}/**/*.{ts,tsx}`], ignores: [...TESTS, ...(layer === "ai" ? AI_KEY_READERS : [])], rules: restrictions(layer) })),
+  // D-56: dentro de ai/, só os adaptadores e o structured.ts leem a key.
+  { files: AI_KEY_READERS, ignores: TESTS, rules: restrictions("ai", { withKey: true }) },
   // Testes ao lado do código: podem ter texto literal e montar dados de várias camadas, mas nunca injetar HTML.
   {
     files: ["src/**/*.test.{ts,tsx}"],

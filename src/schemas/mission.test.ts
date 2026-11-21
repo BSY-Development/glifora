@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { Mission, type MissionInput } from "./mission";
+import { MISSION_LIMITS, Mission, type MissionInput } from "./mission";
 import { checkMission, formatPath, parseMission, type MissionIssue } from "./mission.check";
 
 /** Missão embutida válida, no formato da SPEC (padaria resumida). Cada teste estraga uma cópia. */
@@ -159,7 +159,7 @@ describe("Mission (Zod)", () => {
       ["nodes", (m) => (m.nodes = [m.nodes[0]])],
       ["nodes", (m) => (m.nodes = Array.from({ length: 21 }, (_, i) => ({ ...m.nodes[1], id: `n${i}` })))],
       ["nodes[0].replies", (m) => (m.nodes[0].replies = [])],
-      ["nodes[0].replies", (m) => m.nodes[0].replies.push(m.nodes[1].replies[0], m.nodes[1].replies[1])],
+      ["nodes[0].replies", (m) => (m.nodes[0].replies = Array.from({ length: MISSION_LIMITS.replies + 1 }, () => m.nodes[0].replies[0]))],
       ["vocabulary", (m) => (m.vocabulary = Array.from({ length: 21 }, () => m.vocabulary[0]))],
     ];
     for (const [path, spoil] of cases) {
@@ -167,6 +167,15 @@ describe("Mission (Zod)", () => {
       spoil(m);
       expect(issuesOf(m).map((i) => i.path), path).toContain(path);
     }
+  });
+
+  it("D-57: uma fala aceita até 6 respostas (pedido aberto com os itens do local) e recusa a 7ª", () => {
+    expect(MISSION_LIMITS.replies).toBe(6);
+    const six = loose(valid());
+    six.nodes[0].replies = Array.from({ length: 6 }, () => six.nodes[0].replies[0]);
+    expect(Mission.safeParse(six).success).toBe(true);
+    six.nodes[0].replies.push(six.nodes[0].replies[0]);
+    expect(Mission.safeParse(six).success).toBe(false);
   });
 
   it("apara espaços nas pontas e recusa texto vazio ou com caractere de controle", () => {

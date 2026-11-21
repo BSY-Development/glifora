@@ -128,17 +128,45 @@
         {
           "text": "Can I have a hot chocolate, please?",
           "translation": "Pode me dar um chocolate quente, por favor?",
-          "keywords": [["chocolate"]],
+          "keywords": [["chocolate"], ["hot chocolate"]],
           "chunk": "a hot chocolate",
           "reaction": { "text": "A hot chocolate. The usual! You're a regular now.", "translation": "Um chocolate quente. O de sempre! Agora você é freguês(a)." }
         },
         {
           "text": "Do you have any milk?",
           "translation": "Tem leite?",
-          "keywords": [["milk"], ["juice"], ["tea"]],
+          "keywords": [["milk"]],
           "chunk": "Do you have",
           "echo": "we have",
-          "reaction": { "text": "Yes, we have some. Coming right up.", "translation": "Temos, sim. Já vai." }
+          "reaction": { "text": "Milk? Yes, we have some. Coming right up.", "translation": "Leite? Temos, sim. Já vai." }
+        },
+        {
+          "text": "A cup of tea, please.",
+          "translation": "Uma xícara de chá, por favor.",
+          "keywords": [["tea"]],
+          "chunk": "A cup of tea",
+          "reaction": { "text": "A cup of tea. Good for the end of the day.", "translation": "Uma xícara de chá. Bom para o fim do dia." }
+        },
+        {
+          "text": "An orange juice, please.",
+          "translation": "Um suco de laranja, por favor.",
+          "keywords": [["juice"], ["orange"]],
+          "chunk": "An orange juice",
+          "reaction": { "text": "An orange juice. Coming right up.", "translation": "Um suco de laranja. Já vai." }
+        },
+        {
+          "text": "Just water, please.",
+          "translation": "Só água, por favor.",
+          "keywords": [["water"]],
+          "chunk": "Just water",
+          "reaction": { "text": "Just water? Easy. Here you go.", "translation": "Só água? Fácil. Aqui está." }
+        },
+        {
+          "text": "Some soup, please. I'm hungry.",
+          "translation": "Uma sopa, por favor. Estou com fome.",
+          "keywords": [["soup"]],
+          "chunk": "Some soup",
+          "reaction": { "text": "Some soup. Finally, someone with good taste.", "translation": "Uma sopa. Até que enfim alguém de bom gosto.", "emotion": "proud" }
         }
       ]
     },

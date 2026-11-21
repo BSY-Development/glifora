@@ -71,7 +71,7 @@ Cada **missão** é uma conversa curta (1–3 min) com um NPC. A "missão do dia
 
 ### 1. Modo demo (sem key, sem IA)
 - Missões pré-geradas embutidas no projeto (`content/missions/<base>_<alvo>/<nível>/*.json`), geradas com IA pelo autor e revisadas.
-- Conversas no formato da missão v1 (abaixo): cada fala do NPC oferece 1–3 respostas. O jogador **fala ou digita** a resposta (tocar na opção é ajuda e vale menos XP). A NPC reage a cada resposta, com recast quando a pessoa produz um erro previsto; a explicação fica para o relatório.
+- Conversas no formato da missão v1 (abaixo): cada fala do NPC oferece 1–6 respostas. O jogador **fala ou digita** a resposta (tocar na opção é ajuda e vale menos XP). A NPC reage a cada resposta, com recast quando a pessoa produz um erro previsto; a explicação fica para o relatório.
 - **Comparação tolerante** (D-43): maiúsculas, acentos, pontuação, contrações ("I'm" = "I am", também sem apóstrofo) e pequenos erros de digitação não fazem a pessoa "errar". Na dúvida, vale a resposta boa.
 - **Fecho sem IA** (D-43): a frase própria do fim é aceita se usar pelo menos uma das palavras-alvo da missão, e nada além disso é exigido. São duas tentativas; depois o jogo mostra uma resposta-modelo para repetir, sem travar nem tirar XP.
 - Dá XP e progressão normalmente. Disponível na primeira tela, sem cadastro.
@@ -166,7 +166,7 @@ Formato completo, limites e conferências: `docs/propostas/W0-03-arquitetura.md`
 - Chaves em inglês; par completo (`base` + `target`); `"schema": 1`; objeto estrito.
 - **Escuta antes** (`listen`, princípio 1): 2 a 6 falas curtas que a pessoa ouve antes de falar (obrigatória nas missões embutidas de A1–A2).
 - **Sequência linear** de falas (`nodes`); `next` é opcional e só serve para ramificar para a frente. Assim a IA grátis não erra referência.
-- Cada fala tem 1–3 respostas (`replies`), cada uma com `keywords` para casar a fala ou o texto digitado e uma `reaction` curta da NPC. A resposta `flawed` traz um erro previsto: só casa quando a pessoa produz aquele erro, e a reação da NPC traz o recast (`recast: { original, corrected }`). `note`/`pattern` vão só para o relatório.
+- Cada fala tem 1–6 respostas (D-57) (`replies`), cada uma com `keywords` para casar a fala ou o texto digitado e uma `reaction` curta da NPC. A resposta `flawed` traz um erro previsto: só casa quando a pessoa produz aquele erro, e a reação da NPC traz o recast (`recast: { original, corrected }`). `note`/`pattern` vão só para o relatório.
 - **Fecho obrigatório** (`closing`, princípio 2): pergunta da NPC, palavras-alvo, dica, resposta-modelo e fala de despedida.
 - `kind`: `encounter` ou `boss`. `romanization` opcional (japonês e chinês).
 

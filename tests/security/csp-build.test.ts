@@ -10,6 +10,7 @@ if (!has && process.env["REQUIRE_DIST"]) throw new Error("REQUIRE_DIST=1 mas dis
 
 /** URLs http(s) que podem aparecer como TEXTO nos JS (não são chamadas de rede). Ampliar só com revisão. */
 const KNOWN_URLS = [
+  /^https:\/\/generativelanguage\.googleapis\.com\/v1beta\/models\/$/, // D-56: adaptador do Gemini (é o prefixo exato do connect-src)
   /^https?:\/\/react\.dev(\/|$)/, // links de erro do React
   /^https?:\/\/reactjs\.org(\/|$)/,
   /^https?:\/\/www\.w3\.org\/(1999\/xhtml|2000\/svg|1998\/Math\/MathML|1999\/xlink|XML\/1998\/namespace)$/, // namespaces XML

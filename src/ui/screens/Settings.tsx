@@ -85,6 +85,14 @@ export function Settings() {
         </Link>
       </section>
 
+      <section aria-labelledby="ai-title">
+        <h2 id="ai-title">{t("settings.ai.title")}</h2>
+        <p>{t("settings.ai.text")}</p>
+        <Link className="btn" to="/settings/ai">
+          {t("settings.ai.link")}
+        </Link>
+      </section>
+
       <DataSection />
     </>
   );

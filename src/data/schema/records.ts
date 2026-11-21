@@ -95,8 +95,8 @@ const RunAnswer = z.strictObject({
   input: InputMode,
   /** 0 sem ajuda · 1 ideia · 2 frase à vista · 3 tocou. */
   scaffold: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3)]),
-  /** Posição da resposta casada em `replies` da fala (a missão tem no máximo 3). */
-  reply: z.number().int().min(0).max(2).optional(),
+  /** Posição da resposta casada em `replies` da fala (a missão tem no máximo 6, `MISSION_LIMITS.replies`; D-57). */
+  reply: z.number().int().min(0).max(5).optional(),
   /** O que a pessoa disse ou digitou nesta fala (texto puro, até 100 caracteres; D-55). Falta em rodadas antigas e nos toques. */
   said: PlainText(100).optional(),
 });

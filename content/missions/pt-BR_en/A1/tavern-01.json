@@ -96,15 +96,15 @@
         {
           "text": "Do you have orange juice?",
           "translation": "Tem suco de laranja?",
-          "keywords": [["juice"], ["tea"], ["milk"], ["water"], ["lemonade"], ["coffee"]],
+          "keywords": [["juice"], ["orange"]],
           "chunk": "Do you have",
           "echo": "we have",
-          "reaction": { "text": "We have that, yes. Coming right up.", "translation": "Temos, sim. Já vai." }
+          "reaction": { "text": "Orange juice? Yes, we have that. Coming right up.", "translation": "Suco de laranja? Temos, sim. Já vai." }
         },
         {
           "text": "Can I have a hot chocolate, please?",
           "translation": "Pode me dar um chocolate quente, por favor?",
-          "keywords": [["chocolate"]],
+          "keywords": [["chocolate"], ["hot chocolate"]],
           "chunk": "a hot chocolate",
           "reaction": { "text": "A hot chocolate. Good choice. Best in the village.", "translation": "Um chocolate quente. Boa escolha. O melhor da vila." }
         },
@@ -116,6 +116,28 @@
           "recast": { "original": "A orange juice", "corrected": "An orange juice" },
           "reaction": { "text": "An orange juice? Sure thing.", "translation": "Um suco de laranja? Claro." },
           "pattern": "en.article_a_an"
+        },
+        {
+          "text": "A cup of tea, please.",
+          "translation": "Uma xícara de chá, por favor.",
+          "keywords": [["tea"]],
+          "chunk": "A cup of tea",
+          "reaction": { "text": "A cup of tea. Good, the kettle's still hot.", "translation": "Uma xícara de chá. Boa, a chaleira ainda está quente." }
+        },
+        {
+          "text": "Just water, please.",
+          "translation": "Só água, por favor.",
+          "keywords": [["water"]],
+          "chunk": "Just water",
+          "reaction": { "text": "Just water? Easy. Here you go.", "translation": "Só água? Fácil. Aqui está." }
+        },
+        {
+          "text": "Do you have any milk?",
+          "translation": "Tem leite?",
+          "keywords": [["milk"], ["lemonade"], ["coffee"]],
+          "chunk": "Do you have",
+          "echo": "we have",
+          "reaction": { "text": "Milk, lemonade, coffee... we have them all. Coming right up.", "translation": "Leite, limonada, café... temos de tudo. Já vai." }
         }
       ]
     },
@@ -136,7 +158,7 @@
         {
           "text": "Do you have any bread?",
           "translation": "Tem pão?",
-          "keywords": [["bread"]],
+          "keywords": [["bread"], ["roll"], ["rolls"]],
           "chunk": "any bread",
           "reaction": { "text": "Any bread? Always. Tilda's rolls, from this morning.", "translation": "Pão? Sempre. Os pãezinhos da Tilda, de hoje de manhã." }
         },
@@ -148,6 +170,13 @@
           "recast": { "original": "Has bread", "corrected": "Do you have bread", "local": true },
           "reaction": { "text": "Do you have bread? Always, friend. Tilda's rolls.", "translation": "Se eu tenho pão? Sempre. Os pãezinhos da Tilda." },
           "pattern": "en.do_you_have"
+        },
+        {
+          "text": "Can I have a piece of pie?",
+          "translation": "Pode me dar um pedaço de torta?",
+          "keywords": [["pie"], ["pies"]],
+          "chunk": "a piece of pie",
+          "reaction": { "text": "A piece of pie? Tilda's apple pie. Last piece, it's yours.", "translation": "Um pedaço de torta? Torta de maçã da Tilda. Último pedaço, é seu." }
         }
       ]
     },
@@ -171,6 +200,34 @@
           "keywords": [["tea"]],
           "chunk": "a cup of tea",
           "reaction": { "text": "A cup of tea, too. On its way.", "translation": "Um chá também. Já está a caminho." }
+        },
+        {
+          "text": "A hot chocolate, too, please.",
+          "translation": "Um chocolate quente também, por favor.",
+          "keywords": [["chocolate"]],
+          "chunk": "A hot chocolate",
+          "reaction": { "text": "A hot chocolate, too? Sure thing.", "translation": "Um chocolate quente também? Claro." }
+        },
+        {
+          "text": "Some bread, too, please.",
+          "translation": "Um pouco de pão também, por favor.",
+          "keywords": [["bread"], ["roll"], ["rolls"]],
+          "chunk": "Some bread",
+          "reaction": { "text": "Some bread, too. Tilda's rolls, still soft.", "translation": "Um pouco de pão também. Os pãezinhos da Tilda, ainda macios." }
+        },
+        {
+          "text": "Some soup, too.",
+          "translation": "Uma sopa também.",
+          "keywords": [["soup"]],
+          "chunk": "Some soup",
+          "reaction": { "text": "Some soup, too. Good. It's the best thing I make.", "translation": "Uma sopa também. Bom. É a melhor coisa que eu faço." }
+        },
+        {
+          "text": "And a piece of pie, please.",
+          "translation": "E um pedaço de torta, por favor.",
+          "keywords": [["pie"], ["pies"]],
+          "chunk": "a piece of pie",
+          "reaction": { "text": "A piece of pie. Tilda's apple pie. Last one, it's yours.", "translation": "Um pedaço de torta. Torta de maçã da Tilda. É o último, é seu." }
         }
       ]
     }

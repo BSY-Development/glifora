@@ -34,10 +34,15 @@ describe("parseVoiceEvalSet", () => {
     expect(res.ok && res.set.phrases[0]!.expect.reply).toBe(0);
   });
 
-  it("recusa frase repetida, resposta fora de 0–2, campo desconhecido, base igual ao alvo", () => {
+  it("D-57: a frase pode apontar até a 6ª resposta (índice 5), como o pão da bakery-01", () => {
+    const res = parseVoiceEvalSet({ ...set, phrases: [{ ...phrase, expect: { ...phrase.expect, reply: 5 } }] });
+    expect(res.ok && res.set.phrases[0]!.expect.reply).toBe(5);
+  });
+
+  it("recusa frase repetida, resposta fora de 0–5 (D-57), campo desconhecido, base igual ao alvo", () => {
     const cases: [unknown, string][] = [
       [{ ...set, phrases: [phrase, phrase] }, "phrases[1].id"],
-      [{ ...set, phrases: [{ ...phrase, expect: { ...phrase.expect, reply: 3 } }] }, "phrases[0].expect.reply"],
+      [{ ...set, phrases: [{ ...phrase, expect: { ...phrase.expect, reply: 6 } }] }, "phrases[0].expect.reply"],
       [{ ...set, phrases: [{ ...phrase, audio: "x.mp3" }] }, "phrases[0]"],
       [{ ...set, target: "pt-BR" }, "target"],
     ];

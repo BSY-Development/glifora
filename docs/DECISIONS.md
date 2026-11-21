@@ -329,3 +329,67 @@ Proposta do dono. Muda a fase 7 e acrescenta itens às fases 4, 5 e 8. Nada é i
 - **Missão em andamento:** aparece também na vila, com "Continuar", e não só ao entrar de novo na mesma missão.
 - **Escuta:** o texto de abertura diz que são outras pessoas da vila conversando antes da sua vez (o Ben não é você).
 
+### D-56 — Revisão do relatório com IA, com a key grátis do próprio jogador, adiantada para a fase 2 (2026-11-20) · aceita (dono)
+- **Pedido do dono:** cada pessoa usa a própria key. A IA lê o que a pessoa disse, corrige quando errou e dá um jeito natural **adaptado ao que ela quis dizer** (ela preferiu "bread" → "Can I have some bread, please?"). O dono quer testar já, com o guia de como pegar a key.
+- **Provedor desta rodada: Gemini API** (Google AI Studio), pela cota grátis sem cartão e pela key fácil de criar no celular com a conta Google.
+  - GPT e Claude não têm cota grátis.
+  - O adaptador segue a interface de `ai/providers/` (W0-03 §2.6), então OpenRouter e Groq entram depois sem refazer nada.
+- **Como funciona:**
+  - um botão **"Revisar com IA"** no relatório. Nada é enviado sem a pessoa tocar, o que também poupa a cota;
+  - **uma chamada por missão**, com todas as falas juntas. A cota grátis é pequena (~20 por dia, conforme a conta).
+- **O que vai, minimizado:**
+  - idioma, nível, a fala da NPC, as respostas da missão, o que a pessoa disse (até 100 caracteres, limpo) e se casou, com erro ou não;
+  - **sem apelido** (o vocativo sai antes de enviar), sem perfil e sem ids;
+  - a fala da pessoa vai entre marcadores, com os marcadores tirados do texto dela (W0-03 §2.6).
+- **O que volta:** JSON validado por schema Zod rígido, com campos fechados e teto de tamanho. Para cada fala:
+  - `verdict`, um entre natural, ok com dica e erro;
+  - `correction` e `natural`, no idioma-alvo;
+  - `tip`, no idioma da interface.
+- **Como aparece:**
+  - só como texto, com `lang`, e entra no Copiar relatório;
+  - **nunca muda XP, estrelas nem a rodada guardada**, porque as regras continuam sem IA (D-49);
+  - fica só na memória da sessão: reabrir o relatório não gasta cota de novo enquanto a aba vive.
+- **A key** segue a W0-03 §2.7:
+  - **cofre:** memória por padrão; com "Lembrar neste aparelho", vai para o `localStorage` (`glifora.key.v1.gemini`);
+  - **nunca** em Dexie, exportação, sincronização, log, URL, mensagem de erro ou relatório;
+  - **tela:** campo de senha não controlado e "Apagar minha key".
+- **CSP:** `connect-src` ganha só `https://generativelanguage.googleapis.com/v1beta/models/` (prefixo com barra), com o teste da lista esperada.
+- **Erros:**
+  - key inválida → "confira a key";
+  - cota do dia esgotada (429) → "a cota grátis de hoje acabou";
+  - offline;
+  - resposta fora do schema → "a IA não respondeu direito";
+  - no máximo 1 nova tentativa, nunca em laço.
+- **Guia na tela "IA (opcional)", em Ajustes:**
+  - passo a passo para criar a key grátis no celular;
+  - recomendação de criar uma key só para o Glifora;
+  - **aviso:** na cota grátis, o Google pode usar o que é enviado para melhorar os produtos dele, e pessoas podem ler. Não escreva dados pessoais nas respostas;
+  - onde a key fica, para onde vai e como apagar.
+- **Proposta do Fable** (docs/propostas/W2-22-prompt-relatorio.md), com as decisões do Arquiteto:
+  - **Vereditos:** 4, com `unclear` para fala vazia ou sem sentido. Ficam `natural | polish | fix | unclear`.
+  - **Campo `meant`:** o que a pessoa quis dizer, até 60 caracteres. O App valida e não mostra.
+  - **Nome:** a resposta livre de nome (D-51) não é enviada, e o apelido dentro da fala vira `[name]`.
+  - **Aceitação parcial:**
+    - envelope quebrado falha tudo (1 nova tentativa);
+    - item quebrado derruba só aquela fala, que volta ao relatório sem IA.
+  - **Guarda:** se o jogo casou uma resposta com erro previsto e a IA disse `natural`, vale o recast da missão. A IA não desmente o jogo.
+  - **Endpoint:** `generateContent` em `/v1beta/models/`, dentro da CSP. O endpoint novo `/v1beta/interactions` fica de fora.
+  - **Modelo:** um Flash ou Flash-Lite da cota grátis, numa constante. O gemini-2.5-flash sai em 01/12/2026; o candidato é o gemini-3.5-flash-lite, a conferir na documentação.
+  - **Configuração:** `thinkingLevel` mínimo, `maxOutputTokens` 2048 e tetos de tamanho valendo no Zod, porque o Gemini pode não respeitar `maxLength`.
+- **Quando a key ou os créditos acabam (pedido do dono): avisar sem quebrar nada.**
+  - **Quais casos:**
+    - cota grátis do dia esgotada;
+    - créditos ou cobrança expirados;
+    - key revogada ou vencida;
+    - modelo que saiu da cota grátis;
+    - região não atendida.
+  - **Cada caso:** tem mensagem própria, em linguagem simples, e diz o que fazer (esperar até amanhã, conferir a conta no AI Studio, trocar a key).
+  - **O aviso:** aparece no relatório, no lugar da revisão, e fica marcado na tela "IA (opcional)", com o último problema e a hora.
+  - **O resto segue igual:** o relatório normal, o XP, as estrelas e o resto do jogo. Nenhuma tela de erro e nenhuma tentativa em laço.
+- **Sem key, nada muda:** o relatório de hoje continua igual, e o jogo inteiro funciona sem IA.
+- **Quem faz:** Fable (prompt, contrato de saída e casos de avaliação), App (cofre, adaptador, tela, guia e relatório), Revisor e QA (ataque à key e à injeção).
+
+### D-57 — Pedido aberto aceita qualquer item do local (2026-11-20) · aceita (dono)
+- **Pedido aberto:** nas perguntas abertas ("What can I get you?"), o jogo aceita qualquer item do vocabulário do local, como bread, loaf ou pie na padaria. A reação repete o item (recast implícito, D-54). Hoje só os itens previstos casam, e o resto ouve "repete".
+- **Quem faz:** o Conteúdo, nas 5 missões, sem quebrar o fluxo das falas seguintes.
+

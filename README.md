@@ -45,6 +45,19 @@ Se você já tem o Chrome instalado, pode pular a instalação: `PW_CHANNEL=chro
 
 A instalação como app e o service worker só funcionam em HTTPS, ou em `localhost` no próprio computador. Para testar no celular, use o site publicado, https://glifora.pages.dev, e siga o [roteiro da fase 1](docs/roteiros/fase-1-celular.md).
 
+## Segurança da sua key
+
+A IA é **opcional**: o jogo inteiro funciona sem ela. Se você quiser a revisão do relatório com IA (Ajustes › IA (opcional)), usa a **sua própria key grátis** do Google (Gemini).
+
+- **Para onde ela vai:** direto do seu navegador para `generativelanguage.googleapis.com`. Nunca passa por servidor do Glifora e nunca entra na exportação dos seus dados.
+- **Onde ela fica:** por padrão, só na memória da aba (some ao recarregar). Se você escolher "Lembrar neste aparelho", fica no `localStorage` deste navegador, na entrada `glifora.key.v1.gemini`. Fora do banco de dados do app (Dexie), de propósito: exportar, importar e sincronizar não passam por lá.
+- **Como apagar:** o botão "Apagar minha key" na mesma tela, ou limpar os dados do site no navegador.
+- **Nunca** aparece em log, URL, mensagem de erro, relatório nem exportação. A tela só mostra os 4 últimos caracteres.
+- **Como conferir:** o `Content-Security-Policy` (arquivo `public/_headers`) só deixa o app falar com o próprio site e com `https://generativelanguage.googleapis.com/v1beta/models/`. No DevTools: aba Network (a key vai só no cabeçalho `x-goog-api-key`) e Application › Local Storage. Não há scripts, fontes nem analytics de terceiros.
+- **Recomendado:** crie uma key só para o Glifora no [Google AI Studio](https://aistudio.google.com/apikey). Se um dia quiser parar, apague só ela.
+- **Atenção, cota grátis:** o Google pode usar o que é enviado para melhorar os produtos dele, e pessoas podem ler. Não escreva dados pessoais nas respostas. O Glifora envia só as falas da missão e o que você disse (até 100 caracteres), sem o seu apelido.
+- **Se a key ou a cota acabar:** o jogo só avisa o que houve e o que fazer; o relatório, o XP e as estrelas seguem iguais.
+
 ## Documentos
 
 - Especificação: [docs/SPEC.md](docs/SPEC.md)

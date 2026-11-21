@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { Cefr, ContentLang } from "./lang";
 import { formatPath, type MissionIssue } from "./mission.check";
-import { MissionId, MissionKind } from "./mission";
+import { MISSION_LIMITS, MissionId, MissionKind } from "./mission";
 import { LocalId, text } from "./text";
 import { LocationId } from "./world";
 
@@ -37,7 +37,7 @@ export const VoiceEvalPhrase = z.strictObject({
   expect: z.strictObject({
     mission: MissionId,
     node: LocalId,
-    reply: z.number().int().min(0).max(2),
+    reply: z.number().int().min(0).max(MISSION_LIMITS.replies - 1),
   }),
 });
 export type VoiceEvalPhrase = z.infer<typeof VoiceEvalPhrase>;

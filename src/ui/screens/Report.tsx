@@ -3,12 +3,14 @@
 import { useState } from "react";
 import { Link, useLocation, useParams } from "react-router";
 import { useLiveQuery } from "dexie-react-hooks";
+import { keyInfo, reviewItems, reviewRun, type AiProblem } from "../../services/ai";
 import { loadReport } from "../../services/play";
+import { AiProblemNotice } from "../AiProblemNotice";
 import { Loading } from "../Loading";
 import { PageTitle } from "../PageTitle";
 import { useQuoted } from "../Quoted";
 import { reportText } from "../reportText";
-import { useT } from "../useT";
+import { useLocale, useT } from "../useT";
 
 const AGAIN = {
   1: { label: "report.next.again.1", hint: "report.next.again.1.hint" },
@@ -29,6 +31,9 @@ export function Report() {
   const report = useLiveQuery(() => loadReport(runId), [runId]);
   const [copyNote, setCopyNote] = useState<string | null>(null);
   const [copyFailed, setCopyFailed] = useState(false);
+  const locale = useLocale();
+  const [ai, setAi] = useState<{ runId: string; state: "idle" | "running" | "done" | "problem"; problem?: AiProblem; detail?: string | undefined }>({ runId, state: "idle" });
+  const aiState = ai.runId === runId ? ai.state : "idle";
 
   if (report === undefined) {
     return (
@@ -56,7 +61,15 @@ export function Report() {
   const leveledUp = after.level > before.level;
   const newTitle = after.title !== before.title;
   const closing = run.closing;
-  const text = reportText(report, t);
+  const items = reviewItems(runId);
+  const text = reportText(report, t, items, aiState === "problem" && ai.problem && items === null ? { kind: ai.problem, detail: ai.detail } : null);
+
+  async function reviewWithAi() {
+    if (!report) return;
+    setAi({ runId, state: "running" });
+    const result = await reviewRun(report, locale);
+    setAi(result.ok ? { runId, state: "done" } : { runId, state: "problem", problem: result.problem, detail: result.detail });
+  }
 
   async function copy() {
     try {
@@ -180,6 +193,51 @@ export function Report() {
               </li>
             ))}
           </ul>
+        </section>
+      )}
+
+      {(lines.length > 0 || closing) && (
+        <section aria-labelledby="ai-review-title">
+          <h2 id="ai-review-title">{t("report.ai.title")}</h2>
+          {items === null && keyInfo().has && (
+            <p>
+              <button type="button" className="btn" disabled={aiState === "running"} onClick={() => void reviewWithAi()}>
+                {aiState === "problem" ? t("report.ai.retry") : t("report.ai.button")}
+              </button>
+            </p>
+          )}
+          {items === null && !keyInfo().has && (
+            <p>
+              <Link to="/settings/ai">{t("report.ai.nokey")}</Link>
+            </p>
+          )}
+          <p role="status">{aiState === "running" ? t("report.ai.running") : ""}</p>
+          {aiState === "problem" && ai.problem && items === null && <AiProblemNotice problem={ai.problem} detail={ai.detail} />}
+          {items !== null && (
+            <>
+              {items.length === 0 && <p>{t("report.ai.none")}</p>}
+              <ol className="plain-list">
+                {items.map((item, i) => (
+                  <li key={i} className="report-item">
+                    <p>{quoted("report.said.you", { said: item.said }, mission.target)}</p>
+                    {item.verdict === "natural" && (
+                      <p>
+                        <strong>{t("report.ai.verdict.natural")}</strong>
+                      </p>
+                    )}
+                    {item.correction !== undefined && <p>{quoted("report.ai.correction", { text: item.correction }, mission.target)}</p>}
+                    {item.natural !== undefined && <p>{quoted(item.verdict === "unclear" ? "report.ai.unclear" : "report.ai.natural", { text: item.natural }, mission.target)}</p>}
+                    {item.tip !== undefined && (
+                      <p className="hint" lang={locale}>
+                        {t("report.ai.tip", { text: item.tip })}
+                      </p>
+                    )}
+                  </li>
+                ))}
+              </ol>
+              <p className="hint">{t("report.ai.note")}</p>
+            </>
+          )}
         </section>
       )}
 

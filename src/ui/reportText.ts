@@ -1,6 +1,7 @@
 // O relatório inteiro em texto simples (D-55), para colar numa conversa. Mesmos dados e mesmos textos da tela.
 // Tudo passa por `clean`: sem `<`, `>`, controle, bidi nem invisíveis (o conteúdo vem de missões e do que a pessoa disse).
 import type { MessageKey, Params } from "../i18n";
+import type { AiProblem, ReviewItem } from "../services/ai";
 import type { Report } from "../services/play";
 
 type Translate = (key: MessageKey, params?: Params) => string;
@@ -12,7 +13,7 @@ export function clean(text: string): string {
   return text.replace(UNSAFE, " ").replace(/\s+/g, " ").trim();
 }
 
-export function reportText(report: Report, t: Translate): string {
+export function reportText(report: Report, t: Translate, review: readonly ReviewItem[] | null = null, problem: { kind: AiProblem; detail?: string | undefined } | null = null): string {
   const { run, mission, stars, conversationXp, prizeXp, after, lines, closingWay } = report;
   const out: string[] = [t("report.copy.header"), t("report.copy.mission", { title: clean(mission.title) }), clean(run.canDo ? t("report.cando.yes") : t("report.cando.no"))];
   out.push(clean(mission.can_do));
@@ -40,6 +41,20 @@ export function reportText(report: Report, t: Translate): string {
       if (closingWay?.kind === "recast") out.push(t("report.said.recast", { text: clean(closingWay.text) }));
       if (closingWay?.kind === "model") out.push(t("report.said.model", { text: clean(closingWay.text) }), clean(closingWay.translation));
     }
+  }
+  if (review && review.length > 0) {
+    out.push("", t("report.ai.title"));
+    review.forEach((item, i) => {
+      out.push(`${i + 1}. ${t("report.said.you", { said: clean(item.said) })}`);
+      if (item.verdict === "natural") out.push(`   ${t("report.ai.verdict.natural")}`);
+      if (item.correction !== undefined) out.push(`   ${t("report.ai.correction", { text: clean(item.correction) })}`);
+      if (item.natural !== undefined) out.push(`   ${t(item.verdict === "unclear" ? "report.ai.unclear" : "report.ai.natural", { text: clean(item.natural) })}`);
+      if (item.tip !== undefined) out.push(`   ${t("report.ai.tip", { text: clean(item.tip) })}`);
+    });
+  }
+  if (problem) {
+    out.push("", t("report.ai.title"), t(`ai.problem.${problem.kind}`), t(`ai.problem.${problem.kind}.fix`));
+    if (problem.detail !== undefined) out.push(t("ai.problem.detail", { text: clean(problem.detail) }));
   }
   return out.join("\n");
 }

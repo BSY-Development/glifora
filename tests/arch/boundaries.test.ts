@@ -31,6 +31,17 @@ describe("fronteiras entre camadas", () => {
     expect(await rulesFor("src/ui/example.ts", 'import { openrouter } from "../ai/providers/openrouter";\nexport const x = openrouter;\n')).toContain("no-restricted-imports");
   });
 
+  it("só ai/providers/* e ai/structured.ts importam withKey (D-56)", async () => {
+    const code = 'import { withKey } from "../keyVault";\nexport const x = withKey;\n';
+    expect(await rulesFor("src/ai/tasks/example.ts", code)).toContain("no-restricted-imports");
+    expect(await rulesFor("src/ai/example.ts", 'import { withKey } from "./keyVault";\nexport const x = withKey;\n')).toContain("no-restricted-imports");
+    expect(await rulesFor("src/services/example.ts", 'import { withKey } from "../ai/keyVault";\nexport const x = withKey;\n')).toContain("no-restricted-imports");
+    expect(await rulesFor("src/services/example.ts", 'import * as vault from "../ai/keyVault";\nexport const x = vault;\n')).toContain("no-restricted-imports");
+    expect(await rulesFor("src/ai/providers/example.ts", code)).toEqual([]);
+    expect(await rulesFor("src/ai/structured.ts", 'import { withKey } from "./keyVault";\nexport const x = withKey;\n')).toEqual([]);
+    expect(await rulesFor("src/services/example.ts", 'import { hasKey, setKey } from "../ai/keyVault";\nexport const x = [hasKey, setKey];\n')).toEqual([]);
+  });
+
   it("engine/ não lê relógio nem sorteio direto", async () => {
     expect(await rulesFor("src/engine/example.ts", "export const t = Date.now();\n")).toContain("no-restricted-properties");
     expect(await rulesFor("src/engine/example.ts", "export const r = Math.random();\n")).toContain("no-restricted-properties");

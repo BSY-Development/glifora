@@ -138,6 +138,19 @@ export const Reply = z
   });
 export type Reply = z.infer<typeof Reply>;
 
+/** Teto de texto por campo, para as mensagens e para a fábrica (fase 4) citar no prompt. */
+export const MISSION_LIMITS = {
+  title: 80,
+  theme: 120,
+  can_do: 160,
+  description: 300,
+  characters: 4,
+  listen: 6,
+  nodes: { min: 2, max: 20 },
+  replies: 6,
+  vocabulary: 20,
+} as const;
+
 export const MissionNode = z
   .strictObject({
     id: LocalId,
@@ -146,7 +159,7 @@ export const MissionNode = z
     translation: text(300),
     romanization: text(300).optional(),
     emotion: Emotion.default("neutral"),
-    replies: z.array(Reply).min(1).max(3),
+    replies: z.array(Reply).min(1).max(MISSION_LIMITS.replies),
   })
   .superRefine((node, ctx) => {
     if (node.replies.every((r) => r.flawed)) {
@@ -183,19 +196,6 @@ export const Closing = z.strictObject({
   success: Line,
 });
 export type Closing = z.infer<typeof Closing>;
-
-/** Teto de texto por campo, para as mensagens e para a fábrica (fase 4) citar no prompt. */
-export const MISSION_LIMITS = {
-  title: 80,
-  theme: 120,
-  can_do: 160,
-  description: 300,
-  characters: 4,
-  listen: 6,
-  nodes: { min: 2, max: 20 },
-  replies: 3,
-  vocabulary: 20,
-} as const;
 
 export const Mission = z
   .strictObject({

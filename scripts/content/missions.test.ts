@@ -19,6 +19,164 @@ function mission(id: string): Mission {
 }
 
 const TRIES: Record<string, Record<string, [string, number | null][]>> = {
+  "bakery-01": {
+    "order": [
+      [
+        "Can I have a honey roll, please?",
+        0
+      ],
+      [
+        "honey",
+        0
+      ],
+      [
+        "A cheese roll, please",
+        1
+      ],
+      [
+        "a roll of honey",
+        2
+      ],
+      [
+        "I roll of honey",
+        2
+      ],
+      [
+        "bread",
+        3
+      ],
+      [
+        "Bread, please",
+        3
+      ],
+      [
+        "Can I have some bread?",
+        3
+      ],
+      [
+        "A loaf of bread, please",
+        3
+      ],
+      [
+        "Two loaves, please",
+        3
+      ],
+      [
+        "two breads",
+        3
+      ],
+      [
+        "An apple pie, please",
+        4
+      ],
+      [
+        "pie",
+        4
+      ],
+      [
+        "Can I have a pie?",
+        4
+      ],
+      [
+        "Two apple pies",
+        4
+      ],
+      [
+        "bread and an apple pie",
+        null
+      ],
+      [
+        "cheese, please, and a honey roll",
+        null
+      ],
+      [
+        "sorry?",
+        null
+      ]
+    ],
+    "how-many": [
+      [
+        "Just one, please",
+        0
+      ],
+      [
+        "One loaf",
+        0
+      ],
+      [
+        "Two, please",
+        1
+      ],
+      [
+        "Two loaves",
+        1
+      ],
+      [
+        "two roll",
+        2
+      ]
+    ],
+    "anything-else": [
+      [
+        "Yes, a loaf of bread, please",
+        0
+      ],
+      [
+        "bread",
+        0
+      ],
+      [
+        "No, that's all, thanks",
+        1
+      ],
+      [
+        "Nothing",
+        1
+      ],
+      [
+        "two breads",
+        2
+      ],
+      [
+        "An apple pie, too",
+        3
+      ],
+      [
+        "No, an apple pie",
+        3
+      ],
+      [
+        "pie",
+        3
+      ],
+      [
+        "And a honey roll",
+        4
+      ],
+      [
+        "A cheese roll, too",
+        5
+      ],
+      [
+        "cheese",
+        5
+      ]
+    ],
+    "pay": [
+      [
+        "Here you go",
+        0
+      ],
+      [
+        "Thank you so much",
+        1
+      ],
+      [
+        "Thanks you",
+        2
+      ]
+    ]
+  },
   "bakery-02": {
     "usual": [
       [
@@ -40,6 +198,26 @@ const TRIES: Record<string, Record<string, [string, number | null][]>> = {
       [
         "No, a cheese roll today",
         1
+      ],
+      [
+        "Not today. A loaf of bread, please",
+        3
+      ],
+      [
+        "Can I have some bread?",
+        3
+      ],
+      [
+        "Yes, a loaf of bread",
+        3
+      ],
+      [
+        "An apple pie today",
+        4
+      ],
+      [
+        "pie",
+        4
       ]
     ],
     "name": [
@@ -261,26 +439,46 @@ const TRIES: Record<string, Record<string, [string, number | null][]>> = {
       ],
       [
         "Do you have tea?",
-        0
+        3
       ],
       [
         "Can I have tea?",
-        0
+        3
       ],
       [
         "Do you have milk?",
-        0
+        5
       ],
       [
         "Water, please",
-        0
+        4
       ],
       [
         "I want a coffee",
-        0
+        5
       ],
       [
         "Do you have apple juice?",
+        0
+      ],
+      [
+        "A cup of tea, please",
+        3
+      ],
+      [
+        "Just water, please",
+        4
+      ],
+      [
+        "Some lemonade?",
+        5
+      ],
+      [
+        "A hot chocolate with milk",
+        1
+      ],
+      [
+        "Orange juice",
         0
       ]
     ],
@@ -304,6 +502,18 @@ const TRIES: Record<string, Record<string, [string, number | null][]>> = {
       [
         "Can I have some bread?",
         1
+      ],
+      [
+        "Do you have any rolls?",
+        1
+      ],
+      [
+        "Can I have some pie?",
+        3
+      ],
+      [
+        "A piece of apple pie",
+        3
       ]
     ],
     "pay": [
@@ -318,6 +528,26 @@ const TRIES: Record<string, Record<string, [string, number | null][]>> = {
       [
         "A tea too, please",
         1
+      ],
+      [
+        "A hot chocolate, too",
+        2
+      ],
+      [
+        "Some bread, too",
+        3
+      ],
+      [
+        "And some soup",
+        4
+      ],
+      [
+        "A piece of pie",
+        5
+      ],
+      [
+        "Nothing, thanks",
+        0
       ]
     ],
     "closing": [
@@ -617,7 +847,31 @@ const TRIES: Record<string, Record<string, [string, number | null][]>> = {
       ],
       [
         "Juice, please",
-        1
+        3
+      ],
+      [
+        "A cup of tea",
+        2
+      ],
+      [
+        "Tea, please",
+        2
+      ],
+      [
+        "An orange juice, please",
+        3
+      ],
+      [
+        "Just water",
+        4
+      ],
+      [
+        "Some soup, please",
+        5
+      ],
+      [
+        "Hot chocolate with milk",
+        0
       ]
     ],
     "bread": [
@@ -782,5 +1036,43 @@ describe("D-54 nas 5 missões", () => {
     expect(closingModel(mission("tavern-03"), "I from Brazil and I liked the soup.")).toMatchObject({ kind: "recast", corrected: "I'm from Brazil" });
     expect(closingModel(mission("bakery-02"), "Hi Rosa, I from Brazil.")).toMatchObject({ kind: "recast", corrected: "I'm from Brazil" });
     expect(closingModel(mission("tavern-02"), "How much cost the pancakes?")).toMatchObject({ kind: "recast", corrected: "How much is it" });
+  });
+});
+
+describe("D-57: o pedido aberto aceita os itens do local, e a reação repete o item", () => {
+  const m = mission("bakery-01");
+  const order = m.nodes.find((n) => n.id === "order")!;
+
+  it('"bread" no pedido da Tilda casa com o pão inteiro, a Tilda diz "A loaf of bread!" e o relatório mostra o jeito natural', () => {
+    const hit = matchReply(order.replies, "bread", m.target);
+    expect(hit?.index).toBe(3);
+    expect(hit?.pass).toBe("exact");
+    expect(order.replies[3]!.reaction!.text).toMatch(/^A loaf of bread!/);
+    expect(naturalWay(m, { node: "order", said: "bread" })).toMatchObject({ kind: "model", text: "Can I have a loaf of bread, please?" });
+    expect(naturalWay(m, { node: "order", said: "A loaf of bread, please" })).toEqual({ kind: "natural" });
+  });
+
+  it("depois de pedir pão ou torta, as falas seguintes não falam de pãezinhos", () => {
+    const after = ["how-many", "anything-else", "pay"].map((id) => m.nodes.find((n) => n.id === id)!);
+    for (const node of after) {
+      expect(node.text, node.id).not.toMatch(/\brolls?\b/i);
+      node.replies.filter((r) => !r.flawed && !/roll/i.test(r.text)).forEach((r) => expect(r.reaction?.text ?? "", r.text).not.toMatch(/\brolls?\b/i));
+    }
+  });
+
+  it.each([
+    ["bakery-01", "order"],
+    ["bakery-01", "anything-else"],
+    ["bakery-02", "usual"],
+    ["tavern-01", "drink"],
+    ["tavern-01", "food"],
+    ["tavern-01", "pay"],
+    ["tavern-03", "drink"],
+  ])("%s/%s: cada resposta boa com item repete o trecho-chave na reação", (id, nodeId) => {
+    const node = mission(id).nodes.find((n) => n.id === nodeId)!;
+    for (const r of node.replies.filter((x) => !x.flawed)) {
+      expect(r.chunk, r.text).toBeDefined();
+      expect(r.reaction!.text.toLowerCase(), r.text).toContain((r.echo ?? r.chunk)!.toLowerCase());
+    }
   });
 });

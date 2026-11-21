@@ -50,6 +50,20 @@
           "recast": { "original": "two honey roll", "corrected": "Two honey rolls" },
           "reaction": { "text": "Two honey rolls, coming right up!", "translation": "Dois pãezinhos de mel, saindo!" },
           "pattern": "en.plural_s"
+        },
+        {
+          "text": "Not today. Can I have a loaf of bread?",
+          "translation": "Hoje não. Pode me dar um pão inteiro?",
+          "keywords": [["loaf"], ["loaves"], ["bread"], ["loaf of bread"]],
+          "chunk": "a loaf of bread",
+          "reaction": { "text": "A loaf of bread today? Something new. Here you go!", "translation": "Um pão inteiro hoje? Novidade. Aqui está!" }
+        },
+        {
+          "text": "I'd like an apple pie today.",
+          "translation": "Hoje eu queria uma torta de maçã.",
+          "keywords": [["pie"], ["pies"], ["apple"], ["apple pie"]],
+          "chunk": "an apple pie",
+          "reaction": { "text": "Oh, an apple pie today? Good choice, dear!", "translation": "Ah, uma torta de maçã hoje? Boa escolha, meu bem!" }
         }
       ]
     },
@@ -146,8 +160,8 @@
       "id": "bye",
       "speaker": "tilda",
       "emotion": "happy",
-      "text": "Here are your rolls. See you tomorrow?",
-      "translation": "Aqui estão os seus pães. Até amanhã?",
+      "text": "Here you go, dear. See you tomorrow?",
+      "translation": "Aqui está, meu bem. Até amanhã?",
       "replies": [
         {
           "text": "Yes! See you tomorrow, Tilda.",

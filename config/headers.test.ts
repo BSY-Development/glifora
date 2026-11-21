@@ -37,7 +37,7 @@ describe("previewHeaders", () => {
   it("lê o public/_headers de verdade: CSP completa e cache dos ativos", () => {
     const text = readFileSync("public/_headers", "utf8");
     const all = previewHeaders(text);
-    expect(all["Content-Security-Policy"]).toContain("connect-src 'self';");
+    expect(all["Content-Security-Policy"]).toContain("connect-src 'self' https://generativelanguage.googleapis.com/v1beta/models/;");
     expect(all["Content-Security-Policy"]).toContain("trusted-types glifora-sw");
     expect(Object.keys(all)).toContain("Strict-Transport-Security");
     expect(parseHeadersFile(text)["/assets/*"]?.["Cache-Control"]).toBe("public, max-age=31536000, immutable");
