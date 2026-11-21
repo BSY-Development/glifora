@@ -8,6 +8,9 @@ export const BAKERY_REPLIES = [GREET, "Can I have a honey roll, please?", "Two, 
 export const CLOSING_OWN = "Can I have a cheese roll, please?";
 export const MODEL_ANSWER = "Can I have two cheese rolls, please?";
 
+/** Espera a session gravar o passo antes de recarregar ou navegar: a gravação é solta e a navegação aborta a transação aberta (corrida no CI). */
+export { sessionAt } from "../../e2e-security/support/w2";
+
 export async function onboard(page: Page): Promise<void> {
   await page.goto("/welcome");
   await page.getByRole("button", { name: /Let's go|Começar/ }).click();

@@ -3,7 +3,7 @@
 // repetição no mesmo dia, "De cor" e os caminhos sem voz. Dono: Revisor. Interface em inglês (locale en-US).
 import { expect, test, type Page } from "@playwright/test";
 import { installSpeech, queueSpeech, spokenLines } from "./support/speech";
-import { answerAllByText, BAKERY_REPLIES, CLOSING_OWN, MODEL_ANSWER, next, onboard, setUi, skipListen, startMission, type, xpTotal } from "./support/play";
+import { answerAllByText, BAKERY_REPLIES, CLOSING_OWN, MODEL_ANSWER, next, onboard, sessionAt, setUi, skipListen, startMission, type, xpTotal } from "./support/play";
 
 test.use({ viewport: { width: 360, height: 640 }, locale: "en-US" });
 
@@ -221,6 +221,7 @@ test.describe("rodada retomável e repetição", () => {
     await startMission(page, "phrase");
     await answerAllByText(page, BAKERY_REPLIES.slice(0, 2));
     await expect(page.locator("p.hint", { hasText: "Line 3 of 5" })).toBeVisible();
+    await sessionAt(page, "ask", 2);
     await page.reload();
     await expect(page.getByRole("heading", { name: "You were in the middle of this mission" })).toBeVisible();
     await page.getByRole("button", { name: "Continue where I stopped" }).click();
@@ -238,6 +239,7 @@ test.describe("rodada retomável e repetição", () => {
     await onboard(page);
     await startMission(page, "phrase");
     await answerAllByText(page, BAKERY_REPLIES.slice(0, 1));
+    await sessionAt(page, "ask", 1);
     await page.goto("/play/bakery-01");
     await page.getByRole("button", { name: "Start over" }).click();
     await page.getByRole("button", { name: "Start", exact: true }).click();

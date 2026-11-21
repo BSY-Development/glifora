@@ -3,7 +3,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { installSpeech } from "./support/speech";
-import { answerAllByText, BAKERY_REPLIES, CLOSING_OWN, next, onboard, startMission, type, type ModeName } from "./support/play";
+import { answerAllByText, BAKERY_REPLIES, CLOSING_OWN, next, onboard, sessionAt, startMission, type, type ModeName } from "./support/play";
 import { idbAll, idbPut } from "../e2e-security/support/w2";
 
 test.use({ viewport: { width: 360, height: 640 }, locale: "en-US" });
@@ -206,6 +206,7 @@ test.describe("missão em andamento na vila", () => {
     await expect(page.getByText("Mission in progress")).toHaveCount(0);
     await startMission(page, "phrase");
     await answerAllByText(page, BAKERY_REPLIES.slice(0, 2));
+    await sessionAt(page, "ask", 2);
     await page.goto("/");
     const card = page.locator(".resume-card");
     await expect(card).toBeVisible();

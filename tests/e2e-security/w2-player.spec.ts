@@ -93,6 +93,7 @@ test.describe("voltar e avançar do navegador", () => {
     await onboard(page);
     await startMission(page, "phrase");
     await type(page, BAKERY_REPLIES[0]);
+    await sessionAt(page, "react", 1); // a gravação é solta: voltar antes dela aborta a transação
     await page.goBack();
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     await page.goForward();
