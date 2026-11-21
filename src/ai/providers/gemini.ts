@@ -89,7 +89,7 @@ export function classifyHttpError(status: number, body: unknown): AiErrorKind {
 export function scrubKey(text: string, key: string | null): string {
   let out = text;
   if (key) out = out.replace(new RegExp(key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"), "[key]");
-  return out.replace(/aiza[A-Za-z0-9_-]{8,}/gi, "[key]");
+  return out.replace(/aiza[A-Za-z0-9_-]{8,}/gi, "[key]").replace(/\bAQ\.[A-Za-z0-9._-]{8,}/gi, "[key]");
 }
 
 /** A mensagem do Google como texto puro de uma linha, até 200 caracteres, sem nenhum trecho parecido com a key. */

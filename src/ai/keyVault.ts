@@ -10,8 +10,16 @@ export const PROVIDERS: readonly ProviderId[] = ["gemini"];
 const PREFIX = "glifora.key.v1.";
 const memory = new Map<ProviderId, string>();
 
-/** Chaves de API de verdade: letras, números, "-" e "_"; o limite barra lixo e cabeçalho forjado. */
-const SHAPE = /^[A-Za-z0-9_-]{20,200}$/;
+/**
+ * Chaves de API de verdade: letras, números, ".", "-" e "_" (as keys novas do AI Studio têm ponto, como "AQ.…";
+ * sem o ponto, a key do dono era recusada em 2026-11-20). O limite barra lixo e cabeçalho forjado (":" e quebra de linha não passam).
+ */
+const SHAPE = /^[A-Za-z0-9._-]{20,200}$/;
+
+/** Tira todo espaço, quebra de linha e caractere invisível que o celular cola junto (a key não tem nenhum). */
+export function cleanKey(key: string): string {
+  return key.replace(/[\s\u200B-\u200D\u2060\uFEFF]/g, "");
+}
 
 export function storageName(provider: ProviderId): string {
   return `${PREFIX}${provider}`;
@@ -31,7 +39,7 @@ function current(provider: ProviderId): string | null {
 }
 
 export function isValidKeyShape(key: string): boolean {
-  return SHAPE.test(key.trim());
+  return SHAPE.test(cleanKey(key));
 }
 
 /**
@@ -39,7 +47,7 @@ export function isValidKeyShape(key: string): boolean {
  * `remember: true` → localStorage. Devolve `false` se a key tem formato impossível ou se o aparelho não deixou guardar.
  */
 export function setKey(provider: ProviderId, key: string, remember: boolean): boolean {
-  const clean = key.trim();
+  const clean = cleanKey(key);
   if (!SHAPE.test(clean)) return false;
   memory.set(provider, clean);
   try {

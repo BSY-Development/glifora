@@ -1,7 +1,7 @@
 // Ajustes › IA (opcional) (D-56): guia para pegar a key grátis do Gemini, onde a key fica, salvar, testar e apagar.
 // O campo é de senha, não controlado e limpo ao salvar: a key nunca entra no estado do React nem em nenhum texto da tela.
 import { useRef, useState, type FormEvent } from "react";
-import { clearLastProblem, eraseKey, keyInfo, loadLastProblem, saveKey, testKey, type AiProblem } from "../../services/ai";
+import { clearLastProblem, eraseKey, keyInfo, keyLooksValid, loadLastProblem, saveKey, testKey, type AiProblem } from "../../services/ai";
 import { AiProblemNotice } from "../AiProblemNotice";
 import { ChoiceGroup } from "../ChoiceGroup";
 import { PageTitle } from "../PageTitle";
@@ -31,8 +31,9 @@ export function AiSettings() {
     input.value = ""; // limpo já ao salvar, com sucesso ou não
     setProblem(null);
     if (value.trim() === "") return;
-    const ok = saveKey(value, where === "device");
-    setNote(ok ? { tone: "ok", key: "ai.save.done" } : { tone: "error", key: where === "device" ? "ai.save.failed" : "ai.save.invalid" });
+    // Formato primeiro: "não deu para guardar" só quando a key é válida e o aparelho recusou (antes, key de formato novo caía aqui).
+    const ok = keyLooksValid(value) && saveKey(value, where === "device");
+    setNote(ok ? { tone: "ok", key: "ai.save.done" } : { tone: "error", key: keyLooksValid(value) ? "ai.save.failed" : "ai.save.invalid" });
     setInfo(keyInfo());
     setLast(loadLastProblem());
   }

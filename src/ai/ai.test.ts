@@ -4,7 +4,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AiError } from "./errors";
 import { clearKey, hasKey, isRemembered, maskedKey, setKey, storageName, withKey } from "./keyVault";
-import { classifyHttpError, GEMINI_MODEL, GEMINI_ORIGIN } from "./providers/gemini";
+import { classifyHttpError, GEMINI_MODEL, GEMINI_ORIGIN, scrubKey } from "./providers/gemini";
 import { plainUtterance, UTTERANCE_CLOSE, UTTERANCE_OPEN, wrapUtterance } from "./structured";
 import { buildReviewPrompt, maskName, reviewReport, type ReviewInput, type ReviewTurnInput } from "./tasks/reviewReport";
 
@@ -53,6 +53,21 @@ describe("cofre da key", () => {
     expect(maskedKey("gemini")).toBeNull();
   });
 
+  it("aceita a key de formato novo do AI Studio (com ponto) e tira espaço, quebra de linha e invisível colados (dono, 2026-11-20)", () => {
+    const novo = "AQ.Ab8RN6FAKE-0123456789_abcdefghijklmnop";
+    expect(setKey("gemini", novo, false)).toBe(true);
+    expect(maskedKey("gemini")).toBe("••••mnop");
+    expect(setKey("gemini", `\u200B ${novo.slice(0, 20)}\n${novo.slice(20)} `, true)).toBe(true);
+    expect(localStorage.getItem("glifora.key.v1.gemini")).toBe(novo);
+    expect(setKey("gemini", `${novo}:x`, false)).toBe(false);
+  });
+
+  it("scrubKey esconde as keys de formato antigo ('AIza…') e novo ('AQ.…') mesmo sem saber a key", () => {
+    expect(scrubKey("bad key AQ.Ab8RN6FAKE-0123456789 here", null)).toBe("bad key [key] here");
+    expect(scrubKey("bad key AIzaFAKE0123456789 here", null)).toBe("bad key [key] here");
+    expect(scrubKey("AQUA. is fine", null)).toBe("AQUA. is fine");
+  });
+
   it("withKey sem key lança no_key", async () => {
     await expect(withKey("gemini", async (k) => k)).rejects.toMatchObject({ kind: "no_key" });
   });
@@ -87,7 +102,7 @@ describe("classificação dos erros (status HTTP e error.status/reason)", () => 
 describe("fala da pessoa", () => {
   it("teto, controle e invisíveis; marcadores nunca sobram", () => {
     expect(plainUtterance("a".repeat(500), 100)).toHaveLength(100);
-    expect(plainUtterance("oi\n‮evil​  x", 100)).toBe("oi evil x");
+    expect(plainUtterance("oi\n‮evil\u200B  x", 100)).toBe("oi evil x");
     expect(wrapUtterance("<b>", 100)).toBe(`${UTTERANCE_OPEN}b${UTTERANCE_CLOSE}`);
   });
 });

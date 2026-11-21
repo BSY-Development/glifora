@@ -46,19 +46,19 @@ test("a key mascarada mostra só os 4 últimos e o resto da key não está em lu
   expect(await page.evaluate(() => document.title)).not.toContain("AIza");
 });
 
-test("espaços em volta são aceitos e tirados; espaço no meio, <script>, quebra de linha e 100 mil caracteres são recusados e o campo esvazia", async ({ page }) => {
+test("espaços e quebras de linha colados são tirados (key do dono, 2026-11-20); <script>, cabeçalho forjado, símbolo, bidi, NUL e 100 mil caracteres são recusados e o campo esvazia", async ({ page }) => {
   const problems = watch(page);
   await open(page);
   const mock = await mockGemini(page, () => ({ json: gemini("OK") }));
   const f = field(page);
-  for (const bad of ["AIza Sy-qa_fake0Sy-qa_fake0Sy-qa", "<script>alert(1)</script>AAAAAAAAAAAA", `${FAKE_KEY}\r\nX-Evil: 1`, "A".repeat(100_000), "AIza‮Sy-qa_fake0Sy-qa_fake0Sy", `${FAKE_KEY}\u0000`]) {
+  for (const bad of ["AIza+Sy-qa_fake0Sy-qa_fake0Sy-qa", "<script>alert(1)</script>AAAAAAAAAAAA", `${FAKE_KEY}\r\nX-Evil: 1`, "A".repeat(100_000), "AIza‮Sy-qa_fake0Sy-qa_fake0Sy", `${FAKE_KEY}\u0000`]) {
     await f.fill(bad);
     await page.getByRole("button", { name: "Save the key" }).click();
     await expect(page.getByText("That key does not look right")).toBeVisible();
     expect(await f.inputValue()).toBe("");
     await expect(page.getByText(/Saved key/)).toHaveCount(0);
   }
-  await f.fill(`   ${FAKE_KEY}  `);
+  await f.fill(`   ${FAKE_KEY.slice(0, 12)} ${FAKE_KEY.slice(12)}  `);
   await page.getByRole("button", { name: "Save the key" }).click();
   await expect(page.getByText(`Saved key: ••••${FAKE_KEY.slice(-4)}`)).toBeVisible();
   expect(mock.calls).toHaveLength(0);
