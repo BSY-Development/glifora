@@ -26,7 +26,8 @@ export {
   type Step,
   type TodayLevels,
 } from "./play";
-export { coinsFor, helpOf, levelAt, masteryOf, repeatFactor, rulesV1, runDegree, totalAt, unlocksAt, xpFor } from "./rules.v1";
+export type { DegreeWhy } from "./rules.v1";
+export { coinsFor, degreeWhy, helpOf, levelAt, masteryOf, repeatFactor, rulesV1, runDegree, totalAt, unlocksAt, xpFor } from "./rules.v1";
 export { closingLevel, firstId, planRun, repeatOf, repeatsFor, runEventId, starId, type PlanRunInput, type PlannedEvent, type RunPlan } from "./run";
 export { longestGapDays, streak } from "./streak";
 export {

@@ -3,6 +3,7 @@
 import type { MessageKey, Params } from "../i18n";
 import type { AiProblem, ReviewItem } from "../services/ai";
 import type { Report } from "../services/play";
+import { degreeText } from "./degreeText";
 
 type Translate = (key: MessageKey, params?: Params) => string;
 
@@ -13,21 +14,25 @@ export function clean(text: string): string {
   return text.replace(UNSAFE, " ").replace(/\s+/g, " ").trim();
 }
 
-export function reportText(report: Report, t: Translate, review: readonly ReviewItem[] | null = null, problem: { kind: AiProblem; detail?: string | undefined } | null = null): string {
-  const { run, mission, stars, conversationXp, prizeXp, after, lines, closingWay } = report;
+export function reportText(report: Report, t: Translate, review: readonly ReviewItem[] | null = null, problem: { kind: AiProblem; detail?: string | undefined } | null = null, locale = "pt-BR"): string {
+  const { run, mission, stars, conversationXp, prizeXp, after, lines, closingWay, why } = report;
   const out: string[] = [t("report.copy.header"), t("report.copy.mission", { title: clean(mission.title) }), clean(run.canDo ? t("report.cando.yes") : t("report.cando.no"))];
   out.push(clean(mission.can_do));
-  out.push(t("report.stars", { n: stars }));
+  out.push(t("report.stars", { n: stars }), degreeText(t, why, locale));
   out.push(t("report.xp.total", { n: conversationXp + prizeXp }));
   out.push(t("report.level", { n: after.level, title: t(`hud.title.${after.title}`) }));
 
   if (lines.length > 0) {
     out.push("", t("report.said.title"));
-    lines.forEach((line, i) => {
-      out.push(`${i + 1}. ${t("report.said.you", { said: clean(line.said ?? "") })}`);
+    for (const line of lines) {
+      if (line.input === "tap") {
+        out.push(`${line.turn}. ${t("report.said.tap")}`);
+        continue;
+      }
+      out.push(`${line.turn}. ${t("report.said.you", { said: clean(line.said ?? "") })}${line.help > 0 ? ` (${t("report.said.help")})` : ""}`);
       if (line.way.kind === "recast") out.push(`   ${t("report.said.recast", { text: clean(line.way.text) })}`);
       if (line.way.kind === "model") out.push(`   ${t("report.said.model", { text: clean(line.way.text) })}`, `   ${clean(line.way.translation)}`);
-    });
+    }
   }
 
   const closing = run.closing;

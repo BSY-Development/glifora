@@ -9,6 +9,7 @@ import { AiProblemNotice } from "../AiProblemNotice";
 import { Loading } from "../Loading";
 import { PageTitle } from "../PageTitle";
 import { useQuoted } from "../Quoted";
+import { degreeText } from "../degreeText";
 import { reportText } from "../reportText";
 import { useLocale, useT } from "../useT";
 
@@ -57,12 +58,12 @@ export function Report() {
     );
   }
 
-  const { run, lines, closingWay, mission, stars, starsBefore, conversationXp, prizeXp, patterns, words, before, after, next } = report;
+  const { run, lines, why, closingWay, mission, stars, starsBefore, conversationXp, prizeXp, patterns, words, before, after, next } = report;
   const leveledUp = after.level > before.level;
   const newTitle = after.title !== before.title;
   const closing = run.closing;
   const items = reviewItems(runId);
-  const text = reportText(report, t, items, aiState === "problem" && ai.problem && items === null ? { kind: ai.problem, detail: ai.detail } : null);
+  const text = reportText(report, t, items, aiState === "problem" && ai.problem && items === null ? { kind: ai.problem, detail: ai.detail } : null, locale);
 
   async function reviewWithAi() {
     if (!report) return;
@@ -118,6 +119,7 @@ export function Report() {
           <span>{t("report.stars", { n: stars })}</span>
           {stars > starsBefore && <strong className="badge">{t("report.stars.new")}</strong>}
         </p>
+        <p className="degree-why">{degreeText(t, why, locale)}</p>
       </section>
 
       <section aria-labelledby="xp-title">
@@ -138,8 +140,15 @@ export function Report() {
           <ol className="plain-list">
             {lines.map((line, i) => (
               <li key={`${line.node}-${i}`} className="report-item">
-                <p className="report-item-title">{t("report.said.turn", { n: i + 1 })}</p>
-                <p>{quoted("report.said.you", { said: line.said ?? "" }, mission.target)}</p>
+                <p className="report-item-title">{t("report.said.turn", { n: line.turn })}</p>
+                {line.input === "tap" ? (
+                  <p className="hint">{t("report.said.tap")}</p>
+                ) : (
+                  <>
+                    <p>{quoted("report.said.you", { said: line.said ?? "" }, mission.target)}</p>
+                    {line.help > 0 && <p className="hint">{t("report.said.help")}</p>}
+                  </>
+                )}
                 {line.way.kind === "recast" && <p>{quoted("report.said.recast", { text: line.way.text }, mission.target)}</p>}
                 {line.way.kind === "model" && (
                   <>

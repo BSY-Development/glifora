@@ -400,3 +400,9 @@ Proposta do dono. Muda a fase 7 e acrescenta itens às fases 4, 5 e 8. Nada é i
   - **Cancelar:** descarta tudo, inclusive um resultado que chegue logo depois do toque. Sem envio, sem aviso, sem erro, sem ajuda, sem passo.
 - **Foco:** vai para Enviar ao começar a ouvir; depois de cancelar, volta ao botão do microfone, em "Tocar e falar". Sair da tela continua abortando.
 - **Código:** `listen()` ganhou o `stopSignal` opcional; o `stop()` tem espera máxima de 3 s pelo fim do reconhecedor.
+
+### D-59 — O relatório explica a estrela da rodada (2026-11-21) · aceita (dono)
+- **Por quê:** o dono jogou "de cor", ficou com ★★ e achou que tinha a 1ª e a 3ª. A regra está certa (as estrelas são degraus, D-49), mas o relatório não dizia o que a rodada provou.
+- **O que mostra:** perto das estrelas, uma linha com a estrela que **esta rodada** provou e por que não a seguinte, por exemplo "Esta rodada valeu ★★. A ajuda apareceu nas falas 2 e 4. Para ★★★: de cor, com ajuda em no máximo 1 fala." Os outros motivos: tocar nas opções, fecho sem ser dito ou digitado, fecho com a resposta-modelo, rodada sem falas.
+- **Sem regra duplicada:** a conta é o `degreeWhy` do motor (junto do `runDegree`, mesmos `helpOf` e folga de 1 fala a cada 5), testado em vitest. A tela só traduz o motivo em frase.
+- **Falas:** em "O que você disse" ganham a marca "com ajuda" (ajuda > 0) ou "tocou numa opção"; a numeração é a da rodada. O "Copiar relatório" leva a linha e as marcas.

@@ -8,6 +8,7 @@ import {
   repeatOf,
   rulesV1,
   runDegree,
+  degreeWhy,
   streak,
   totalAt,
   unlocksAt,
@@ -468,5 +469,50 @@ describe("conquistas (§5.4)", () => {
     expect(earned({ activeDays: 30 })).toEqual(["days_30"]);
     expect(earned({ longestGapDays: 7 })).toEqual(["comeback"]);
     expect(earned({ bestStreak: 7 })).toEqual(["streak_7"]);
+  });
+});
+
+describe("degreeWhy: por que a rodada valeu a estrela que valeu", () => {
+  const run = (answers: RunAnswer[], closing?: RunClosing) => ({ answers, closing });
+  const mixed = (helps: Record<number, Scaffold>, n = 5): RunAnswer[] => Array.from({ length: n }, (_, i) => ans("voice", helps[i] ?? 0, `f${i}`));
+  it("★★★: nada a explicar", () => {
+    expect(degreeWhy(run(six("voice", 0), own))).toEqual({ degree: 3, reason: "done" });
+  });
+  it("★★ de cor com ajuda em 2 falas: diz quais (a partir de 1) e a folga", () => {
+    expect(degreeWhy(run(mixed({ 1: 1, 3: 1 }), own))).toEqual({ degree: 2, reason: "help", turns: [2, 4], max: 1, next: 3 });
+  });
+  it("com 1 ajuda em 5 falas é ★★★ (dentro da folga)", () => {
+    const answers = mixed({ 1: 1 });
+    expect(runDegree(run(answers, own))).toBe(3);
+    expect(degreeWhy(run(answers, own)).degree).toBe(3);
+  });
+  it("sem folga (menos de 5 falas): max 0", () => {
+    expect(degreeWhy(run(mixed({ 2: 1 }, 4), own))).toEqual({ degree: 2, reason: "help", turns: [3], max: 0, next: 3 });
+  });
+  it("★ com a frase na tela: o que falta é a ideia (próxima ★★)", () => {
+    expect(degreeWhy(run(mixed({ 0: 2, 4: 2 }), own))).toEqual({ degree: 1, reason: "help", turns: [1, 5], max: 1, next: 2 });
+  });
+  it("tocar nas opções: sem estrela, fala quais", () => {
+    expect(degreeWhy(run([ans("tap", 3, "a"), ans("tap", 3, "b"), ans("voice", 0, "c")], own))).toEqual({ degree: 0, reason: "taps", turns: [1, 2], max: 0, next: 1 });
+  });
+  it("fecho tocado ou ausente", () => {
+    expect(degreeWhy(run(six("voice", 0), tapClosing))).toEqual({ degree: 0, reason: "closing_none" });
+    expect(degreeWhy(run(six("voice", 0)))).toEqual({ degree: 0, reason: "closing_none" });
+  });
+  it("fecho que não valeu", () => {
+    expect(degreeWhy(run(six("voice", 0), { input: "typed", accepted: false, usedModel: false }))).toEqual({ degree: 0, reason: "closing_failed" });
+  });
+  it("fecho com a resposta-modelo", () => {
+    expect(degreeWhy(run(six("voice", 0), modelClosing))).toEqual({ degree: 1, reason: "closing_model" });
+  });
+  it("rodada sem falas", () => {
+    expect(degreeWhy(run([], own))).toEqual({ degree: 0, reason: "empty" });
+  });
+  it("sempre concorda com o runDegree", () => {
+    for (const closing of [undefined, own, modelClosing, tapClosing]) {
+      for (const input of ["voice", "tap"] as const) {
+        for (const sc of [0, 1, 2, 3] as const) expect(degreeWhy(run(six(input, sc), closing)).degree).toBe(runDegree(run(six(input, sc), closing)));
+      }
+    }
   });
 });

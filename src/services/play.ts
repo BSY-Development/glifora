@@ -5,8 +5,10 @@ import { list as listCatalog, load as loadCatalog, loadNpc, loadPatterns, type C
 import { appendEvent, appendRun, clearSession, listEvents, listRuns, loadSession, localDay, saveSession, type Run } from "../data";
 import {
   answersOf,
+  degreeWhy,
   deriveProgress,
   effectiveMode,
+  helpOf,
   masteryOf,
   parseState,
   paysFullToday,
@@ -16,6 +18,7 @@ import {
   start,
   suggestedMode,
   todayLevels,
+  type DegreeWhy,
   type Mode,
   type PlayState,
   type Progress,
@@ -306,6 +309,10 @@ export interface ReportPattern {
 /** Uma fala da rodada no relatório: o que a pessoa disse e o que mostrar ao lado (D-55). */
 export interface ReportLine {
   node: string;
+  /** A posição da fala na rodada, a partir de 1 (as falas sem texto guardado também contam). */
+  turn: number;
+  /** Nível de ajuda desta fala (`helpOf`): 0 de cor, 1 com a ideia, 2 com a frase na tela, 3 tocou. */
+  help: number;
   /** Falta em rodadas antigas e nos toques. */
   said?: string;
   input: "voice" | "typed" | "tap";
@@ -316,6 +323,8 @@ export interface Report {
   run: Run;
   /** Cada fala em que a pessoa disse algo, na ordem da rodada. */
   lines: ReportLine[];
+  /** Por que a rodada valeu as estrelas que valeu (mesma conta do motor). */
+  why: DegreeWhy;
   /** A frase do fecho com o que mostrar ao lado (só quando a pessoa disse uma frase). */
   closingWay: SaidWay | null;
   mission: Mission;
@@ -373,9 +382,11 @@ export async function loadReport(runId: string): Promise<Report | null> {
     const after1 = siblings[siblings.findIndex((e) => e.id === mission.id) + 1];
     if (after1) next = { kind: "mission", id: after1.id, title: after1.title };
   }
-  const lines: ReportLine[] = run.answers.flatMap((a): ReportLine[] =>
-    a.said === undefined || a.input === "tap" ? [] : [{ node: a.node, said: a.said, input: a.input, way: wayOfAnswer(mission, { node: a.node, reply: a.reply, said: a.said }) }],
-  );
+  const lines: ReportLine[] = run.answers.flatMap((a, i): ReportLine[] => {
+    const base = { node: a.node, turn: i + 1, help: helpOf(a) };
+    if (a.input === "tap") return [{ ...base, input: "tap", way: { kind: "natural" } }];
+    return a.said === undefined ? [] : [{ ...base, said: a.said, input: a.input, way: wayOfAnswer(mission, { node: a.node, reply: a.reply, said: a.said }) }];
+  });
   const closingWay = run.closing && run.closing.input !== "tap" ? wayOfClosing(mission, run.closing.text) : null;
-  return { run, lines, closingWay, mission, stars, starsBefore, conversationXp: run.xp, prizeXp, patterns, words, before, after, next };
+  return { run, lines, why: degreeWhy(run), closingWay, mission, stars, starsBefore, conversationXp: run.xp, prizeXp, patterns, words, before, after, next };
 }

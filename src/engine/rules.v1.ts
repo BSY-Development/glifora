@@ -113,6 +113,31 @@ export function runDegree(run: Pick<RunSummary, "answers" | "closing">): number 
   return 0;
 }
 
+/** Por que a rodada valeu as estrelas que valeu e o que faltou para a seguinte (o relatório explica, sem regra duplicada na tela). */
+export type DegreeWhy =
+  | { degree: 3; reason: "done" }
+  | { degree: 0; reason: "empty" | "closing_none" | "closing_failed" }
+  | { degree: 0 | 1; reason: "taps"; turns: number[]; max: number; next: 1 | 2 }
+  | { degree: 1; reason: "closing_model" }
+  | { degree: 1 | 2; reason: "help"; turns: number[]; max: number; next: 2 | 3 };
+
+/** Mesma conta do `runDegree`. `turns`: as falas (a partir de 1, na ordem da rodada) com ajuda demais; `max`: a folga de falas. */
+export function degreeWhy(run: Pick<RunSummary, "answers" | "closing">): DegreeWhy {
+  const degree = runDegree(run);
+  const n = run.answers.length;
+  if (degree === 3) return { degree: 3, reason: "done" };
+  if (n === 0) return { degree: 0, reason: "empty" };
+  const closing = run.closing;
+  const max = Math.floor(n / 5);
+  const turnsWhere = (over: (h: number) => boolean): number[] => run.answers.flatMap((a, i) => (over(helpOf(a)) ? [i + 1] : []));
+  const produced = closing !== undefined && closing.input !== "tap" && (closing.accepted || closing.usedModel);
+  if (!produced) return { degree: 0, reason: closing !== undefined && closing.input !== "tap" ? "closing_failed" : "closing_none" };
+  if (degree === 0) return { degree: 0, reason: "taps", turns: turnsWhere((h) => h > 2), max, next: 1 };
+  if (!(closing!.accepted && !closing!.usedModel)) return { degree: 1, reason: "closing_model" };
+  if (degree === 1) return { degree: 1, reason: "help", turns: turnsWhere((h) => h > 1), max, next: 2 };
+  return { degree: 2, reason: "help", turns: turnsWhere((h) => h > 0), max, next: 3 };
+}
+
 /** O maior degrau entre as rodadas concluídas da missão. Nunca desce. */
 export function masteryOf(runs: readonly RunSummary[]): number {
   return runs.reduce((best, run) => Math.max(best, runDegree(run)), 0);
