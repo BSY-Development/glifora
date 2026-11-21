@@ -74,7 +74,7 @@ Data: ____ · Aparelho/versão: ____ (commit: ____)
 
 ## Sessão 2 — Teste de lembrar e mais uma missão (outro dia)
 
-Data: ____
+Data: 21/11/2026 (parcial: o dono parou no fim do dia; a sessão continua amanhã)
 
 **Primeiro, o teste de lembrar (3 a 5 min):**
 1. Abra o jogo, vá à **Padaria** e entre em **"Pão quentinho"**. **Antes de qualquer outra coisa**, escolha **De cor** (★★★) e jogue sem ajuda.
@@ -94,10 +94,14 @@ Data: ____
 - **Irritou?**
 
 **Ficha da sessão 2 (1 min):**
-- Quis continuar? (sim/não e por quê): ____
-- Quero voltar amanhã? (0 a 10): ____
-- Lembrei sem ver: ____ de ____ falas (bakery-01, "Pão quentinho")
-- O que irritou: ____
+- Quis continuar? (sim/não e por quê): ____ (falta o dono)
+- Quero voltar amanhã? (0 a 10): ____ (falta o dono)
+- Lembrei sem ver: ____ de 5 falas (bakery-01, "Pão quentinho"). Pelo relatório, a rodada "De cor" valeu ★★ e a ajuda apareceu em 2 das 5 falas, ou seja 3 de 5 sem ajuda (deduzido; o dono confirma o "de primeira").
+- O que irritou:
+  - eram dois toques para enviar a fala e não havia como descartar uma fala gaguejada (virou a W2-26: botões Enviar e Cancelar, no ar);
+  - a rodada "De cor" deu ★★ sem dizer por quê, e a sugestão "3ª estrela: de cor" pareceu errada (virou a W2-27: o relatório explica a estrela da rodada);
+  - a key nova do AI Studio ("AQ.") era recusada (hotfix be3c77d).
+- O que funcionou: a revisão com IA (key do dono) respeitou as frases certas e corrigiu só as erradas ("Good can I have…", "row of honey" → "honey roll"); o reconhecimento entendeu "roll" como "row" uma vez.
 
 ---
 
@@ -197,7 +201,7 @@ Passa se as duas respostas forem **sim**. Quem decide é você, não o número: 
 | Sessão | Dia | Quis continuar? | Voltar amanhã (0–10) | Lembrei sem ver | O que irritou |
 | --- | --- | --- | --- | --- | --- |
 | 1 | | | | — | |
-| 2 | | | | de | |
+| 2 | 21/11 (parcial) | (falta) | (falta) | 3 de 5 sem ajuda (deduzido) | dois toques para enviar; ★★ sem explicação; key "AQ." recusada |
 | 3 | | | | de | |
 | 4 | | | | de | |
 | 5 | | | | de / de | |
