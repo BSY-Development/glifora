@@ -38,6 +38,9 @@ export interface BuildResult {
 /** Teto de caracteres de uma fala da NPC por nível (W0-03 §5.4): frases curtas, um pouco acima do nível. */
 export const LINE_MAX: Record<Cefr, number> = { A1: 80, A2: 120, B1: 160, B2: 220, C1: 220, C2: 220 };
 
+/** Mínimo de modelos do fecho nas embutidas (`model_answer` + `models`; o schema deixa até 4). */
+export const MODELS_MIN = 2;
+
 const MISSION_PATH = /^missions\/([^/]+)\/([^/]+)\/([^/]+)\.json$/;
 
 function zodIssues(file: string, error: { issues: readonly { path: readonly PropertyKey[]; message: string }[] }): ContentIssue[] {
@@ -96,7 +99,11 @@ export function alcoholIssues(file: string, json: unknown): ContentIssue[] {
  * Regras de qualidade só das missões embutidas, além do schema:
  * - teto de caracteres da fala por nível;
  * - fala amigável à voz do navegador: sem dígito, símbolo ou emoji, e com pontuação no fim;
- * - a resposta-modelo também sem dígito (a pessoa repete em voz alta).
+ * - a resposta-modelo e os outros modelos do fecho também sem dígito (a pessoa repete em voz alta);
+ * - recast implícito (D-54): toda resposta boa que não é livre tem `chunk` (o parseMission confere que a
+ *   reação da NPC repete o trecho);
+ * - o fecho tem de 2 a 4 modelos (`model_answer` e `models`), para o modelo combinar com o que a pessoa
+ *   disse.
  * O vocativo ", {player}" (D-53) sai antes: a conferência 8 do parseMission já cuida dele, e a fala tem
  * de ficar boa também sem apelido.
  */
@@ -107,10 +114,24 @@ export function qualityIssues(file: string, m: Mission): ContentIssue[] {
   for (const { path, text } of lines) {
     if (text.length > max) issues.push({ file, path, message: `fala com ${text.length} caracteres; o teto do ${m.level} é ${max}` });
   }
-  for (const { path, text } of [...lines, { path: "closing.model_answer.text", text: m.closing.model_answer.text }]) {
+  const models = [
+    { path: "closing.model_answer.text", text: m.closing.model_answer.text },
+    ...(m.closing.models ?? []).map((l, i) => ({ path: `closing.models[${i}].text`, text: l.text })),
+  ];
+  for (const { path, text } of [...lines, ...models]) {
     if (/\d/.test(text)) issues.push({ file, path, message: "escreva os números por extenso (a voz e o casamento ficam iguais)" });
     if (/[&/%*#@~<>[\]{}_|^$]|\p{Extended_Pictographic}/u.test(text)) issues.push({ file, path, message: "tire símbolos e emoji da fala" });
     if (!/[.!?]$/.test(text)) issues.push({ file, path, message: "termine a fala com . ! ou ?" });
+  }
+  m.nodes.forEach((n, i) =>
+    n.replies.forEach((r, j) => {
+      if (!r.flawed && !r.free && r.chunk === undefined) {
+        issues.push({ file, path: `nodes[${i}].replies[${j}].chunk`, message: "falta o chunk: o trecho-chave da resposta, que a reação da NPC repete (D-54)" });
+      }
+    }),
+  );
+  if (models.length < MODELS_MIN) {
+    issues.push({ file, path: "closing.models", message: `o fecho precisa de ${MODELS_MIN} a 4 modelos (model_answer e models), para combinar com o que a pessoa disse (D-54)` });
   }
   return issues;
 }

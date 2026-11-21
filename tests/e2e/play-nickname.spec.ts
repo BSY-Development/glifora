@@ -3,6 +3,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { installSpeech, spokenLines } from "./support/speech";
 import { skipListen, type } from "./support/play";
+import { idbAll, idbPut } from "../e2e-security/support/w2";
 
 test.use({ locale: "en-US", viewport: { width: 360, height: 640 } });
 
@@ -11,6 +12,13 @@ async function onboardAs(page: Page, nickname: string | null): Promise<void> {
   if (nickname !== null) await page.locator("main input[type=text]").first().fill(nickname);
   await page.locator("main button.btn-primary").first().click();
   await expect(page).toHaveURL(/\/$/);
+}
+
+/** Apelido que a regra nova (D-55) não deixa digitar, mas que perfis e arquivos antigos podem ter (a leitura aceita até 30). */
+async function seedNickname(page: Page, nickname: string): Promise<void> {
+  await onboardAs(page, null);
+  const row = (await idbAll(page, "docs")).find((d) => d["id"] === "profile")!;
+  await idbPut(page, "docs", { ...row, data: { ...(row["data"] as object), nickname }, updatedAt: Date.now() + 1000 });
 }
 
 async function noMarker(page: Page): Promise<void> {
@@ -59,7 +67,7 @@ test("sem apelido, a frase fica natural, sem vírgula solta nem marcador", async
 
 test("apelido com emoji: só a primeira palavra que vale vira nome falado; sem nenhuma, a NPC não usa nome", async ({ page }) => {
   await installSpeech(page, "ok");
-  await onboardAs(page, "Zé 😀");
+  await seedNickname(page, "Zé 😀"); // legado: hoje o campo recusa emoji
   await toLike(page);
   await expect(page.getByText("So, do you like it here, Zé?")).toBeVisible();
   await noMarker(page);
@@ -67,7 +75,7 @@ test("apelido com emoji: só a primeira palavra que vale vira nome falado; sem n
 
 test("apelido só de emoji: a NPC não usa nome e nada quebra", async ({ page }) => {
   await installSpeech(page, "ok");
-  await onboardAs(page, "😀");
+  await seedNickname(page, "😀");
   await toLike(page);
   await expect(page.getByText("So, do you like it here?")).toBeVisible();
   await noMarker(page);

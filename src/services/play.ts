@@ -26,6 +26,7 @@ import { getLocale } from "../i18n";
 import { fillPlayer, type ContentLang, type Mission, type Npc, type Pattern, type VocabItem } from "../schemas";
 import { loadPrefs, loadProfile } from "./player";
 import { getDb, getDeps } from "./storage";
+import { wayOfAnswer, wayOfClosing, type SaidWay } from "./said";
 import { tts } from "./voice";
 
 export type { Mode, PlayState, Step } from "../engine";
@@ -145,6 +146,19 @@ export async function prepare(missionId: string): Promise<PrepareResult> {
   };
 }
 
+/** A missão que ficou pela metade (a rodada guardada em `session`), para o cartão da vila. `null` se não há ou não dá para retomar. */
+export async function loadInProgress(): Promise<{ id: string; title: string } | null> {
+  try {
+    const row = await loadSession(getDb());
+    if (!row) return null;
+    const loaded = await loadCatalog(row.missionId);
+    if (!loaded.ok || parseState(loaded.mission, row.state) === null) return null;
+    return { id: loaded.mission.id, title: loaded.mission.title };
+  } catch {
+    return null;
+  }
+}
+
 /** Começa uma rodada nova (apaga a que estava guardada, de qualquer missão). */
 export function startRun(prepared: Prepared, mode: Mode): PlayState {
   const state = start(prepared.mission, { runId: getDeps().uuid(), day: prepared.day, mode: effectiveMode(mode, prepared.mission.kind) });
@@ -257,7 +271,10 @@ export async function finishRun(mission: Mission, state: PlayState): Promise<{ r
     replies: { good: state.steps.length - flawed, flawed, retry: state.retries },
     recasts: [...recasts].slice(0, 20).map(([pattern, count]) => ({ pattern, count })),
     words,
-    answers,
+    answers: answers.map(({ said, ...rest }) => {
+      const clean = said === undefined ? "" : plain(said, 100);
+      return clean ? { ...rest, said: clean } : rest;
+    }),
     closing: {
       text: plain(closing.text, 300) || plain(mission.closing.model_answer.text, 300) || "-",
       input: closing.input,
@@ -286,8 +303,21 @@ export interface ReportPattern {
   recast?: { original: string; corrected: string };
 }
 
+/** Uma fala da rodada no relatório: o que a pessoa disse e o que mostrar ao lado (D-55). */
+export interface ReportLine {
+  node: string;
+  /** Falta em rodadas antigas e nos toques. */
+  said?: string;
+  input: "voice" | "typed" | "tap";
+  way: SaidWay;
+}
+
 export interface Report {
   run: Run;
+  /** Cada fala em que a pessoa disse algo, na ordem da rodada. */
+  lines: ReportLine[];
+  /** A frase do fecho com o que mostrar ao lado (só quando a pessoa disse uma frase). */
+  closingWay: SaidWay | null;
   mission: Mission;
   /** Estrelas depois desta rodada e antes dela. */
   stars: number;
@@ -343,5 +373,9 @@ export async function loadReport(runId: string): Promise<Report | null> {
     const after1 = siblings[siblings.findIndex((e) => e.id === mission.id) + 1];
     if (after1) next = { kind: "mission", id: after1.id, title: after1.title };
   }
-  return { run, mission, stars, starsBefore, conversationXp: run.xp, prizeXp, patterns, words, before, after, next };
+  const lines: ReportLine[] = run.answers.flatMap((a): ReportLine[] =>
+    a.said === undefined || a.input === "tap" ? [] : [{ node: a.node, said: a.said, input: a.input, way: wayOfAnswer(mission, { node: a.node, reply: a.reply, said: a.said }) }],
+  );
+  const closingWay = run.closing && run.closing.input !== "tap" ? wayOfClosing(mission, run.closing.text) : null;
+  return { run, lines, closingWay, mission, stars, starsBefore, conversationXp: run.xp, prizeXp, patterns, words, before, after, next };
 }

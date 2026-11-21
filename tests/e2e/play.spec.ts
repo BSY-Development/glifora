@@ -110,7 +110,7 @@ test.describe("bakery-01 por texto", () => {
     await noPunishment(page);
     await type(page, MODEL_ANSWER);
     await page.getByRole("button", { name: "See the report" }).click();
-    await expect(page.getByText("Model answer")).toBeVisible();
+    await expect(page.getByText(/You said: .Can I have two cheese rolls/)).toBeVisible();
     await expect(page.getByText("Conversation: 52 XP")).toBeVisible(); // 40 + 12: o modelo paga menos que a frase própria
   });
 

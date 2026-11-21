@@ -1019,13 +1019,12 @@ mark.recast {
 }
 
 @keyframes levelup-pop {
+  /* Só a escala: opacidade ou cor no texto derrubariam o contraste em algum quadro. */
   0% {
     transform: scale(0.8);
-    opacity: 0;
   }
   60% {
     transform: scale(1.06);
-    opacity: 1;
   }
   100% {
     transform: scale(1);
@@ -1057,4 +1056,30 @@ mark.recast {
   margin: 0.25rem 0 0.75rem;
   font-family: ui-monospace, monospace;
   font-size: 0.85rem;
+}
+
+/* Missão em andamento na vila (W2-20): cartão compacto, cabe em 360×640 sem empurrar a rua para fora da tela. */
+.resume-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.75rem;
+  margin: 0.75rem 0;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid var(--accent, var(--border));
+  border-radius: 0.5rem;
+  background: var(--surface);
+}
+
+.resume-card-title {
+  flex: 1 0 100%;
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.resume-card-mission {
+  flex: 1 1 8rem;
+  margin: 0;
+  overflow-wrap: anywhere;
 }

@@ -96,7 +96,7 @@ describe("escuta e falas", () => {
     const { state, outcome } = step(m, asked, say("a cheese roll please"));
     expect(outcome).toEqual({ kind: "matched", reply: 1, alternative: 0 });
     expect(state.phase).toBe("react");
-    expect(state.steps).toEqual([{ node: "order", reply: 1, input: "typed", scaffold: 1 }]);
+    expect(state.steps).toEqual([{ node: "order", reply: 1, input: "typed", scaffold: 1, said: "a cheese roll please" }]);
     const after = run(state, { type: "next" });
     expect(after).toMatchObject({ phase: "ask", node: "pay", help: 1, fails: 0 });
   });
@@ -197,7 +197,10 @@ describe("XP na hora e na rodada", () => {
   });
   it("as respostas viram o que o motor grava", () => {
     const s = run(init(), { type: "next" }, { type: "next" }, say("honey"));
-    expect(answersOf(s)).toEqual([{ node: "order", input: "typed", scaffold: 0 }]);
+    expect(answersOf(s)).toEqual([{ node: "order", reply: 0, input: "typed", scaffold: 0, said: "honey" }]);
+    // o toque não tem fala: nada de `said`
+    const tapped = answersOf({ ...s, steps: [{ node: "order", reply: 0, input: "tap", scaffold: 3 }] });
+    expect(tapped).toEqual([{ node: "order", reply: 0, input: "tap", scaffold: 3 }]);
   });
 });
 

@@ -140,6 +140,25 @@ describe("build-index pega cada tipo de problema", () => {
     expect(messages(f.list).join(" | ")).toContain('o apelido entra só como ", {player}"');
   });
 
+  it("qualidade (D-54): resposta boa sem chunk, reação que não repete o trecho e fecho com menos de 2 modelos", () => {
+    const f = files();
+    delete f.get(BAKERY).nodes[1].replies[0].chunk;
+    expect(messages(f.list).join(" | ")).toContain("nodes[1].replies[0].chunk: falta o chunk");
+    const g = files();
+    g.get(BAKERY).nodes[1].replies[0].reaction.text = "Lovely! Those are new today.";
+    expect(messages(g.list).join(" | ")).toContain("não está na reação da NPC (D-54");
+    const h = files();
+    delete h.get(BAKERY).closing.models;
+    expect(messages(h.list).join(" | ")).toContain("o fecho precisa de 2 a 4 modelos");
+    const i = files();
+    i.get(BAKERY).closing.models[0].text = "Can I have 2 honey rolls?";
+    expect(messages(i.list).join(" | ")).toContain("closing.models[0].text: escreva os números por extenso");
+    // Resposta livre (nome) e resposta com erro não pedem chunk.
+    const ok = files();
+    expect(ok.get("missions/pt-BR_en/A1/bakery-02.json").nodes[1].replies[0].chunk).toBeUndefined();
+    expect(messages(ok.list)).toEqual([]);
+  });
+
   it("qualidade: bebida alcoólica em qualquer texto, em inglês ou português", () => {
     for (const spoil of [
       (m: Loose) => (m.nodes[1].replies[0].text = "Can I have a beer, please?"),

@@ -30,6 +30,10 @@ export interface RunAnswer {
   node: string;
   input: InputMode;
   scaffold: Scaffold;
+  /** Posição da resposta casada em `replies` da fala (para o jeito natural no relatório). Falta em rodadas antigas. */
+  reply?: number;
+  /** O que a pessoa disse ou digitou (texto puro, até SAID_MAX caracteres). Falta em rodadas antigas e nos toques. */
+  said?: string;
 }
 
 /** O fecho da rodada: como foi dito e se ficou com a frase própria. */

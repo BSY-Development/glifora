@@ -457,3 +457,92 @@ describe("formatPath", () => {
     expect(formatPath(["closing"])).toBe("closing");
   });
 });
+
+describe("D-54: trecho-chave (chunk/echo), recast na boca da pessoa (learner/local) e modelos do fecho", () => {
+  const withChunk = () => {
+    const m = loose(valid());
+    m.nodes[0].replies[0].chunk = "a honey roll";
+    m.nodes[0].replies[0].reaction.text = "A honey roll! Lovely, those are new today.";
+    return m;
+  };
+
+  it("campos novos são opcionais e válidos juntos", () => {
+    const m = withChunk();
+    m.nodes[0].replies[1].recast.learner = "two loaves of bread";
+    m.nodes[0].replies[1].recast.local = true;
+    m.closing.models = [{ text: "Can I have a honey roll, please?", translation: "Pode me dar um pão de mel?" }];
+    expect(issuesOf(m)).toEqual([]);
+    expect(issuesOf(valid())).toEqual([]);
+  });
+
+  it("chunk tem de estar no texto da resposta", () => {
+    const m = withChunk();
+    m.nodes[0].replies[0].chunk = "a cheese roll";
+    expect(hasIssue(issuesOf(m), "nodes[0].replies[0].chunk", "não está no texto da resposta")).toBe(true);
+  });
+
+  it("a reação repete o chunk (conferência 9), também com e sem apelido", () => {
+    const m = withChunk();
+    m.nodes[0].replies[0].reaction.text = "Lovely! Those are new today.";
+    expect(hasIssue(issuesOf(m), "nodes[0].replies[0].chunk", "não está na reação")).toBe(true);
+    const n = withChunk();
+    n.nodes[0].replies[0].reaction.text = "A honey, {player}, roll! Lovely.";
+    n.nodes[0].replies[0].reaction.translation = "Um pão, {player}, de mel! Que bom.";
+    expect(hasIssue(issuesOf(n), "nodes[0].replies[0].chunk", "não está na reação")).toBe(true);
+  });
+
+  it("echo: a reação repete o echo, e não o chunk, quando a NPC muda a pessoa do verbo", () => {
+    const m = loose(valid());
+    m.nodes[0].replies[0] = {
+      text: "I'm from Brazil.",
+      translation: "Sou do Brasil.",
+      keywords: [["from"]],
+      chunk: "I'm from",
+      echo: "you're from",
+      reaction: { text: "So you're from far away! Welcome.", translation: "Então você vem de longe! Bem-vindo(a)." },
+    };
+    expect(issuesOf(m)).toEqual([]);
+    m.nodes[0].replies[0].echo = "you are here";
+    expect(hasIssue(issuesOf(m), "nodes[0].replies[0].echo", "não está na reação")).toBe(true);
+  });
+
+  it("chunk não vale em resposta com erro nem livre; echo sem chunk e chunk sem reação não valem", () => {
+    const flawed = loose(valid());
+    flawed.nodes[0].replies[1].chunk = "two breads";
+    expect(hasIssue(issuesOf(flawed), "nodes[0].replies[1].chunk", "só vale em resposta boa")).toBe(true);
+    const free = loose(valid());
+    Object.assign(free.nodes[1].replies[0], { free: "name", chunk: "one", reaction: { text: "One. Here.", translation: "Um." } });
+    expect(hasIssue(issuesOf(free), "nodes[1].replies[0].chunk", "só vale em resposta boa")).toBe(true);
+    const echo = loose(valid());
+    echo.nodes[0].replies[0].echo = "honey";
+    expect(hasIssue(issuesOf(echo), "nodes[0].replies[0].echo", "só vale junto com chunk")).toBe(true);
+    const noReaction = loose(valid());
+    noReaction.nodes[1].replies[0].chunk = "Just one";
+    expect(hasIssue(issuesOf(noReaction), "nodes[1].replies[0].reaction", "precisa de reaction")).toBe(true);
+  });
+
+  it("chunk e echo têm teto de 80 caracteres; learner, de 200; campo desconhecido no recast é recusado", () => {
+    const m = withChunk();
+    m.nodes[0].replies[0].chunk = "x".repeat(81);
+    expect(issuesOf(m).some((i) => i.path === "nodes[0].replies[0].chunk")).toBe(true);
+    const n = loose(valid());
+    n.nodes[0].replies[1].recast.learner = "x".repeat(201);
+    expect(issuesOf(n).some((i) => i.path === "nodes[0].replies[1].recast.learner")).toBe(true);
+    const o = loose(valid());
+    o.nodes[0].replies[1].recast.anywhere = true;
+    expect(issuesOf(o).some((i) => i.path.startsWith("nodes[0].replies[1].recast"))).toBe(true);
+  });
+
+  it("closing.models: de 1 a 3, cada um com uma palavra-alvo (conferência 5), sem {player}", () => {
+    const line = (text: string) => ({ text, translation: "tradução" });
+    const m = loose(valid());
+    m.closing.models = [line("Can I have a cup of tea?")];
+    expect(hasIssue(issuesOf(m), "closing.models[0].text", "nenhuma das palavras-alvo")).toBe(true);
+    m.closing.models = [];
+    expect(issuesOf(m).some((i) => i.path === "closing.models")).toBe(true);
+    m.closing.models = [line("A honey roll."), line("A cheese roll."), line("A loaf of bread."), line("An apple pie.")];
+    expect(issuesOf(m).some((i) => i.path === "closing.models")).toBe(true);
+    m.closing.models = [{ text: "A honey roll, {player}.", translation: "Um pão de mel, {player}." }];
+    expect(hasIssue(issuesOf(m), "closing.models[0].text", "{player} só pode aparecer")).toBe(true);
+  });
+});

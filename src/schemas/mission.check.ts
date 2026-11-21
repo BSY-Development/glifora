@@ -6,11 +6,14 @@
 //      termina; a conferência que sobra é a de fala que nenhum caminho alcança.
 //   3. O texto de cada resposta casa com ela mesma no passe exato, sem empate com as irmãs.
 //   4. Com `flawed`: `recast.original` está no texto da resposta e `recast.corrected` está em `reaction.text`.
-//   5. `model_answer` contém uma das palavras-alvo (`closing.target_words` ou, se faltar, o vocabulário).
+//   5. `model_answer` e cada um dos `closing.models` contêm uma das palavras-alvo (`closing.target_words`
+//      ou, se faltar, o vocabulário).
 //   6. Todo `speaker` (escuta e falas) existe em `characters`.
 //   7. Resposta livre (D-51): no máximo uma por fala, e nunca com `flawed`.
 //   8. Apelido (D-53): `{player}` só nas falas das NPCs e nas traduções delas, sempre como ", {player}"
 //      depois de algum texto, e no mesmo número no texto e na tradução. Em qualquer outro campo, não.
+//   9. Trecho-chave (D-54): `chunk` está no texto da resposta, e `echo` (ou, sem ele, o `chunk`) está em
+//      `reaction.text`, com e sem apelido.
 //
 // Só na embutida: toda resposta tem `keywords`, A1–A2 tem escuta de pelo menos 2 falas e o id é slug.
 // Com o catálogo de erros em mãos, `pattern` precisa existir nele.
@@ -83,7 +86,7 @@ function stringLeaves(value: unknown, path: PropertyKey[] = [], out: [PropertyKe
   return out;
 }
 
-/** As conferências 1–8 (e as da origem) sobre uma missão que já passou no Zod. Lista vazia = tudo certo. */
+/** As conferências 1–9 (e as da origem) sobre uma missão que já passou no Zod. Lista vazia = tudo certo. */
 export function checkMission(m: Mission, options: MissionCheckOptions = {}): MissionIssue[] {
   const origin = options.origin ?? "builtin";
   const issues: MissionIssue[] = [];
@@ -137,6 +140,9 @@ export function checkMission(m: Mission, options: MissionCheckOptions = {}): Mis
     }),
   );
 
+  // Com e sem apelido (D-53): o vocativo não pode cair no meio do trecho que a NPC repete.
+  const inReaction = (reaction: string, needle: string) => [null, SAMPLE_NICKNAME].every((nick) => containsWords(fillPlayer(reaction, nick), needle, lang));
+
   // 4. Recast coerente com a resposta e com a reação.
   m.nodes.forEach((node, i) =>
     node.replies.forEach((r, j) => {
@@ -144,10 +150,20 @@ export function checkMission(m: Mission, options: MissionCheckOptions = {}): Mis
       if (!containsWords(r.text, r.recast.original, lang)) {
         add(["nodes", i, "replies", j, "recast", "original"], `"${r.recast.original}" não está no texto da resposta`);
       }
-      // Com e sem apelido (D-53): o vocativo não pode cair no meio da forma certa.
-      const reaction = r.reaction.text;
-      if (![null, SAMPLE_NICKNAME].every((nick) => containsWords(fillPlayer(reaction, nick), r.recast!.corrected, lang))) {
+      if (!inReaction(r.reaction.text, r.recast.corrected)) {
         add(["nodes", i, "replies", j, "recast", "corrected"], `"${r.recast.corrected}" não está na reação da NPC`);
+      }
+    }),
+  );
+
+  // 9. Trecho-chave da resposta boa: está na resposta e a NPC repete na reação.
+  m.nodes.forEach((node, i) =>
+    node.replies.forEach((r, j) => {
+      if (r.chunk === undefined || !r.reaction) return;
+      if (!containsWords(r.text, r.chunk, lang)) add(["nodes", i, "replies", j, "chunk"], `"${r.chunk}" não está no texto da resposta`);
+      const echo = r.echo ?? r.chunk;
+      if (!inReaction(r.reaction.text, echo)) {
+        add(["nodes", i, "replies", j, r.echo !== undefined ? "echo" : "chunk"], `"${echo}" não está na reação da NPC (D-54: a NPC repete o trecho-chave)`);
       }
     }),
   );
@@ -156,8 +172,13 @@ export function checkMission(m: Mission, options: MissionCheckOptions = {}): Mis
   const targets = closingTargets(m);
   if (targets.length === 0) {
     add(["closing", "target_words"], "o fecho precisa de target_words (ou de vocabulary)");
-  } else if (!checkClosingAnswer(targets, m.closing.model_answer.text, lang).accepted) {
-    add(["closing", "model_answer", "text"], "a resposta-modelo não tem nenhuma das palavras-alvo");
+  } else {
+    if (!checkClosingAnswer(targets, m.closing.model_answer.text, lang).accepted) {
+      add(["closing", "model_answer", "text"], "a resposta-modelo não tem nenhuma das palavras-alvo");
+    }
+    m.closing.models?.forEach((model, i) => {
+      if (!checkClosingAnswer(targets, model.text, lang).accepted) add(["closing", "models", i, "text"], "o modelo não tem nenhuma das palavras-alvo");
+    });
   }
 
   // 6. Quem fala existe em `characters`.

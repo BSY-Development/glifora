@@ -120,3 +120,24 @@ describe("idioma atual", () => {
     expect(getLocale()).toBe("pt-BR");
   });
 });
+
+describe("translate: nunca sobra '{marcador}' (D-55)", () => {
+  it("em dev e em teste, o parâmetro que falta lança, com a chave no erro", () => {
+    expect(() => translate("pt-BR", "report.level", { n: 2 })).toThrow(/\{title\}.*report\.level/);
+    expect(() => translate("pt-BR", "report.level")).toThrow(/\{n\}/);
+    expect(() => translate("en", "report.levelup.title", {})).toThrow(/\{title\}/);
+  });
+
+  it("com todos os parâmetros, nada sobra", () => {
+    expect(translate("pt-BR", "report.level", { n: 2, title: "Viajante" })).toBe("Nível 2 · Viajante");
+    expect(translate("en", "report.next.again.2.hint", { base: "English", target: "Portuguese" })).not.toMatch(/[{}]/);
+  });
+
+  it("um valor que contém chaves entra como texto (só o modelo é conferido)", () => {
+    expect(translate("en", "report.level", { n: 1, title: "{x}" })).toBe("Level 1 · {x}");
+  });
+
+  it("render sem strict continua devolvendo o marcador (usado nos testes de entrada hostil)", () => {
+    expect(render("en", "x {a} y", {})).toBe("x {a} y");
+  });
+});

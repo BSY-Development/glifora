@@ -32,13 +32,15 @@
           "text": "Yes, can I have a room, please?",
           "translation": "Sim, pode me dar um quarto, por favor?",
           "keywords": [["room"], ["yes"]],
-          "reaction": { "text": "Sure. I have a quiet one upstairs.", "translation": "Claro. Tenho um quietinho lá em cima." }
+          "chunk": "a room",
+          "reaction": { "text": "A room, sure. I have a quiet one upstairs.", "translation": "Um quarto, claro. Tenho um tranquilo lá em cima." }
         },
         {
           "text": "Do you have a small, cheap one?",
           "translation": "Tem um pequeno e baratinho?",
           "keywords": [["small"], ["cheap"], ["small room"], ["cheap room"]],
-          "reaction": { "text": "I have just the thing.", "translation": "Tenho o lugar certo." }
+          "chunk": "a small, cheap one",
+          "reaction": { "text": "A small, cheap one? I have just the thing.", "translation": "Um pequeno e barato? Tenho o ideal." }
         }
       ]
     },
@@ -60,7 +62,9 @@
           "text": "Just call me Alex.",
           "translation": "Pode me chamar de Alex. (diga o seu nome)",
           "keywords": [["call me"]],
-          "reaction": { "text": "Easy to remember. Good.", "translation": "Fácil de lembrar. Ótimo." }
+          "chunk": "call me",
+          "echo": "call you",
+          "reaction": { "text": "Easy. I'll call you that, then.", "translation": "Fácil. Vou te chamar assim, então." }
         }
       ]
     },
@@ -75,13 +79,15 @@
           "text": "Just one night.",
           "translation": "Só uma noite.",
           "keywords": [["one"], ["won"]],
+          "chunk": "one night",
           "reaction": { "text": "One night. Easy.", "translation": "Uma noite. Fácil." }
         },
         {
           "text": "Two nights, please.",
           "translation": "Duas noites, por favor.",
           "keywords": [["two"], ["to night"], ["to nights"], ["too night"], ["too nights"], ["three"], ["four"], ["five"], ["week"]],
-          "reaction": { "text": "Good. I'll write that down.", "translation": "Ótimo. Vou anotar." }
+          "chunk": "nights",
+          "reaction": { "text": "A few nights, then. Good. I'll write that down.", "translation": "Algumas noites, então. Bom. Vou anotar." }
         },
         {
           "text": "Three night, please.",
@@ -105,12 +111,14 @@
           "text": "How much is it?",
           "translation": "Quanto é?",
           "keywords": [["how much"], ["price"], ["cost"]],
-          "reaction": { "text": "Five coins a night. And breakfast is free.", "translation": "Cinco moedas por noite. E o café da manhã é de graça." }
+          "chunk": "How much",
+          "reaction": { "text": "How much? Five coins a night. And breakfast is free.", "translation": "Quanto? Cinco moedas por noite. E o café da manhã é de graça." }
         },
         {
           "text": "Is the room quiet?",
           "translation": "O quarto é silencioso?",
           "keywords": [["quiet"], ["noisy"]],
+          "chunk": "quiet",
           "reaction": { "text": "Very quiet. Only Pepper snores. And breakfast is free.", "translation": "Bem silencioso. Só a Pepper ronca. E o café da manhã é de graça." }
         },
         {
@@ -135,13 +143,15 @@
           "text": "Pancakes! What time is breakfast?",
           "translation": "Panquecas! Que horas é o café da manhã?",
           "keywords": [["what time"]],
-          "reaction": { "text": "At seven. Pepper wakes up everyone anyway.", "translation": "Às sete. A Pepper acorda todo mundo mesmo." }
+          "chunk": "What time",
+          "reaction": { "text": "What time? Seven o'clock. Pepper wakes up everyone anyway.", "translation": "Que horas? Às sete. A Pepper acorda todo mundo mesmo." }
         },
         {
           "text": "Don't worry, I always get up early.",
           "translation": "Pode deixar, eu sempre acordo cedo.",
           "keywords": [["early"], ["worry"]],
-          "reaction": { "text": "An early bird. I like that. Breakfast is at seven.", "translation": "Madrugador. Gosto disso. O café da manhã é às sete." }
+          "chunk": "get up early",
+          "reaction": { "text": "You get up early? An early bird. I like that. Breakfast is at seven.", "translation": "Você levanta cedo? Madrugador(a). Gosto disso. O café é às sete." }
         },
         {
           "text": "What hour is breakfast?",
@@ -164,21 +174,23 @@
         {
           "text": "Yes, at seven o'clock, please.",
           "translation": "Sim, às sete horas, por favor.",
-          "keywords": [["yes"], ["seven"], ["six"], ["eight"], ["nine"]],
-          "reaction": { "text": "Right. I'll knock. Twice, if I have to.", "translation": "Certo. Eu bato. Duas vezes, se precisar." }
+          "keywords": [["yes"],["seven"],["sure"],["okay"],["ok"],["please"]],
+          "chunk": "at seven o'clock",
+          "reaction": { "text": "At seven o'clock, then. I'll knock. Twice, if I have to.", "translation": "Às sete, então. Eu bato. Duas vezes, se precisar." }
         },
         {
           "text": "No, thanks. I have an alarm.",
           "translation": "Não, obrigado(a). Eu tenho despertador.",
           "keywords": [["alarm"], ["no"], ["no thanks"], ["get up"]],
-          "reaction": { "text": "Fine. But Pepper is louder than any alarm.", "translation": "Tudo bem. Mas a Pepper é mais barulhenta que qualquer despertador." }
+          "chunk": "an alarm",
+          "reaction": { "text": "An alarm? Fine. But Pepper is louder than any alarm.", "translation": "Um despertador? Tudo bem. Mas a Pepper é mais alta que qualquer despertador." }
         },
         {
           "text": "Yes, in seven o'clock.",
           "translation": "Sim, às sete horas.",
           "flawed": true,
           "keywords": [["in seven"], ["on seven"]],
-          "recast": { "original": "in seven o'clock", "corrected": "At seven o'clock" },
+          "recast": { "original": "in seven o'clock", "corrected": "At seven o'clock", "local": true },
           "reaction": { "text": "At seven o'clock? Right. I'll knock.", "translation": "Às sete horas? Certo. Eu bato." },
           "pattern": "en.prep_time"
         }
@@ -190,6 +202,11 @@
     "target_words": ["pancakes", "pancake", "honey", "cheese", "roll", "bread", "pie", "eggs", "egg", "juice", "tea", "milk", "chocolate", "soup"],
     "hint": "Diga o que você quer comer ou beber, por exemplo com \"Can I have...?\" ou \"I'd like...\".",
     "model_answer": { "text": "Can I have two pancakes and an orange juice, please?", "translation": "Pode me dar duas panquecas e um suco de laranja, por favor?" },
+    "models": [
+      { "text": "I'd like some eggs and a cup of tea, please.", "translation": "Eu queria uns ovos e uma xícara de chá, por favor." },
+      { "text": "Can I have a honey roll and some milk, please?", "translation": "Pode me dar um pãozinho de mel e um pouco de leite, por favor?" },
+      { "text": "Pancakes, please! And a hot chocolate.", "translation": "Panquecas, por favor! E um chocolate quente." }
+    ],
     "success": { "text": "Done. I'll get it ready. Sleep well, {player}!", "translation": "Combinado. Vou deixar pronto. Durma bem, {player}!" }
   },
   "vocabulary": [

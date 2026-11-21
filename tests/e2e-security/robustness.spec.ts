@@ -207,13 +207,13 @@ test("trocar o idioma no meio de uma edição do apelido não perde o rascunho n
   await start(page, "Ana");
   await page.goto("/profile");
   const field = page.getByLabel(/Apelido|Nickname/).first();
-  await field.fill("x".repeat(31));
+  await field.fill("x".repeat(15));
   await page.getByRole("button", { name: "Salvar apelido" }).click();
   await expect(page.getByRole("alert").first()).toBeVisible();
   await page.getByRole("group", { name: "Idioma da interface" }).getByRole("radio", { name: "English" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(/Your profile/);
-  await expect(page.getByLabel(/Nickname/).first()).toHaveValue("x".repeat(31));
-  await expect(page.getByRole("alert").first()).toContainText(/30/); // a mensagem de erro também troca de idioma
+  await expect(page.getByLabel(/Nickname/).first()).toHaveValue("x".repeat(15));
+  await expect(page.getByRole("alert").first()).toContainText(/10/); // a mensagem (D-55: limite de 10) de erro também troca de idioma
   expect(errors).toEqual([]);
 });
 

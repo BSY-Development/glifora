@@ -18,7 +18,12 @@ export interface Step {
   reply: number;
   input: InputMode;
   scaffold: Scaffold;
+  /** O que a pessoa disse ou digitou (a alternativa do reconhecedor que casou); falta no toque. */
+  said?: string;
 }
+
+/** Teto, em caracteres, do que se guarda do que a pessoa disse em cada fala (D-55). */
+export const SAID_MAX = 100;
 
 export interface Finish extends RunClosing {
   /** O que a pessoa disse ou digitou (ou a resposta-modelo, se tocou para seguir). */
@@ -134,6 +139,7 @@ export function isRealDay(day: unknown): day is string {
 }
 
 const clip = (s: string): string => s.slice(0, 300);
+const clipSaid = (s: string): string => Array.from(s).slice(0, SAID_MAX).join("");
 
 /**
  * Um passo. Entrada fora de hora é ignorada (`none`): o botão errado nunca quebra a rodada. Nunca trava e nunca tira XP:
@@ -170,8 +176,8 @@ function next(mission: Mission, state: PlayState): { state: PlayState; outcome: 
   return { state, outcome: NONE };
 }
 
-function matched(state: PlayState, replyIndex: number, input: InputMode, scaffold: Scaffold, alternative = 0): { state: PlayState; outcome: Outcome } {
-  const stepDone: Step = { node: state.node, reply: replyIndex, input, scaffold };
+function matched(state: PlayState, replyIndex: number, input: InputMode, scaffold: Scaffold, alternative = 0, said?: string): { state: PlayState; outcome: Outcome } {
+  const stepDone: Step = { node: state.node, reply: replyIndex, input, scaffold, ...(said ? { said: clipSaid(said) } : {}) };
   return { state: { ...state, phase: "react", steps: [...state.steps, stepDone], fails: 0 }, outcome: { kind: "matched", reply: replyIndex, alternative } };
 }
 
@@ -189,7 +195,7 @@ function say(mission: Mission, state: PlayState, input: { input: "voice" | "type
     const node = nodeOf(mission, state.node);
     if (!node) return { state, outcome: NONE };
     const hit = matchReply(node.replies, heard, mission.target);
-    if (hit) return matched(state, hit.index, input.input, state.help, hit.alternative);
+    if (hit) return matched(state, hit.index, input.input, state.help, hit.alternative, heard[hit.alternative] ?? heard[0]);
     const fails = state.fails + 1;
     const raised = fails % FAILS_PER_RAISE === 0 && state.help < 3;
     return {
@@ -219,7 +225,7 @@ function finishClosing(state: PlayState, closing: Finish): { state: PlayState; o
 
 // ---------- O que a rodada entrega ----------
 
-export const answersOf = (state: PlayState): RunAnswer[] => state.steps.map(({ node, input, scaffold }) => ({ node, input, scaffold }));
+export const answersOf = (state: PlayState): RunAnswer[] => state.steps.map(({ node, reply, input, scaffold, said }) => ({ node, reply, input, scaffold, ...(said ? { said } : {}) }));
 
 /** Quantas respostas foram dadas (para "fala 2 de 5"). */
 export const progressOf = (mission: Mission, state: PlayState): { done: number; total: number } => ({ done: state.steps.length, total: mission.nodes.length });
@@ -281,7 +287,8 @@ export function parseState(mission: Mission, raw: unknown): PlayState | null {
     const n = nodeOf(mission, s["node"]);
     if (!n || !isInt(s["reply"], 0, n.replies.length - 1) || !isInt(s["scaffold"], 0, 3)) return null;
     if (typeof s["input"] !== "string" || !(INPUTS as readonly string[]).includes(s["input"])) return null;
-    parsedSteps.push({ node: s["node"], reply: s["reply"], input: s["input"] as InputMode, scaffold: s["scaffold"] as Scaffold });
+    const said = typeof s["said"] === "string" ? clipSaid(s["said"]) : "";
+    parsedSteps.push({ node: s["node"], reply: s["reply"], input: s["input"] as InputMode, scaffold: s["scaffold"] as Scaffold, ...(said ? { said } : {}) });
   }
   let finish: Finish | undefined;
   if (closing !== undefined) {

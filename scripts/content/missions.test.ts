@@ -4,7 +4,7 @@
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { checkClosingAnswer, closingTargets, matchReply, parseMission, type Mission } from "../../src/schemas/index.ts";
+import { checkClosingAnswer, closingModel, closingModels, closingTargets, matchReply, naturalWay, parseMission, type Mission } from "../../src/schemas/index.ts";
 import { readContentDir } from "./lib.ts";
 
 const contentDir = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "content");
@@ -227,6 +227,10 @@ const TRIES: Record<string, Record<string, [string, number | null][]>> = {
       ],
       [
         "I'm Brazilian",
+        0
+      ],
+      [
+        "I'm staying here for a while",
         1
       ],
       [
@@ -711,3 +715,72 @@ for (const [id, nodes] of Object.entries(TRIES)) {
     }
   });
 }
+
+// ---------------------------------------------------------------- D-54 nas missões reais
+
+const ALL = ["bakery-01", "bakery-02", "tavern-01", "tavern-02", "tavern-03"];
+
+describe("D-54: a sessão 1 do dono na bakery-01", () => {
+  const m = mission("bakery-01");
+  const order = m.nodes.find((n) => n.id === "order")!;
+
+  it.each([
+    ["I roll of honey", 2], // a fala que o reconhecedor do Chrome devolveu
+    ["a roll of honey", 2],
+    ["one roll of honey", 2],
+    ["can I have one roll of honey", 2],
+    ["I role of honey", 2],
+    ["a roll a honey please", 2],
+    ["honey", 0],
+    ["a honey roll", 0],
+  ])("order: %j → %i", (said, want) => {
+    expect(matchReply(order.replies, said, m.target)?.index).toBe(want);
+  });
+
+  it('o recast: "I roll of honey" → "A honey roll", e a Tilda diz a forma certa', () => {
+    expect(naturalWay(m, { node: "order", said: "I roll of honey" })).toMatchObject({ kind: "recast", original: "A roll of honey", corrected: "A honey roll" });
+    expect(order.replies[2]!.reaction!.text).toContain("A honey roll");
+  });
+
+  it('quem disse só "honey" ouve "A honey roll!" na reação e vê o modelo no relatório', () => {
+    expect(order.replies[0]!.reaction!.text).toBe("A honey roll! Lovely, those are new today.");
+    expect(naturalWay(m, { node: "order", said: "honey" })).toMatchObject({ kind: "model", text: "Can I have a honey roll, please?" });
+  });
+
+  it('fecho: "Can I have one roll of honey?" → recast "A honey roll"; sem o erro, o modelo do pãozinho de mel', () => {
+    expect(closingModel(m, "Can I have one roll of honey?")).toMatchObject({ kind: "recast", corrected: "A honey roll" });
+    expect(closingModel(m, "Can I have one honey roll?")).toMatchObject({ kind: "model", text: "Can I have a honey roll, please?" });
+    expect(closingModel(m, "A loaf of bread")).toMatchObject({ kind: "model", text: "I'd like a loaf of bread, please." });
+    expect(closingModel(m, "Two cheese rolls")).toMatchObject({ kind: "model", text: "Can I have two cheese rolls, please?" });
+  });
+});
+
+describe("D-54 nas 5 missões", () => {
+  for (const id of ALL) {
+    const m = mission(id);
+    it(`${id}: dizer o texto de cada resposta boa é natural; o da resposta com erro dá o recast na boca da pessoa`, () => {
+      for (const node of m.nodes) {
+        node.replies.forEach((r, j) => {
+          const way = naturalWay(m, { node: node.id, said: r.text });
+          if (r.flawed) expect(way, r.text).toEqual({ kind: "recast", original: r.recast!.original, corrected: r.recast!.learner ?? r.recast!.corrected, node: node.id, reply: j });
+          else expect(way, r.text).toEqual({ kind: "natural" });
+        });
+      }
+    });
+
+    it(`${id}: o fecho tem de 2 a 4 modelos, e repetir cada um é natural`, () => {
+      const models = closingModels(m);
+      expect(models.length).toBeGreaterThanOrEqual(2);
+      expect(models.length).toBeLessThanOrEqual(4);
+      for (const model of models) expect(closingModel(m, model.text), model.text).toEqual({ kind: "natural" });
+    });
+  }
+
+  it("erros que dependem da pergunta (local) não viram recast no fecho; os outros viram, na boca da pessoa", () => {
+    expect(closingModel(mission("tavern-03"), "I eat honey rolls every day.")).toMatchObject({ kind: "model" });
+    expect(closingModel(mission("tavern-01"), "Good night! Some soup, please.")).toMatchObject({ kind: "model" });
+    expect(closingModel(mission("tavern-03"), "I from Brazil and I liked the soup.")).toMatchObject({ kind: "recast", corrected: "I'm from Brazil" });
+    expect(closingModel(mission("bakery-02"), "Hi Rosa, I from Brazil.")).toMatchObject({ kind: "recast", corrected: "I'm from Brazil" });
+    expect(closingModel(mission("tavern-02"), "How much cost the pancakes?")).toMatchObject({ kind: "recast", corrected: "How much is it" });
+  });
+});

@@ -31,13 +31,15 @@
           "text": "It was great, thanks!",
           "translation": "Foi ótimo, obrigado(a)!",
           "keywords": [["great"], ["good"], ["nice"], ["amazing"], ["wonderful"]],
-          "reaction": { "text": "Oh, I'm so happy to hear that!", "translation": "Ah, que bom ouvir isso!" }
+          "chunk": "It was",
+          "reaction": { "text": "Oh, it was a good day? I'm so happy to hear that!", "translation": "Ah, foi um dia bom? Fico tão feliz em saber!" }
         },
         {
           "text": "Busy, but really fun.",
           "translation": "Corrido, mas bem divertido.",
           "keywords": [["busy"], ["fun"], ["tired"]],
-          "reaction": { "text": "Ha! New places, new faces. That's a lot.", "translation": "Rá! Lugar novo, gente nova. É muita coisa." }
+          "chunk": "Busy",
+          "reaction": { "text": "Busy, of course! New places, new faces. That's a lot.", "translation": "Corrido, claro! Lugares novos, rostos novos. É muita coisa." }
         },
         {
           "text": "Oh, was a great day!",
@@ -61,20 +63,23 @@
           "text": "I had a honey roll this morning.",
           "translation": "Comi um pãozinho de mel de manhã.",
           "keywords": [["had"], ["ate"]],
-          "reaction": { "text": "Good. But tonight, you try my soup.", "translation": "Ótimo. Mas hoje você prova a minha sopa." }
+          "chunk": "I had",
+          "echo": "you had",
+          "reaction": { "text": "Oh, you had breakfast? Good. But tonight, you try my soup.", "translation": "Ah, você tomou café? Bom. Mas hoje à noite você prova a minha sopa." }
         },
         {
           "text": "Nothing yet. I'm really hungry!",
           "translation": "Nada ainda. Estou morrendo de fome!",
           "keywords": [["nothing"], ["hungry"]],
-          "reaction": { "text": "Then you need my soup. Right now.", "translation": "Então você precisa da minha sopa. Agora mesmo." }
+          "chunk": "hungry",
+          "reaction": { "text": "Hungry? Then you need my soup. Right now.", "translation": "Com fome? Então você precisa da minha sopa. Agora mesmo." }
         },
         {
           "text": "I eat a honey roll this morning.",
           "translation": "Comi um pãozinho de mel de manhã.",
           "flawed": true,
           "keywords": [["i eat"], ["i eated"]],
-          "recast": { "original": "I eat", "corrected": "You ate" },
+          "recast": { "original": "I eat", "corrected": "You ate", "learner": "I ate", "local": true },
           "reaction": { "text": "Oh, you ate already? Good. But tonight, you try my soup.", "translation": "Ah, já comeu? Ótimo. Mas hoje você prova a minha sopa." },
           "pattern": "en.past_simple"
         }
@@ -91,12 +96,15 @@
           "text": "I'm from Brazil.",
           "translation": "Eu sou do Brasil.",
           "keywords": [["i am from"], ["from"], ["brazil"]],
-          "reaction": { "text": "I knew it. You're too nice to be from around here.", "translation": "Eu sabia. Você é gente boa demais para ser daqui." }
+          "chunk": "I'm from",
+          "echo": "you're from",
+          "reaction": { "text": "So you're from far away! See, Bram? I knew it.", "translation": "Então você vem de longe! Viu, Bram? Eu sabia." }
         },
         {
           "text": "I'm Brazilian. It's very far away.",
           "translation": "Sou brasileiro(a). É bem longe.",
           "keywords": [["brazilian"], ["far away"]],
+          "chunk": "far away",
           "reaction": { "text": "Far away. And still you found the best soup. Smart.", "translation": "Bem longe. E mesmo assim achou a melhor sopa. Boa escolha." }
         },
         {
@@ -104,7 +112,7 @@
           "translation": "Eu sou do Brasil.",
           "flawed": true,
           "keywords": [["i from brazil"]],
-          "recast": { "original": "I from Brazil", "corrected": "You're from Brazil" },
+          "recast": { "original": "I from Brazil", "corrected": "You're from Brazil", "learner": "I'm from Brazil" },
           "reaction": { "text": "You're from Brazil? I knew it. Welcome, friend.", "translation": "Você é do Brasil? Eu sabia. Boas-vindas." },
           "pattern": "en.verb_be"
         }
@@ -121,13 +129,16 @@
           "text": "Can I have a hot chocolate, please?",
           "translation": "Pode me dar um chocolate quente, por favor?",
           "keywords": [["chocolate"]],
-          "reaction": { "text": "The usual. You're a regular now.", "translation": "O de sempre. Agora você já é de casa." }
+          "chunk": "a hot chocolate",
+          "reaction": { "text": "A hot chocolate. The usual! You're a regular now.", "translation": "Um chocolate quente. O de sempre! Agora você é freguês(a)." }
         },
         {
           "text": "Do you have any milk?",
           "translation": "Tem leite?",
           "keywords": [["milk"], ["juice"], ["tea"]],
-          "reaction": { "text": "Of course. Coming right up.", "translation": "Claro. Saindo já." }
+          "chunk": "Do you have",
+          "echo": "we have",
+          "reaction": { "text": "Yes, we have some. Coming right up.", "translation": "Temos, sim. Já vai." }
         }
       ]
     },
@@ -142,13 +153,17 @@
           "text": "Yes, please! I love your bread.",
           "translation": "Quero, sim! Eu adoro o seu pão.",
           "keywords": [["love"], ["yes"], ["pieces"], ["piece"], ["some"]],
-          "reaction": { "text": "Oh, you're so sweet! Did you hear that, Bram?", "translation": "Ah, que fofura! Ouviu isso, Bram?", "emotion": "proud" }
+          "chunk": "your bread",
+          "echo": "my bread",
+          "reaction": { "text": "Here you go. Everyone loves my bread! Did you hear that, Bram?", "translation": "Aqui está. Todo mundo adora o meu pão! Ouviu isso, Bram?", "emotion": "proud" }
         },
         {
           "text": "No, thanks. I'm full.",
           "translation": "Não, obrigado(a). Estou satisfeito(a).",
           "keywords": [["full"], ["no"]],
-          "reaction": { "text": "Full already? Bram's soup is too big.", "translation": "Já encheu? A sopa do Bram é grande demais." }
+          "chunk": "I'm full",
+          "echo": "you're full",
+          "reaction": { "text": "You're full already? Bram's soup is too big.", "translation": "Já está cheio(a)? A sopa do Bram é grande demais." }
         },
         {
           "text": "Yes, two breads, please!",
@@ -172,19 +187,23 @@
           "text": "I liked the bakery, of course!",
           "translation": "Gostei da padaria, é claro!",
           "keywords": [["bakery"], ["roll"], ["rolls"]],
-          "reaction": { "text": "Oh, I knew it! Ha!", "translation": "Ah, eu sabia! Rá!", "emotion": "proud" }
+          "chunk": "I liked",
+          "echo": "you liked",
+          "reaction": { "text": "You liked the bakery? Oh, I knew it! Ha!", "translation": "Você gostou da padaria? Ah, eu sabia! Rá!", "emotion": "proud" }
         },
         {
           "text": "The tavern! The hot chocolate is amazing.",
           "translation": "A taverna! O chocolate quente é incrível.",
           "keywords": [["tavern"], ["hot chocolate"], ["soup"]],
-          "reaction": { "text": "Oh no, don't tell Bram! He's so proud already.", "translation": "Ah, não, não fala isso para o Bram! Ele já é todo convencido." }
+          "chunk": "The tavern",
+          "reaction": { "text": "The tavern? Oh no, don't tell Bram! He's so proud already.", "translation": "A taverna? Ah, não, não conta para o Bram! Ele já é tão orgulhoso." }
         },
         {
           "text": "I liked everything. The people are so nice.",
           "translation": "Gostei de tudo. O pessoal é muito legal.",
           "keywords": [["everything"], ["people"], ["everyone"]],
-          "reaction": { "text": "Oh, that's lovely. We like you too, dear.", "translation": "Ah, que lindo. A gente também gosta de você, meu bem." }
+          "chunk": "everything",
+          "reaction": { "text": "Everything? Oh, that's lovely. We like you too, dear.", "translation": "Tudo? Ah, que lindo. A gente também gosta de você, meu bem." }
         }
       ]
     },
@@ -199,12 +218,14 @@
           "text": "What time is breakfast?",
           "translation": "Que horas é o café da manhã?",
           "keywords": [["what time"]],
-          "reaction": { "text": "At seven. Same as yesterday. Same as always.", "translation": "Às sete. Igual a ontem. Igual a sempre." }
+          "chunk": "What time",
+          "reaction": { "text": "What time? Seven, friend. Same as yesterday.", "translation": "Que horas? Às sete, amigo(a). Igual a ontem." }
         },
         {
           "text": "No, I'm fine. Good night, everyone!",
           "translation": "Não, tudo certo. Boa noite, pessoal!",
           "keywords": [["good night"], ["fine"], ["no"]],
+          "chunk": "Good night",
           "reaction": { "text": "Good night, friend. Sleep well.", "translation": "Boa noite. Durma bem." }
         },
         {
@@ -224,6 +245,11 @@
     "target_words": ["roll", "bread", "honey", "cheese", "soup", "juice", "chocolate", "tea", "milk", "pancakes", "room", "bakery", "tavern", "village", "friend", "friends", "ate", "had", "was", "liked", "loved", "met", "from", "great", "fun"],
     "hint": "Conte o que você comeu, do que gostou ou quem conheceu, por exemplo com \"I had...\", \"I liked...\" ou \"It was...\".",
     "model_answer": { "text": "I had a honey roll, and I liked the village.", "translation": "Comi um pãozinho de mel e gostei da vila." },
+    "models": [
+      { "text": "It was great! I met Tilda and Bram, and I had soup.", "translation": "Foi ótimo! Conheci a Tilda e o Bram e tomei sopa." },
+      { "text": "I was at the bakery, and I loved the bread.", "translation": "Eu fui à padaria e adorei o pão." },
+      { "text": "It was fun. I made new friends in the village.", "translation": "Foi divertido. Fiz amigos novos na vila." }
+    ],
     "success": { "text": "What a lovely day! Welcome to the village, {player}.", "translation": "Que dia lindo! Boas-vindas à vila, {player}." }
   },
   "vocabulary": [

@@ -193,6 +193,15 @@ describe("importação hostil de events e runs", () => {
     expect(parseExport(JSON.stringify({ ...base, events: [ev()], runs: [rn()] }), NOW)).toMatchObject({ ok: true });
   });
 
+  it("o que a pessoa disse (D-55): até 100 caracteres, texto puro; rodada antiga sem `said` segue valendo", () => {
+    const run = (said: unknown) => rn({ answers: [{ node: "order", input: "typed", scaffold: 0, said }] });
+    const parse = (r: RunFile) => parseExport(JSON.stringify({ ...base, runs: [r] }), NOW);
+    expect(parse(run("a honey roll, please"))).toMatchObject({ ok: true });
+    expect(parse(run("a".repeat(100)))).toMatchObject({ ok: true });
+    expect(parse(rn({ answers: [{ node: "order", input: "typed", scaffold: 0 }] }))).toMatchObject({ ok: true });
+    for (const bad of ["a".repeat(101), "<b>hi</b>", "oi" + String.fromCharCode(0x202e) + "txt", "", "linha" + String.fromCharCode(10) + "dois"]) expect(parse(run(bad)), JSON.stringify(bad)).toMatchObject({ ok: false });
+  });
+
   it("os dois tipos de prêmio único e os limites exatos passam", () => {
     const events = [
       ev({ id: "first:bakery-01", kind: "mission_first", xp: 24, coins: 5 }),

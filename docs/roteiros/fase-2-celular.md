@@ -55,7 +55,7 @@ Data: ____ · Aparelho/versão: ____ (commit: ____)
 
 **O que observar hoje:**
 - **Voz:** a NPC fala em inglês? A voz é compreensível? O botão **Ouvir de novo** funciona?
-- **Apelido:** a Tilda te chamou pelo nome falado ("Good morning, {nome}!")? Soou natural? Sem nome, a frase ficou normal?
+- **Apelido:** nesta primeira missão a Tilda **ainda não sabe o seu nome**, então não usa (é de propósito). Ela pergunta o nome na **"Prazer, Tilda"** e passa a te chamar por ele dali em diante. Se der tempo de jogar o começo dela (passo 5), veja se soou natural.
 - **Recast:** quando você errou, a NPC **não parou o jogo com "errado"**; a conversa continuou com o jeito natural? Ficou claro, sem ser humilhante?
 - **Relatório:** em **"Jeitos mais naturais de dizer"** o trecho certo está destacado e a explicação é útil? A **meta** ("Consigo pedir comida…") e as **palavras novas** apareceram?
 - **XP e level up:** apareceu "+N XP" a cada resposta? Se subiu de nível, a animação apareceu (e nada de tela de erro)?

@@ -92,6 +92,18 @@ export async function setNickname(page: Page, nickname: string): Promise<void> {
   await expect(page.getByText("Nickname saved")).toBeVisible();
 }
 
+/**
+ * Grava o apelido direto no perfil do IndexedDB, como um perfil ou arquivo ANTIGO (a D-55 limitou o que se digita a 10 letras,
+ * mas a leitura ainda aceita até 30 caracteres: é por aí que o apelido hostil chega à fala, ao TTS e ao HUD).
+ * Exige perfil já criado (onboard antes).
+ */
+export async function seedNickname(page: Page, nickname: string): Promise<void> {
+  const row = (await idbAll(page, "docs")).find((d) => d["id"] === "profile");
+  if (!row) throw new Error("seedNickname: sem perfil (chame onboard antes)");
+  await idbPut(page, "docs", { ...row, data: { ...(row["data"] as object), nickname }, updatedAt: Date.now() + 1000 });
+  await page.goto("/");
+}
+
 /** Tem controle, formato (bidi, largura zero) ou separador de linha? (Cc, Cf, Zl, Zp) */
 // Montada por código: o arquivo é só ASCII e uma barra invertida digitada aqui já se perdeu uma vez.
 const BS = String.fromCharCode(92);

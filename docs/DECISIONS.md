@@ -296,3 +296,36 @@ Proposta do dono. Muda a fase 7 e acrescenta itens às fases 4, 5 e 8. Nada é i
   - **O apelido continua como está** (até 30 caracteres): mudar o schema do apelido quebraria perfis e arquivos exportados.
   - O perfil mostra "Nas conversas, as NPCs vão te chamar de: Maria", ou avisa que não vão usar um nome. Assim a pessoa ajusta se quiser.
 
+### D-54 — O recast vale para toda resposta, não só para a do erro previsto (2026-11-20) · aceita (Arquiteto, a partir da sessão 1 do dono)
+- **Achados do dono (sessão 1, bakery-01):**
+  - **Erro de propósito sem correção:** ele disse "a roll of honey", erro pedido no roteiro. O reconhecedor ouviu "I roll of honey" e a Tilda respondeu "Lovely! Those are new today.", sem recast. A resposta com erro (`flawed`, palavra-chave "roll of honey") deveria ter vencido pelo número de palavras; a causa precisa ser reproduzida.
+  - **Fecho com modelo sem relação:** ele pediu "Can I have one roll of honey?" e o fecho mostrou "Can I have two cheese rolls, please?", o `model_answer` fixo. O modelo não tem nada a ver com o pedido dele.
+- **Decisão:**
+  1. **Erro previsto:** a resposta `flawed` cuja expressão aparece na fala ganha da resposta boa de palavra mais curta, também com ruído do reconhecedor em volta ("I roll of honey"). Com teste usando a fala real do dono.
+  2. **Recast implícito em toda resposta boa:** a reação repete o trecho-chave da resposta modelo ("A honey roll! Lovely, those are new today."). Assim, quem acertou só a palavra ouve a frase inteira do jeito natural, sem ser corrigido. Vira regra de qualidade no `lib.ts`, aplicada às 5 missões.
+  3. **Fecho:**
+     - o modelo mostrado é o mais próximo do que a pessoa disse, escolhido pelas palavras-alvo em comum (campo opcional com vários modelos, ficando o `model_answer` como padrão);
+     - os erros previstos da missão também valem no fecho, com o recast.
+  4. **Relatório:** mostra o que a pessoa disse em cada fala e o jeito natural ao lado (D-55).
+- **Causa provável do "I roll of honey"** (W2-21; falta a confirmação do dono):
+  - o modo ★ não tira as respostas com erro, e o `matchReply` acerta "I roll of honey";
+  - então a 1ª alternativa final do reconhecedor deve ter vindo sem o "of" e casou com a boa pela palavra "honey";
+  - com o item 2, até nesse caso a pessoa agora ouve "A honey roll!" e vê o jeito natural no relatório;
+  - a resposta com erro também passou a aceitar "role of honey" e "roll a honey".
+- **Medido e recusado:** trocar a regra 6 por "a alternativa de maior pontuação entre todas".
+  - Deu 2 recasts falsos em 220 pares simulados do eval.
+  - Em 16 casos de quem fala certo com a forma errada numa alternativa de baixo ("two rolls" × "two roll", "an orange" × "a orange"), deu 11 recasts falsos, e 7 mesmo com guarda.
+  - A regra continua sendo "a 1ª alternativa que casar".
+
+### D-55 — Achados de interface da sessão 1 do dono (2026-11-20) · aceita (dono)
+- **Apelido:**
+  - o campo aceita **até 10 caracteres**, só letras (com acento), espaço, hífen ou apóstrofo. O texto de ajuda diz o limite;
+  - o schema de leitura continua aceitando 30, para perfis e arquivos antigos, e o `spokenName` continua protegendo a fala.
+- **Relatório:**
+  - lista cada fala da pessoa ("Você disse") com o jeito natural ou a correção;
+  - ganha um botão **Copiar relatório**, com o texto selecionável quando a cópia falhar, útil agora para depuração;
+  - corrige o "{title}" que apareceu sem valor.
+- **Botão de jogar de novo:** diz o que vai acontecer, por exemplo "Ganhar a 2ª estrela: jogar só com a ideia", com uma linha explicando o modo.
+- **Missão em andamento:** aparece também na vila, com "Continuar", e não só ao entrar de novo na mesma missão.
+- **Escuta:** o texto de abertura diz que são outras pessoas da vila conversando antes da sua vez (o Ben não é você).
+

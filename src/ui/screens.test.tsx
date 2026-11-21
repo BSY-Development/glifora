@@ -73,9 +73,9 @@ describe("primeira visita", () => {
     fireEvent.click(screen.getByRole("button", { name: t("welcome.start") }));
     expect((await screen.findByRole("alert")).textContent).toBe(t("nickname.error.chars"));
 
-    fireEvent.change(input, { target: { value: "x".repeat(31) } });
+    fireEvent.change(input, { target: { value: "x".repeat(11) } });
     fireEvent.click(screen.getByRole("button", { name: t("welcome.start") }));
-    await waitFor(() => expect(screen.getByRole("alert").textContent).toBe(t("nickname.error.long", { max: 30 })));
+    await waitFor(() => expect(screen.getByRole("alert").textContent).toBe(t("nickname.error.long", { max: 10 })));
     expect(await profileRepo.get(db)).toBeNull();
   });
 

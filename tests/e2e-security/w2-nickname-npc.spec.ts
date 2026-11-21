@@ -3,7 +3,7 @@
 import { expect, test } from "@playwright/test";
 import { installSpeech, spokenLines } from "../e2e/support/speech";
 import { skipListen } from "../e2e/support/play";
-import { onboard, payload, setNickname, watch } from "./support/w2";
+import { onboard, payload, seedNickname, watch } from "./support/w2";
 
 test.use({ viewport: { width: 360, height: 640 }, locale: "en-US" });
 
@@ -14,7 +14,7 @@ for (const [nick, spoken] of Object.entries({ ...table.ok, ...table.none })) {
     const problems = watch(page);
     await installSpeech(page, "ok", { consent: true });
     await onboard(page, "Ana");
-    await setNickname(page, nick);
+    await seedNickname(page, nick);
     await page.goto("/play/tavern-03");
     // tavern-03 é o chefe: sem escolha de modo
     await page.getByRole("button", { name: "Start", exact: true }).click();
@@ -36,7 +36,8 @@ for (const [nick, spoken] of Object.entries({ ...table.ok, ...table.none })) {
 test("o nome falado aparece no perfil sem virar HTML, mesmo com apelido-marcador", async ({ page }) => {
   const problems = watch(page);
   await onboard(page, "Ana");
-  await setNickname(page, "&lt;b&gt;x");
+  await seedNickname(page, "&lt;b&gt;x");
+  await page.goto("/profile");
   await expect(page.locator("main b")).toHaveCount(0);
   expect(problems).toEqual([]);
 });

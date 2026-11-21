@@ -6,7 +6,7 @@ import { VOICE_LANGS, type VoiceLang } from "../../services/voice";
 import { holdUpdates } from "../../services/appUpdate";
 import { finishRun, keepSession, speak, startRun, stopSpeaking, xpOfStep, type Mode, type Prepared, type PlayState, type Voice } from "../../services/play";
 import { step, type Input, type Outcome } from "../../engine";
-import type { Mission } from "../../schemas";
+import { closestModel, type Mission } from "../../schemas";
 import { PageTitle } from "../PageTitle";
 import type { Art } from "../art/sprites";
 import { npcView } from "../world";
@@ -36,6 +36,7 @@ export function Player({ prepared }: { prepared: Prepared }) {
   const [asking, setAsking] = useState(prepared.resume !== null); // "continuar ou recomeçar?"
   const [notice, setNotice] = useState<Notice | null>(null);
   const [said, setSaid] = useState("");
+  const [tried, setTried] = useState(""); // a última frase tentada no fecho: escolhe o modelo mais próximo
   const [saved, setSaved] = useState<string | "error" | null>(null); // id da rodada gravada; null = gravando
   const finishing = useRef(false);
 
@@ -62,6 +63,7 @@ export function Player({ prepared }: { prepared: Prepared }) {
   const base = mission.base;
   /** Quem faz a pergunta do fecho e pede para repetir: a primeira personagem com ficha de NPC. */
   const host = mission.characters.find((c) => npcs[c.id])?.id ?? mission.characters[0]!.id;
+  const model = closestModel(mission, tried);
 
   const retryLine = (who: string, fallback: Line): Line => {
     const line = npcs[who]?.lines[mission.target]?.retry ?? npcs[host]?.lines[mission.target]?.retry;
@@ -86,6 +88,7 @@ export function Player({ prepared }: { prepared: Prepared }) {
 
   function apply(input: Input, utterances: readonly string[] = []) {
     if (!state) return;
+    if (state.phase === "closing" && input.type === "say") setTried(utterances[0] ?? "");
     const { state: next, outcome } = step(mission, state, input);
     if (outcome.kind === "none" && next === state) return;
     setState(next);
@@ -120,7 +123,7 @@ export function Player({ prepared }: { prepared: Prepared }) {
     }
     if (input.type === "help") return;
     if (after.phase !== before.phase || after.node !== before.node || after.listen !== before.listen) {
-      const line = lineAt(mission, after, host);
+      const line = lineAt(mission, after, host, input.type === "say" ? (utterances[0] ?? tried) : tried);
       if (line) say(line);
     }
   }
@@ -250,10 +253,10 @@ export function Player({ prepared }: { prepared: Prepared }) {
               <Bubble
                 tone="model"
                 name={t("play.you")}
-                text={mission.closing.model_answer.text}
+                text={model.text}
                 lang={lang(host)}
-                translation={mission.closing.model_answer.translation}
-                onReplay={() => say({ text: mission.closing.model_answer.text, who: host })}
+                translation={model.translation}
+                onReplay={() => say({ text: model.text, who: host })}
               />
             )}
             {notice && (
@@ -316,7 +319,7 @@ export function Player({ prepared }: { prepared: Prepared }) {
 }
 
 /** A fala que se diz ao entrar neste ponto da rodada (`null` quando não há uma). */
-export function lineAt(mission: Mission, state: PlayState, host: string): Line | null {
+export function lineAt(mission: Mission, state: PlayState, host: string, tried = ""): Line | null {
   if (state.phase === "listen") {
     const line = mission.listen[state.listen];
     return line ? { text: line.text, translation: line.translation, who: line.speaker } : null;
@@ -326,7 +329,10 @@ export function lineAt(mission: Mission, state: PlayState, host: string): Line |
     return node ? { text: node.text, translation: node.translation, who: node.speaker } : null;
   }
   if (state.phase === "closing") return { text: mission.closing.question.text, translation: mission.closing.question.translation, who: host };
-  if (state.phase === "model") return { text: mission.closing.model_answer.text, translation: mission.closing.model_answer.translation, who: host };
+  if (state.phase === "model") {
+    const model = closestModel(mission, tried);
+    return { text: model.text, translation: model.translation, who: host };
+  }
   return null;
 }
 

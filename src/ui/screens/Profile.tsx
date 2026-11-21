@@ -57,7 +57,7 @@ export function Profile() {
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
-    const check = checkNickname(nickname);
+    const check = checkNickname(nickname, profile?.nickname);
     setProblem(check.ok ? null : check.reason);
     if (!check.ok) return;
     try {

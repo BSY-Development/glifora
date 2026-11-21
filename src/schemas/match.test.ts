@@ -485,3 +485,48 @@ describe("matchReply: resposta livre para nome (D-51)", () => {
     expect(matchReply(bad, "Maria", "en")).toBeNull();
   });
 });
+
+// ---------------------------------------------------------------- D-54: a fala real do dono
+
+describe('D-54: a resposta com erro vence a boa de palavra mais curta, também com ruído ("I roll of honey")', () => {
+  // A fala "order" da bakery-01, com as keywords de hoje.
+  const order = [
+    r("Can I have a honey roll, please?", [["honey"]]),
+    r("I'd like a cheese roll, please.", [["cheese"]]),
+    r("A roll of honey, please.", [["roll of honey"], ["rolls of honey"], ["role of honey"], ["roll a honey"], ["rolls a honey"]], true),
+  ];
+
+  it.each([
+    ["I roll of honey", 2], // o que o reconhecedor do Chrome devolveu na sessão 1
+    ["a roll of honey", 2],
+    ["one roll of honey", 2],
+    ["can I have one roll of honey", 2],
+    ["Can I have one roll of honey, please?", 2],
+    ["um I roll of honey please", 2],
+    ["two rolls of honey", 2],
+    ["I role of honey", 2], // ruído do reconhecedor: "roll" → "role"
+    ["a roll a honey", 2], // ruído do reconhecedor: "of" → "a"
+    ["a honey roll", 0],
+    ["honey", 0],
+    ["Can I have a honey roll?", 0],
+    ["two honey rolls", 0],
+    ["a cheese roll", 1],
+  ])("%j → %i", (said, want) => {
+    expect(pick(order, said)).toBe(want);
+    expect(matchReply(order, said, "en")?.pass).toBe("exact");
+  });
+
+  it("na voz, cada alternativa decide sozinha (regra 6): a com erro casa em qualquer posição em que for a 1ª a casar", () => {
+    expect(pick(order, ["I roll of honey"])).toBe(2);
+    expect(pick(order, ["I roll of honey", "I roll honey"])).toBe(2);
+    expect(matchReply(order, ["", "?!", "I roll of honey"], "en")).toMatchObject({ index: 2, alternative: 2 });
+  });
+
+  it("regra 6 mantida: a 1ª alternativa que casa vence, mesmo que uma de baixo traga o erro previsto", () => {
+    // Medido na W2-21: trocar pela "maior pontuação entre as alternativas" dá recast falso quando a pessoa fala
+    // certo e o reconhecedor põe a forma com erro numa alternativa de baixo (11 de 16 casos; ver D-54).
+    expect(pick(order, ["I roll honey", "I roll of honey"])).toBe(0);
+    const howMany = [r("Two rolls, please.", [["two"]]), r("Two roll, please.", [["two roll"]], true)];
+    expect(pick(howMany, ["Two rolls, please.", "Two roll please"])).toBe(0);
+  });
+});

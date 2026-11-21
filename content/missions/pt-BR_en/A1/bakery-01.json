@@ -31,13 +31,15 @@
           "text": "Good morning!",
           "translation": "Bom dia!",
           "keywords": [["good morning"], ["morning"], ["hello"], ["hi"]],
+          "chunk": "Good morning",
           "reaction": { "text": "Good morning! I'm Tilda.", "translation": "Bom dia! Eu sou a Tilda." }
         },
         {
           "text": "Thank you! It smells so good in here.",
           "translation": "Obrigado(a)! Que cheiro bom aqui dentro.",
           "keywords": [["smells"], ["smell"]],
-          "reaction": { "text": "Oh, thank you! I'm Tilda.", "translation": "Ah, obrigada! Eu sou a Tilda.", "emotion": "proud" }
+          "chunk": "It smells so good",
+          "reaction": { "text": "It smells so good, right? Fresh from the oven. I'm Tilda.", "translation": "Cheiro bom, né? Acabou de sair do forno. Eu sou a Tilda.", "emotion": "proud" }
         }
       ]
     },
@@ -52,19 +54,21 @@
           "text": "Can I have a honey roll, please?",
           "translation": "Pode me dar um pãozinho de mel, por favor?",
           "keywords": [["honey"]],
-          "reaction": { "text": "Lovely! Those are new today.", "translation": "Que bom! Esses são novidade de hoje." }
+          "chunk": "a honey roll",
+          "reaction": { "text": "A honey roll! Lovely, those are new today.", "translation": "Um pãozinho de mel! Que bom, esses são novidade de hoje." }
         },
         {
           "text": "I'd like a cheese roll, please.",
           "translation": "Eu queria um pãozinho de queijo, por favor.",
           "keywords": [["cheese"]],
-          "reaction": { "text": "Sure! Cheese rolls are my favorite.", "translation": "Claro! O de queijo é o meu preferido." }
+          "chunk": "a cheese roll",
+          "reaction": { "text": "A cheese roll! Sure, that's my favorite.", "translation": "Um pãozinho de queijo! Claro, é o meu preferido." }
         },
         {
           "text": "A roll of honey, please.",
           "translation": "Um pãozinho de mel, por favor.",
           "flawed": true,
-          "keywords": [["roll of honey"], ["rolls of honey"]],
+          "keywords": [["roll of honey"], ["rolls of honey"], ["role of honey"], ["roll a honey"], ["rolls a honey"]],
           "recast": { "original": "A roll of honey", "corrected": "A honey roll" },
           "reaction": { "text": "A honey roll? Good choice!", "translation": "Um pãozinho de mel? Boa escolha!" },
           "pattern": "en.noun_modifier_order"
@@ -82,13 +86,15 @@
           "text": "Just one, please.",
           "translation": "Só um, por favor.",
           "keywords": [["one"], ["won"]],
+          "chunk": "Just one",
           "reaction": { "text": "Just one. Here you go!", "translation": "Só um. Aqui está!" }
         },
         {
-          "text": "Two, please.",
+          "text": "Two rolls, please.",
           "translation": "Dois, por favor.",
           "keywords": [["two"], ["to"], ["too"]],
-          "reaction": { "text": "Two. Here you go!", "translation": "Dois. Aqui está!" }
+          "chunk": "Two rolls",
+          "reaction": { "text": "Two rolls. Here you go!", "translation": "Dois pãezinhos. Aqui está!" }
         },
         {
           "text": "Two roll, please.",
@@ -112,12 +118,14 @@
           "text": "Yes, a loaf of bread, please.",
           "translation": "Sim, um pão inteiro, por favor.",
           "keywords": [["loaf"], ["bread"]],
-          "reaction": { "text": "One loaf of bread. Lovely!", "translation": "Um pão inteiro. Que bom!" }
+          "chunk": "a loaf of bread",
+          "reaction": { "text": "A loaf of bread. Lovely!", "translation": "Um pão inteiro. Que bom!" }
         },
         {
           "text": "No, that's all, thanks.",
           "translation": "Não, é só isso, obrigado(a).",
           "keywords": [["that is all"], ["no"], ["nothing"]],
+          "chunk": "that's all",
           "reaction": { "text": "That's all? No problem.", "translation": "Só isso? Sem problema." }
         },
         {
@@ -142,13 +150,15 @@
           "text": "Here you go.",
           "translation": "Aqui está.",
           "keywords": [["here you go"], ["here you are"], ["here"]],
-          "reaction": { "text": "Thank you, dear. Enjoy!", "translation": "Obrigada, meu bem. Bom apetite!" }
+          "chunk": "Here you go",
+          "reaction": { "text": "Thank you, dear. And here you go, your rolls. Enjoy!", "translation": "Obrigada, meu bem. E aqui estão os seus pãezinhos. Bom apetite!" }
         },
         {
           "text": "Thank you so much!",
           "translation": "Muito obrigado(a)!",
           "keywords": [["thank you"], ["thanks"]],
-          "reaction": { "text": "You're welcome, dear. Enjoy!", "translation": "De nada, meu bem. Bom apetite!" }
+          "chunk": "Thank you",
+          "reaction": { "text": "Oh, thank you, dear! Enjoy your rolls!", "translation": "Ah, obrigada a você, meu bem! Bom apetite!" }
         },
         {
           "text": "Thanks you!",
@@ -167,6 +177,11 @@
     "target_words": ["honey", "cheese", "roll", "bread", "loaf", "loaves", "pie", "apple"],
     "hint": "Diga algo da padaria, por exemplo com \"Can I have...?\" ou \"I'd like...\".",
     "model_answer": { "text": "Can I have two cheese rolls, please?", "translation": "Pode me dar dois pãezinhos de queijo, por favor?" },
+    "models": [
+      { "text": "Can I have a honey roll, please?", "translation": "Pode me dar um pãozinho de mel, por favor?" },
+      { "text": "I'd like a loaf of bread, please.", "translation": "Eu queria um pão inteiro, por favor." },
+      { "text": "Can I have an apple pie, please?", "translation": "Pode me dar uma torta de maçã, por favor?" }
+    ],
     "success": { "text": "Lovely! See you tomorrow, dear!", "translation": "Que bom! Até amanhã, meu bem!" }
   },
   "vocabulary": [

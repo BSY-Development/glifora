@@ -57,6 +57,16 @@ export const Recast = z.strictObject({
   original: text(200),
   /** Forma certa, como aparece na reação da NPC (o app destaca). */
   corrected: text(200),
+  /**
+   * Forma certa na boca da pessoa, quando a NPC muda a pessoa do verbo ("You're from Brazil" → "I'm from
+   * Brazil"). É o que o relatório mostra ao lado do "Você disse" (D-54). Sem ele, vale `corrected`.
+   */
+  learner: text(200).optional(),
+  /**
+   * O erro só é erro como resposta a esta fala ("Good night" ao chegar, "I eat" sobre hoje). Com `true`,
+   * ele não vale no fecho (D-54); sem ele, o fecho também reconhece o erro e mostra a correção.
+   */
+  local: z.boolean().optional(),
 });
 export type Recast = z.infer<typeof Recast>;
 
@@ -102,6 +112,16 @@ export const Reply = z
      * modelo da ajuda, e a reação da NPC não repete nada do que a pessoa disse.
      */
     free: z.enum(["name"]).optional(),
+    /**
+     * Trecho-chave da resposta boa, como está no `text` (D-54): a reação da NPC repete esse trecho (recast
+     * implícito), e quem já disse o trecho falou do jeito natural. Ex.: "a honey roll".
+     */
+    chunk: text(80).optional(),
+    /**
+     * Como a NPC repete o trecho quando muda a pessoa do verbo ("I'm from" → "you're from"). Sem ele, a
+     * reação repete o próprio `chunk`.
+     */
+    echo: text(80).optional(),
   })
   .superRefine((r, ctx) => {
     if (r.flawed) {
@@ -110,6 +130,11 @@ export const Reply = z
     } else if (r.recast) {
       ctx.addIssue({ code: "custom", message: "recast só vale em resposta com erro (flawed: true)", path: ["recast"] });
     }
+    if (r.chunk !== undefined && (r.flawed || r.free)) {
+      ctx.addIssue({ code: "custom", message: "chunk só vale em resposta boa (a com erro usa recast; a livre não repete nada)", path: ["chunk"] });
+    }
+    if (r.chunk !== undefined && !r.reaction) ctx.addIssue({ code: "custom", message: "resposta com chunk precisa de reaction", path: ["reaction"] });
+    if (r.echo !== undefined && r.chunk === undefined) ctx.addIssue({ code: "custom", message: "echo só vale junto com chunk", path: ["echo"] });
   });
 export type Reply = z.infer<typeof Reply>;
 
@@ -147,8 +172,13 @@ export const Closing = z.strictObject({
   target_words: z.array(Keyword).min(1).max(30).optional(),
   /** No idioma base; aparece na 2ª tentativa. */
   hint: text(160),
-  /** Aparece para repetir depois de duas tentativas. Contém uma das palavras-alvo. */
+  /** Aparece para repetir depois de duas tentativas. Contém uma das palavras-alvo. É o modelo padrão. */
   model_answer: Line,
+  /**
+   * Outros modelos (D-54). O app mostra o mais próximo do que a pessoa disse, pelas palavras-alvo em
+   * comum (`closestModel`); sem nada em comum, vale o `model_answer`. Cada um contém uma palavra-alvo.
+   */
+  models: z.array(Line).min(1).max(3).optional(),
   /** A despedida da NPC. */
   success: Line,
 });

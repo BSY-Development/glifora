@@ -37,13 +37,17 @@ export function detectLocale(languages: readonly string[]): Locale {
 
 /** Traduz sem estado: `translate("pt-BR", "mission.xp", { n: 12 })`. */
 export function translate(locale: Locale, key: MessageKey, params?: Params): string {
-  return render(locale, MESSAGES[locale][key], params);
+  return render(locale, MESSAGES[locale][key], params, true, key);
 }
 
-/** Escolhe a forma do plural (por `n`) e troca os `{marcadores}`. Exportada para teste. */
-export function render(locale: Locale, message: Message, params?: Params): string {
+/**
+ * Escolhe a forma do plural (por `n`) e troca os `{marcadores}`. Exportada para teste.
+ * `strict` (usado por `translate`): nunca sobra "{marcador}" na tela. Faltou o parâmetro: em dev e em teste
+ * lança o erro (a chave e o marcador na mensagem); em produção o marcador some do texto.
+ */
+export function render(locale: Locale, message: Message, params?: Params, strict = false, key?: string): string {
   const template = typeof message === "string" ? message : pickPlural(locale, message, params?.["n"]);
-  return interpolate(locale, template, params);
+  return interpolate(locale, template, params, strict, key);
 }
 
 function pickPlural(locale: Locale, forms: PluralForms, n: string | number | undefined): string {
@@ -52,13 +56,19 @@ function pickPlural(locale: Locale, forms: PluralForms, n: string | number | und
   return forms[new Intl.PluralRules(locale).select(count)] ?? forms.other;
 }
 
-function interpolate(locale: Locale, template: string, params?: Params): string {
-  if (!params) return template;
+function missing(placeholder: string, strict: boolean, key: string | undefined): string {
+  if (!strict) return placeholder;
+  if (import.meta.env.DEV || import.meta.env.MODE === "test") throw new Error(`i18n: falta o parâmetro ${placeholder} em "${key ?? "?"}".`);
+  return "";
+}
+
+function interpolate(locale: Locale, template: string, params: Params | undefined, strict: boolean, key: string | undefined): string {
+  if (!params && !strict) return template;
   return template.replace(/\{(\w+)\}/g, (placeholder, name: string) => {
     // hasOwn: "{constructor}" e afins não podem ler a cadeia de protótipos.
-    if (!Object.hasOwn(params, name)) return placeholder;
+    if (!params || !Object.hasOwn(params, name)) return missing(placeholder, strict, key);
     const value = params[name];
-    if (value === undefined) return placeholder;
+    if (value === undefined) return missing(placeholder, strict, key);
     return typeof value === "number" ? new Intl.NumberFormat(locale).format(value) : value;
   });
 }

@@ -3,6 +3,7 @@
 // o permitido, o apelido é texto puro, o arquivo hostil é recusado, e o service worker não guarda nada fora do precache.
 import { readFileSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
+import { idbAll, idbPut } from "../e2e-security/support/w2";
 
 test.use({ locale: "pt-BR" });
 
@@ -161,7 +162,10 @@ test("apelido é texto puro: aparece literal, sem virar HTML, atributo, URL ou s
   const nick = "A&amp; {x} $& ${1+1} \"'`%s"; // até 30 caracteres
   expect(Array.from(nick).length).toBeLessThanOrEqual(30);
   const { problems } = watch(page);
-  await start(page, nick);
+  await start(page); // o campo só aceita letras (D-55): o apelido hostil entra como perfil/arquivo antigo, que a leitura ainda aceita
+  const row = (await idbAll(page, "docs")).find((d) => d["id"] === "profile")!;
+  await idbPut(page, "docs", { ...row, data: { ...(row["data"] as object), nickname: nick }, updatedAt: Date.now() + 1000 });
+  await page.goto("/");
   await expect(page.getByText(nick, { exact: false }).first()).toBeVisible();
   expect(await page.locator("img, script:not([src]), iframe, svg [onload]").count()).toBe(0); // (as figuras do pixel art são SVG, sem imagem)
   expect(await page.locator("[onclick], [onerror], [onload], [onmouseover]").count()).toBe(0);

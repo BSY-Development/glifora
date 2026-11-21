@@ -3,6 +3,7 @@
 // deixa passar (achado F-W1-16-01/02): corrigidos na W1-17: agora são testes normais (têm de ser recusados).
 import { readFileSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
+import { seedNickname } from "./support/w2";
 
 test.use({ locale: "pt-BR" });
 
@@ -78,11 +79,16 @@ for (const [id, text] of Object.entries(payloads.suspect)) {
   });
 }
 
+// D-55: o campo só aceita até 10 letras (espaço, hífen, apóstrofo). Estes apelidos "estranhos mas inofensivos" já não se digitam,
+// mas perfis e arquivos antigos podem tê-los (a leitura aceita 30): entram pelo IndexedDB e têm de continuar literais e inofensivos.
 for (const [id, text] of Object.entries(payloads.accept)) {
-  test(`apelido estranho mas legítimo fica literal e inofensivo: ${id}`, async ({ page }) => {
+  test(`perfil antigo com apelido estranho fica literal e inofensivo: ${id}`, async ({ page }) => {
     const problems = watch(page);
-    await welcomeWith(page, text);
+    await page.goto("/welcome");
+    await page.getByLabel("Apelido (opcional)").fill("Ana");
+    await page.getByRole("button", { name: "Começar" }).click();
     await expect(page).toHaveURL(/\/$/);
+    await seedNickname(page, text);
     await expect(page.getByText(`Olá, ${text}!`, { exact: true })).toBeVisible();
     expect(await page.evaluate(() => (window as unknown as Record<string, unknown>)["__pwned"])).toBeUndefined();
     expect(await page.locator("main img, main script, main style, main a[href^='javascript']").count()).toBe(0);
@@ -93,6 +99,52 @@ for (const [id, text] of Object.entries(payloads.accept)) {
     expect(problems).toEqual([]);
   });
 }
+
+// D-55: o que a regra nova recusa na digitação (11 letras, número, emoji, < >, pontuação, invisíveis, os "accept" de antes).
+const { acentos: _acentos, ...acceptTooLong } = payloads.accept; // "João Açaí" (9 letras) cabe na regra nova
+void _acentos;
+const typedRefused: Record<string, string> = {
+  ...acceptTooLong,
+  "11-letras": "Abcdefghijk",
+  numero: "Jo1",
+  emoji: "😀",
+  "menor-maior": "a<b>",
+  tag: "<b>x</b>",
+  ponto: "Ana.Lu",
+  sublinhado: "Ana_Lu",
+  chaves: "{player}",
+  cifrao: "$&",
+  porcento: "100%",
+  barra: "a/b",
+  "dois-nomes-longos": "Maria Clara!",
+};
+for (const [id, text] of Object.entries(typedRefused)) {
+  test(`D-55: apelido digitado é recusado na /welcome e no /profile: ${id}`, async ({ page }) => {
+    const problems = watch(page);
+    await welcomeWith(page, text);
+    await expect(page.getByRole("alert").first()).toBeVisible();
+    await expect(page).toHaveURL(/\/welcome$/);
+    await welcomeWith(page, "Ana");
+    await expect(page).toHaveURL(/\/$/);
+    await profileSave(page, text);
+    await expect(page.getByRole("alert").first()).toBeVisible();
+    await page.goto("/");
+    await expect(page.getByText("Olá, Ana!")).toBeVisible();
+    expect(problems).toEqual([]);
+  });
+}
+
+test("D-55: apelidos que cabem na regra são aceitos (10 letras, acento, hífen, apóstrofo, espaço)", async ({ page }) => {
+  for (const ok of ["Abcdefghij", "Zoë", "Ana-Lu", "D'Ávila", "Ana Bob"]) {
+    await welcomeWith(page, ok);
+    await expect(page, ok).toHaveURL(/\/$/);
+    await expect(page.getByText(`Olá, ${ok}!`, { exact: true })).toBeVisible();
+    await page.goto("/settings");
+    await page.getByRole("button", { name: /Apagar os dados/ }).click();
+    await page.getByRole("button", { name: /Sim, apagar tudo/ }).click();
+    await expect(page).toHaveURL(/\/(welcome)?$/);
+  }
+});
 
 test("borda dos 30 caracteres: 30 passa; 31 é recusado ou cortado em 30 (emoji e combinantes contam por ponto de código)", async ({ page }) => {
   const cases = ["x".repeat(30), "x".repeat(31), "😀".repeat(30), "😀".repeat(31), "é".repeat(15), "é".repeat(16)];

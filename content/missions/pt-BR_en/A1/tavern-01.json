@@ -32,20 +32,22 @@
           "text": "Good evening!",
           "translation": "Boa noite!",
           "keywords": [["good evening"], ["evening"], ["hello"], ["hi"]],
-          "reaction": { "text": "Welcome to my tavern. I'm Bram.", "translation": "Boas-vindas à minha taverna. Eu sou o Bram." }
+          "chunk": "Good evening",
+          "reaction": { "text": "Good evening! Welcome to my tavern. I'm Bram.", "translation": "Boa noite! Boas-vindas à minha taverna. Eu sou o Bram." }
         },
         {
           "text": "Thanks! It's so cozy in here.",
           "translation": "Obrigado(a)! Aqui dentro é tão aconchegante.",
           "keywords": [["cozy"], ["cosy"], ["warm"]],
-          "reaction": { "text": "That's the fire. And the soup. I'm Bram.", "translation": "É a lareira. E a sopa. Eu sou o Bram.", "emotion": "proud" }
+          "chunk": "cozy in here",
+          "reaction": { "text": "Cozy in here, right? That's the fire. I'm Bram.", "translation": "Aconchegante, né? É a lareira. Eu sou o Bram.", "emotion": "proud" }
         },
         {
           "text": "Good night!",
           "translation": "Boa noite! (chegando)",
           "flawed": true,
           "keywords": [["good night"], ["goodnight"], ["good morning"], ["good afternoon"]],
-          "recast": { "original": "Good night", "corrected": "good evening" },
+          "recast": { "original": "Good night", "corrected": "good evening", "local": true },
           "reaction": { "text": "Ha, good evening! It's night already, friend.", "translation": "Rá, boa noite! Já é noite." },
           "pattern": "en.greeting_time"
         }
@@ -61,21 +63,24 @@
         {
           "text": "I'm from Brazil.",
           "translation": "Eu sou do Brasil.",
-          "keywords": [["i am from"], ["from"], ["brazil"]],
-          "reaction": { "text": "Long way. Welcome, friend.", "translation": "Que viagem longa. Boas-vindas." }
+          "keywords": [["i am from"], ["from"], ["brazil"], ["brazilian"]],
+          "chunk": "I'm from",
+          "echo": "you're from",
+          "reaction": { "text": "So you're from far away. Welcome, friend.", "translation": "Então você vem de longe. Seja bem-vindo(a), amigo(a)." }
         },
         {
-          "text": "I'm Brazilian. I'm staying in the village.",
-          "translation": "Sou brasileiro(a). Estou passando uns dias na vila.",
-          "keywords": [["brazilian"], ["staying"]],
-          "reaction": { "text": "Good. Then you'll see me a lot.", "translation": "Ótimo. Então vai me ver bastante." }
+          "text": "I'm staying in the village for a while.",
+          "translation": "Vou ficar na vila por um tempo.",
+          "keywords": [["staying"],["stay"],["live here"],["living here"]],
+          "chunk": "staying in the village",
+          "reaction": { "text": "Staying in the village? Good. Then you'll see me a lot.", "translation": "Vai ficar na vila? Bom. Então vai me ver bastante." }
         },
         {
           "text": "I from Brazil.",
           "translation": "Eu sou do Brasil.",
           "flawed": true,
           "keywords": [["i from brazil"]],
-          "recast": { "original": "I from Brazil", "corrected": "You're from Brazil" },
+          "recast": { "original": "I from Brazil", "corrected": "You're from Brazil", "learner": "I'm from Brazil" },
           "reaction": { "text": "You're from Brazil? Long way. Welcome, friend.", "translation": "Você é do Brasil? Que viagem longa. Boas-vindas." },
           "pattern": "en.verb_be"
         }
@@ -92,13 +97,16 @@
           "text": "Do you have orange juice?",
           "translation": "Tem suco de laranja?",
           "keywords": [["juice"], ["tea"], ["milk"], ["water"], ["lemonade"], ["coffee"]],
-          "reaction": { "text": "Yes, we do. Coming right up.", "translation": "Tem, sim. Saindo já." }
+          "chunk": "Do you have",
+          "echo": "we have",
+          "reaction": { "text": "We have that, yes. Coming right up.", "translation": "Temos, sim. Já vai." }
         },
         {
           "text": "Can I have a hot chocolate, please?",
           "translation": "Pode me dar um chocolate quente, por favor?",
           "keywords": [["chocolate"]],
-          "reaction": { "text": "Good choice. Best in the village.", "translation": "Boa escolha. O melhor da vila." }
+          "chunk": "a hot chocolate",
+          "reaction": { "text": "A hot chocolate. Good choice. Best in the village.", "translation": "Um chocolate quente. Boa escolha. O melhor da vila." }
         },
         {
           "text": "A orange juice, please.",
@@ -122,20 +130,22 @@
           "text": "Yes! Can I have some soup, please?",
           "translation": "Sim! Pode me dar uma sopa, por favor?",
           "keywords": [["soup"]],
-          "reaction": { "text": "One soup. You won't be sorry.", "translation": "Uma sopa. Você não vai se arrepender." }
+          "chunk": "some soup",
+          "reaction": { "text": "Some soup, coming up. You won't be sorry.", "translation": "Uma sopa, já vai. Você não vai se arrepender." }
         },
         {
           "text": "Do you have any bread?",
           "translation": "Tem pão?",
           "keywords": [["bread"]],
-          "reaction": { "text": "Always. Tilda's rolls, from this morning.", "translation": "Sempre. Os pãezinhos da Tilda, de hoje cedo." }
+          "chunk": "any bread",
+          "reaction": { "text": "Any bread? Always. Tilda's rolls, from this morning.", "translation": "Pão? Sempre. Os pãezinhos da Tilda, de hoje de manhã." }
         },
         {
           "text": "Has bread?",
           "translation": "Tem pão?",
           "flawed": true,
           "keywords": [["has bread"], ["has any bread"]],
-          "recast": { "original": "Has bread", "corrected": "Do you have bread" },
+          "recast": { "original": "Has bread", "corrected": "Do you have bread", "local": true },
           "reaction": { "text": "Do you have bread? Always, friend. Tilda's rolls.", "translation": "Se eu tenho pão? Sempre. Os pãezinhos da Tilda." },
           "pattern": "en.do_you_have"
         }
@@ -152,13 +162,15 @@
           "text": "That's all, thanks.",
           "translation": "É só isso, obrigado(a).",
           "keywords": [["that is all"], ["no"], ["nothing"]],
-          "reaction": { "text": "Right. You can pay when you leave. Enjoy.", "translation": "Certo. Pode pagar na saída. Bom apetite." }
+          "chunk": "That's all",
+          "reaction": { "text": "That's all? Right. Pay when you leave. Enjoy.", "translation": "Só isso? Certo. Paga quando sair. Bom proveito." }
         },
         {
           "text": "Can I have a cup of tea, too?",
           "translation": "Pode me dar uma xícara de chá também?",
           "keywords": [["tea"]],
-          "reaction": { "text": "One tea, too. Coming right up.", "translation": "Um chá também. Saindo já." }
+          "chunk": "a cup of tea",
+          "reaction": { "text": "A cup of tea, too. On its way.", "translation": "Um chá também. Já está a caminho." }
         }
       ]
     }
@@ -168,6 +180,11 @@
     "target_words": ["juice", "tea", "milk", "chocolate", "water", "lemonade", "soup", "bread", "roll", "honey", "cheese", "pie"],
     "hint": "Peça uma bebida ou comida, por exemplo com \"Can I have...?\" ou \"Do you have...?\".",
     "model_answer": { "text": "Can I have a hot chocolate and some soup, please?", "translation": "Pode me dar um chocolate quente e uma sopa, por favor?" },
+    "models": [
+      { "text": "Can I have an orange juice and some bread, please?", "translation": "Pode me dar um suco de laranja e um pouco de pão, por favor?" },
+      { "text": "I'd like a cup of tea and a cheese roll, please.", "translation": "Eu queria uma xícara de chá e um pãozinho de queijo, por favor." },
+      { "text": "Do you have any lemonade? And some soup, please.", "translation": "Vocês têm limonada? E uma sopa, por favor." }
+    ],
     "success": { "text": "Good. I'll be here. Good night, friend!", "translation": "Ótimo. Vou estar aqui. Boa noite!" }
   },
   "vocabulary": [

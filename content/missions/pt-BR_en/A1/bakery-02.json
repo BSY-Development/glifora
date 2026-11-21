@@ -32,13 +32,15 @@
           "text": "Yes, please! Two honey rolls.",
           "translation": "Sim, por favor! Dois pãezinhos de mel.",
           "keywords": [["yes"], ["two honey"]],
+          "chunk": "Two honey rolls",
           "reaction": { "text": "Two honey rolls. Here you go!", "translation": "Dois pãezinhos de mel. Aqui está!" }
         },
         {
           "text": "Can I have a cheese roll today?",
           "translation": "Pode me dar um pãozinho de queijo hoje?",
           "keywords": [["cheese"]],
-          "reaction": { "text": "Something new today? Lovely!", "translation": "Novidade hoje? Que bom!" }
+          "chunk": "a cheese roll",
+          "reaction": { "text": "A cheese roll today? Something new. Lovely!", "translation": "Um pãozinho de queijo hoje? Novidade. Que bom!" }
         },
         {
           "text": "Yes, two honey roll.",
@@ -69,6 +71,7 @@
           "text": "My name is Alex. Nice to meet you!",
           "translation": "Meu nome é Alex. Prazer! (diga o seu nome)",
           "keywords": [["my name"], ["name is"], ["nice to meet"], ["call me"]],
+          "chunk": "Nice to meet you",
           "reaction": { "text": "Nice to meet you, too, dear!", "translation": "O prazer é meu, meu bem!" }
         }
       ]
@@ -84,20 +87,24 @@
           "text": "I'm from Brazil.",
           "translation": "Eu sou do Brasil.",
           "keywords": [["i am from"], ["from"], ["brazil"]],
-          "reaction": { "text": "Oh, that's far away! Welcome to the village.", "translation": "Nossa, que longe! Boas-vindas à vila." }
+          "chunk": "I'm from",
+          "echo": "you're from",
+          "reaction": { "text": "So you're from far away! Welcome to the village.", "translation": "Então você vem de longe! Boas-vindas à vila." }
         },
         {
           "text": "I'm Brazilian.",
           "translation": "Sou brasileiro(a).",
           "keywords": [["brazilian"]],
-          "reaction": { "text": "How lovely! Welcome to the village.", "translation": "Que lindo! Boas-vindas à vila." }
+          "chunk": "I'm Brazilian",
+          "echo": "you're Brazilian",
+          "reaction": { "text": "Oh, you're Brazilian? How lovely! Welcome to the village.", "translation": "Ah, você é brasileiro(a)? Que lindo! Boas-vindas à vila." }
         },
         {
           "text": "I from Brazil.",
           "translation": "Eu sou do Brasil.",
           "flawed": true,
           "keywords": [["i from brazil"]],
-          "recast": { "original": "I from Brazil", "corrected": "you're from Brazil" },
+          "recast": { "original": "I from Brazil", "corrected": "you're from Brazil", "learner": "I'm from Brazil" },
           "reaction": { "text": "Oh, you're from Brazil? Welcome to the village!", "translation": "Ah, você é do Brasil? Boas-vindas à vila!" },
           "pattern": "en.verb_be"
         }
@@ -114,13 +121,15 @@
           "text": "Yes, I love it here!",
           "translation": "Sim, estou adorando!",
           "keywords": [["love"], ["like"], ["yes"], ["yes it is"]],
-          "reaction": { "text": "Oh, I'm so glad!", "translation": "Ah, que alegria!" }
+          "chunk": "love it here",
+          "reaction": { "text": "Oh, I'm so glad you love it here!", "translation": "Ah, que bom que você adora isto aqui!" }
         },
         {
           "text": "It's very nice. And your bread is great!",
           "translation": "É muito legal. E o seu pão é ótimo!",
           "keywords": [["nice"], ["great"], ["beautiful"], ["is nice"], ["is great"], ["is beautiful"]],
-          "reaction": { "text": "Ha! Thank you, dear.", "translation": "Rá! Obrigada, meu bem.", "emotion": "proud" }
+          "chunk": "It's very nice",
+          "reaction": { "text": "Ha! It's very nice, isn't it? Thank you, dear.", "translation": "Rá! É muito bonito, né? Obrigada, meu bem.", "emotion": "proud" }
         },
         {
           "text": "Yes! Is very beautiful.",
@@ -144,12 +153,14 @@
           "text": "Yes! See you tomorrow, Tilda.",
           "translation": "Sim! Até amanhã, Tilda.",
           "keywords": [["see you", "tomorrow"], ["see you"], ["tomorrow"]],
+          "chunk": "See you tomorrow",
           "reaction": { "text": "See you tomorrow, dear!", "translation": "Até amanhã, meu bem!" }
         },
         {
           "text": "Thank you! Bye!",
           "translation": "Obrigado(a)! Tchau!",
           "keywords": [["bye"], ["thank you"], ["thanks"]],
+          "chunk": "Bye",
           "reaction": { "text": "Bye, dear! Have a lovely day!", "translation": "Tchau, meu bem! Tenha um ótimo dia!" }
         }
       ]
@@ -160,6 +171,10 @@
     "target_words": ["i am", "my name", "from", "nice to meet", "brazil", "brazilian"],
     "hint": "Diga o seu nome e de onde você é, por exemplo com \"I'm...\" e \"I'm from...\".",
     "model_answer": { "text": "Hi, Rosa! I'm Alex. I'm from Brazil.", "translation": "Oi, Rosa! Eu sou o Alex. Sou do Brasil." },
+    "models": [
+      { "text": "Hi, Rosa! My name is Alex. Nice to meet you!", "translation": "Oi, Rosa! Meu nome é Alex. Prazer em te conhecer!" },
+      { "text": "Hello, Rosa! I'm Alex, and I'm Brazilian.", "translation": "Olá, Rosa! Eu sou o(a) Alex e sou brasileiro(a)." }
+    ],
     "success": { "text": "Lovely! Now you two are friends. See you tomorrow, {player}!", "translation": "Que bom! Agora vocês são amigos. Até amanhã, {player}!" }
   },
   "vocabulary": [

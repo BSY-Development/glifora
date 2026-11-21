@@ -4,7 +4,7 @@ import { expect, test } from "@playwright/test";
 import { installHostileVoice, script } from "./support/voice";
 import { installSpeech } from "../e2e/support/speech";
 import { answerAllByText, BAKERY_REPLIES, CLOSING_OWN, next, startMission, type } from "../e2e/support/play";
-import { HEAD, idbAll, idbPut, importText, onboard, payload, setNickname, watch } from "./support/w2";
+import { HEAD, idbAll, idbPut, importText, onboard, payload, seedNickname, watch } from "./support/w2";
 
 test.use({ viewport: { width: 360, height: 640 }, locale: "en-US" });
 
@@ -88,7 +88,8 @@ for (const [id, nick] of Object.entries(suspect)) {
   test(`F-W2-13-04: apelido com marca combinante (${id}) não vira nome falado`, async ({ page }) => {
     await installSpeech(page, "ok", { consent: true });
     await onboard(page, "Ana");
-    await setNickname(page, nick);
+    await seedNickname(page, nick);
+    await page.goto("/profile");
     await expect(page.getByText(/will not use a name/)).toBeVisible();
   });
 }

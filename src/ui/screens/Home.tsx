@@ -1,8 +1,9 @@
 // A vila (W1-11): mapa em DOM + CSS (sem canvas). Os locais vêm do catálogo; cada um é um link com rótulo.
 // Primeira visita (sem perfil): leva para /welcome.
-import { Navigate } from "react-router";
+import { Link, Navigate } from "react-router";
 import { useLiveQuery } from "dexie-react-hooks";
 import { DEFAULT_AVATAR, loadAvatar, loadProfile } from "../../services/player";
+import { loadInProgress } from "../../services/play";
 import { loadProgress } from "../../services/progress";
 import { getLocations } from "../../services/world";
 import { Avatar } from "../Avatar";
@@ -19,6 +20,8 @@ export function Home() {
   const avatar = useLiveQuery(() => loadAvatar()) ?? DEFAULT_AVATAR;
   // Até ter a soma do livro-razão não há número: nada de "Nível 1" falso para quem já está bem acima.
   const progress = useLiveQuery(() => loadProgress());
+  // A rodada guardada em `session` (W2-20): o cartão leva de volta para ela. `null` = nenhuma.
+  const mission = useLiveQuery(() => loadInProgress());
 
   // Mesmo enquanto o perfil carrega, o título já existe: o Layout põe o foco nele ao trocar de rota.
   if (profile === undefined) {
@@ -55,6 +58,18 @@ export function Home() {
       </section>
 
       <IosInstallNotice />
+
+      {mission && (
+        <section className="resume-card" aria-labelledby="resume-card-title">
+          <p id="resume-card-title" className="resume-card-title">
+            {t("home.resume.title")}
+          </p>
+          <p className="resume-card-mission">{mission.title}</p>
+          <Link className="btn btn-primary" to={`/play/${mission.id}`}>
+            {t("home.resume.continue")}
+          </Link>
+        </section>
+      )}
 
       <p className="hint">{t(getLocations().length > 2 ? "home.hint_swipe" : "home.hint")}</p>
 
