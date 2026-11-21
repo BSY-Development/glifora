@@ -3,11 +3,12 @@
 import { expect, test, type Page } from "@playwright/test";
 import { installSpeech } from "../e2e/support/speech";
 import { answerAllByText, BAKERY_REPLIES, CLOSING_OWN, next, setUi, skipListen, startMission, type, xpTotal } from "../e2e/support/play";
-import { idbAll, onboard, watch } from "./support/w2";
+import { idbAll, onboard, sessionAt, watch } from "./support/w2";
 
 test.use({ viewport: { width: 360, height: 640 }, locale: "en-US" });
 
-const resume = async (page: Page) => {
+const resume = async (page: Page, phase: string, steps: number) => {
+  await sessionAt(page, phase, steps);
   await page.goto("/play/bakery-01");
   await page.getByRole("button", { name: /Continue where I/ }).click();
 };
@@ -49,22 +50,22 @@ test.describe("recarregar em cada passo", () => {
     await page.getByRole("button", { name: "Start", exact: true }).click();
     // escuta
     await expect(page.getByRole("heading", { name: "Listen to the scene" })).toBeVisible();
-    await resume(page);
+    await resume(page, "listen", 0);
     await skipListen(page);
     // fala (pergunta)
     await expect(page.locator("#answer-text")).toBeVisible();
-    await resume(page);
+    await resume(page, "ask", 0);
     await expect(page.locator("#answer-text")).toBeVisible();
     await type(page, BAKERY_REPLIES[0]);
     // reação
     await expect(page.getByRole("button", { name: "Continue", exact: true })).toBeVisible();
-    await resume(page);
+    await resume(page, "react", 1);
     await expect(page.getByRole("button", { name: "Continue", exact: true })).toBeVisible();
     await next(page);
     await answerAllByText(page, BAKERY_REPLIES.slice(1));
     // fecho
     await expect(page.getByRole("heading", { name: "Now, in your own words" })).toBeVisible();
-    await resume(page);
+    await resume(page, "closing", 5);
     await expect(page.getByRole("heading", { name: "Now, in your own words" })).toBeVisible();
     await type(page, CLOSING_OWN);
     // fim (a rodada já foi gravada; recarregar antes de abrir o relatório não pode pagar de novo nem perder a rodada)
@@ -96,7 +97,7 @@ test.describe("voltar e avançar do navegador", () => {
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     await page.goForward();
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-    await resume(page);
+    await resume(page, "react", 1);
     await expect(page.getByRole("button", { name: "Continue", exact: true })).toBeVisible();
     await next(page);
     await answerAllByText(page, BAKERY_REPLIES.slice(1));
@@ -192,7 +193,7 @@ test.describe("duas abas na mesma missão", () => {
     await installSpeech(other, "ok", { consent: true });
     await startMission(other, "phrase");
     await type(other, BAKERY_REPLIES[0]);
-    await resume(page);
+    await resume(page, "react", 1);
     await next(page);
     await answerAllByText(page, BAKERY_REPLIES.slice(1));
     await type(page, CLOSING_OWN);

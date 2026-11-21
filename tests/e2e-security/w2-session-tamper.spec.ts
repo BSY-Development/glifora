@@ -3,7 +3,7 @@
 import { expect, test } from "@playwright/test";
 import { installSpeech } from "../e2e/support/speech";
 import { startMission, type } from "../e2e/support/play";
-import { idbAll, idbPut, onboard, payload, watch } from "./support/w2";
+import { idbAll, idbPut, onboard, payload, sessionAt, watch } from "./support/w2";
 
 test.use({ locale: "en-US" });
 
@@ -32,6 +32,7 @@ for (const c of cases) {
     await onboard(page);
     await startMission(page, "phrase");
     await type(page, "Good morning!");
+    await sessionAt(page, "react", 1);
     const [row] = await idbAll(page, "session");
     expect(row).toBeTruthy();
     let tampered: unknown;
@@ -67,6 +68,7 @@ test("session adulterada com fecho em HTML (fase done): a rodada grava limpa e o
   await onboard(page);
   await startMission(page, "phrase");
   await type(page, "Good morning!");
+  await sessionAt(page, "react", 1);
   const [row] = await idbAll(page, "session");
   const state = { ...(row!["state"] as Record<string, unknown>), phase: "done", closing: { text: `<img src=x onerror=alert(1)><script>alert(2)</script> ok ${BIG.slice(0, 5000)}`, accepted: true, usedModel: false, input: "typed" } };
   await idbPut(page, "session", { ...row, state });

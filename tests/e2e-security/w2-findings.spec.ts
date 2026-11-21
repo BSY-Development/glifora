@@ -4,7 +4,7 @@ import { expect, test } from "@playwright/test";
 import { installHostileVoice, script } from "./support/voice";
 import { installSpeech } from "../e2e/support/speech";
 import { answerAllByText, BAKERY_REPLIES, CLOSING_OWN, next, startMission, type } from "../e2e/support/play";
-import { HEAD, idbAll, idbPut, importText, onboard, payload, seedNickname, watch } from "./support/w2";
+import { HEAD, idbAll, idbPut, importText, onboard, payload, sessionAt, seedNickname, watch } from "./support/w2";
 
 test.use({ viewport: { width: 360, height: 640 }, locale: "en-US" });
 
@@ -47,6 +47,7 @@ for (const day of ["2026-13-45", "2026-02-30", "9999-99-99"]) {
     await onboard(page);
     await startMission(page, "phrase");
     await type(page, BAKERY_REPLIES[0]);
+    await sessionAt(page, "react", 1);
     const [row] = await idbAll(page, "session");
     await idbPut(page, "session", { ...row, state: { ...(row!["state"] as object), day } });
     await page.goto("/play/bakery-01");

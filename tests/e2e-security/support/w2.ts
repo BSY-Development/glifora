@@ -29,6 +29,19 @@ export async function onboard(page: Page, nickname = ""): Promise<void> {
   await expect(page).toHaveURL(/\/$/);
 }
 
+/**
+ * Espera a rodada guardada em `session` refletir o passo (fase e quantas respostas já tem). A gravação é solta
+ * (a tela não espera o disco), então recarregar logo depois do clique pode cortar a gravação e voltar ao passo anterior.
+ */
+export async function sessionAt(page: Page, phase: string, steps: number): Promise<void> {
+  await expect
+    .poll(async () => {
+      const st = ((await idbAll(page, "session"))[0]?.["state"] ?? {}) as { phase?: string; steps?: unknown[] };
+      return `${st.phase}/${st.steps?.length}`;
+    }, { message: "a sessão guardada ainda não reflete o passo" })
+    .toBe(`${phase}/${steps}`);
+}
+
 /** Lê todas as linhas de uma tabela do banco "glifora". */
 export function idbAll(page: Page, store: "events" | "runs" | "session" | "docs" | "meta"): Promise<Record<string, unknown>[]> {
   return page.evaluate(
