@@ -15,7 +15,8 @@ export default defineConfig({
   workers: process.env["CI"] ? undefined : 3,
   forbidOnly: !!process.env["CI"],
   retries: process.env["CI"] ? 1 : 0,
-  reporter: process.env["CI"] ? [["list"], ["html", { open: "never" }]] : "list",
+  // No CI, o reporter "github" vira annotations, que a API pública do GitHub mostra sem login (os logs pedem login).
+  reporter: process.env["CI"] ? [["list"], ["github"], ["html", { open: "never" }]] : "list",
   use: {
     baseURL: `http://localhost:${PORT}`,
     trace: "retain-on-failure",
