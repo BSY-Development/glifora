@@ -261,6 +261,8 @@ test.describe("laços, corrida e tempo", () => {
     await reportWithKey(page);
     await shows(page);
     await expect(aiSection(page).getByRole("status")).toContainText("reading");
+    // O relógio de 30 s só existe depois que o fetch saiu: adiantar antes disso não dispara nada (falhou assim no CI do be3c77d).
+    await expect.poll(() => mock.calls.length).toBe(1);
     await page.clock.fastForward(31_000);
     await expect(page.getByRole("alert").first()).toContainText("The AI took too long to answer.");
     expect(mock.calls.length).toBeLessThanOrEqual(2);
