@@ -7,7 +7,9 @@ import { installHostileVoice, script, sttStats, type SttStep, type TtsMode } fro
 
 test.use({ viewport: { width: 360, height: 640 }, locale: "en-US" });
 
-const mic = (page: Page) => page.getByRole("button", { name: /Tap and speak|Stop listening/ });
+const mic = (page: Page) => page.getByRole("button", { name: /Tap and speak/ });
+const send = (page: Page) => page.locator(".mic-actions").getByRole("button", { name: "Send", exact: true });
+const cancel = (page: Page) => page.getByRole("button", { name: "Cancel", exact: true });
 
 async function begin(page: Page, opts: { tts?: TtsMode; stt?: "ok" | "none" } = {}) {
   const problems = watch(page);
@@ -136,16 +138,128 @@ test.describe("reconhecedor devolve lixo", () => {
 });
 
 test.describe("microfone que trava", () => {
-  test("reconhecedor que nunca termina: dá para parar, e o texto responde", async ({ page }) => {
+  test("reconhecedor que nunca termina: dá para cancelar, e o texto responde", async ({ page }) => {
     const problems = await begin(page);
     await script(page, { hang: true });
     await mic(page).click();
-    await expect(mic(page)).toHaveText(/Stop listening/);
-    await mic(page).click();
-    await expect(mic(page)).toHaveText(/Tap and speak/);
+    await expect(send(page)).toBeFocused();
+    await cancel(page).click();
+    await expect(mic(page)).toBeFocused();
     expect((await sttStats(page)).live, "reconhecedor ficou aberto").toBe(0);
     await type(page, BAKERY_REPLIES[0]);
     await expect(page.getByRole("button", { name: "Continue", exact: true })).toBeVisible();
+    expect(problems).toEqual([]);
+  });
+
+  test("Enviar com resultado final: stop() (não abort()) e a resposta conta uma vez", async ({ page }) => {
+    const problems = await begin(page);
+    await script(page, { hang: true, stopFinal: ["Good morning!"] });
+    await mic(page).click();
+    await expect(cancel(page)).toBeVisible();
+    await expect(page.locator("#answer-text")).toBeInViewport();
+    await send(page).click();
+    await expect(page.getByRole("button", { name: "Continue", exact: true })).toBeVisible();
+    const stats = await sttStats(page);
+    expect(stats.aborts, "Enviar usou abort()").toBe(0);
+    expect(stats.live).toBe(0);
+    const [row] = await idbAll(page, "session");
+    expect((row!["state"] as { steps: unknown[] }).steps.length).toBe(1);
+    await next(page);
+    await finish(page, BAKERY_REPLIES.slice(1));
+    expect(await xpTotal(page)).toBe(128);
+    expect(problems).toEqual([]);
+  });
+
+  test("Enviar só com texto parcial: o último parcial vale como resposta", async ({ page }) => {
+    const problems = await begin(page);
+    await script(page, { hang: true, interim: "Good morning!" });
+    await mic(page).click();
+    await expect(page.locator(".voice-interim")).toContainText("Good morning!");
+    await send(page).click();
+    await expect(page.getByRole("button", { name: "Continue", exact: true })).toBeVisible();
+    expect((await sttStats(page)).aborts).toBe(0);
+    const [row] = await idbAll(page, "session");
+    expect((row!["state"] as { steps: unknown[] }).steps.length).toBe(1);
+    await next(page);
+    await finish(page, BAKERY_REPLIES.slice(1));
+    expect(await xpTotal(page)).toBe(128);
+    expect(problems).toEqual([]);
+  });
+
+  test("Enviar com o navegador que nunca fecha: depois de 3 s o reconhecedor é abortado (microfone desligado) e o parcial vale", async ({ page }) => {
+    test.setTimeout(30_000);
+    const problems = await begin(page);
+    await script(page, { hang: true, interim: "Good morning!", stopIgnored: true });
+    await mic(page).click();
+    await expect(page.locator(".voice-interim")).toContainText("Good morning!");
+    await send(page).click();
+    await expect(page.getByRole("button", { name: "Continue", exact: true })).toBeVisible({ timeout: 8000 });
+    const stats = await sttStats(page);
+    expect(stats.live, "reconhecedor ficou aberto").toBe(0);
+    expect(stats.aborts).toBe(1);
+    const [row] = await idbAll(page, "session");
+    expect((row!["state"] as { steps: unknown[] }).steps.length).toBe(1);
+    expect(problems).toEqual([]);
+  });
+
+  test("Enviar sem nada ouvido: aviso de 'não ouvi', sem erro, sem passo, e dá para falar de novo", async ({ page }) => {
+    const problems = await begin(page);
+    await script(page, { hang: true }, { alts: ["Good morning!"] });
+    await mic(page).click();
+    await send(page).click();
+    await expect(page.locator(".notice-error")).toBeVisible();
+    await expect(mic(page)).toBeVisible();
+    const rows = await idbAll(page, "session");
+    expect(rows.length === 0 || (rows[0]!["state"] as { steps: unknown[] }).steps.length === 0, "gravou passo sem fala").toBe(true);
+    await mic(page).click();
+    await expect(page.getByRole("button", { name: "Continue", exact: true })).toBeVisible();
+    const [row] = await idbAll(page, "session");
+    expect((row!["state"] as { steps: unknown[] }).steps.length).toBe(1);
+    await next(page);
+    await finish(page, BAKERY_REPLIES.slice(1));
+    expect(await xpTotal(page)).toBe(128);
+    expect(problems).toEqual([]);
+  });
+
+  test("Cancelar no meio (e com resultado atrasado): descarta tudo, nada é enviado e dá para falar de novo", async ({ page }) => {
+    test.setTimeout(60_000);
+    const problems = await begin(page);
+    // 1) cancela um reconhecedor pendurado; 2) cancela com um resultado ok que chega junto do toque (a corrida); 3) fala de verdade
+    await script(page, { hang: true }, { hang: true }, { alts: ["Good morning!"] });
+    await page.evaluate(() => {
+      const C = (window as unknown as { SpeechRecognition: { prototype: { abort(): void } } }).SpeechRecognition;
+      const orig = C.prototype.abort;
+      let n = 0;
+      C.prototype.abort = function (this: { onresult?: (e: unknown) => void }) {
+        n += 1;
+        if (n === 2) {
+          const result = Object.assign([{ transcript: "Good morning!", confidence: 0.9 }], { isFinal: true });
+          this.onresult?.({ resultIndex: 0, results: [result] });
+        }
+        orig.call(this);
+      };
+    });
+    await mic(page).click();
+    await expect(cancel(page)).toBeVisible();
+    await cancel(page).click();
+    await expect(mic(page)).toHaveText(/Tap and speak/);
+    await expect(mic(page)).toBeFocused();
+    await mic(page).click();
+    await cancel(page).click(); // o resultado ok chega junto do toque
+    await expect(mic(page)).toBeFocused();
+    await page.waitForTimeout(300);
+    await expect(page.getByRole("button", { name: "Continue", exact: true })).toHaveCount(0);
+    await expect(page.locator(".notice-error")).toHaveCount(0);
+    expect((await sttStats(page)).live, "reconhecedor ficou aberto").toBe(0);
+    const rows = await idbAll(page, "session");
+    expect(rows.length === 0 || (rows[0]!["state"] as { steps: unknown[] }).steps.length === 0, "cancelar gravou passo").toBe(true);
+    await mic(page).click();
+    await expect(page.getByRole("button", { name: "Continue", exact: true })).toBeVisible();
+    const [row] = await idbAll(page, "session");
+    expect((row!["state"] as { steps: unknown[] }).steps.length, "a resposta deve contar uma vez").toBe(1);
+    await next(page);
+    await finish(page, BAKERY_REPLIES.slice(1));
+    expect(await xpTotal(page)).toBe(128);
     expect(problems).toEqual([]);
   });
 
@@ -153,7 +267,7 @@ test.describe("microfone que trava", () => {
     const problems = await begin(page);
     await script(page, { hang: true });
     await mic(page).click();
-    await expect(mic(page)).toHaveText(/Stop listening/);
+    await expect(cancel(page)).toBeVisible();
     await page.getByRole("link", { name: "Back to the place" }).click();
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     await expect.poll(async () => (await sttStats(page)).live, { message: "reconhecedor ficou aberto depois de sair" }).toBe(0);

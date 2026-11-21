@@ -715,6 +715,18 @@ html[data-motion="on"] *::after {
   font-style: italic;
 }
 
+.mic-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.mic-actions .mic-btn {
+  flex: 1 1 0;
+  width: auto;
+  min-width: 0;
+  padding-inline: 0.5rem;
+}
+
 .voice-alternatives {
   padding-left: 1.5rem;
 }

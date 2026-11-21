@@ -82,7 +82,7 @@ export const voicesFor = (lang: VoiceLang): Promise<VoiceInfo[]> => get().tts.vo
  * Ouve uma frase. Só abre o microfone depois do aviso de privacidade (`giveMicConsent`): sem ele devolve `denied`
  * sem tocar no microfone, então nenhum caminho de código ouve sem a pessoa saber para onde o áudio vai.
  */
-export function listen(options: { lang: VoiceLang; signal: AbortSignal; onInterim?: (text: string) => void }): Promise<SttResult> {
+export function listen(options: { lang: VoiceLang; signal: AbortSignal; stopSignal?: AbortSignal; onInterim?: (text: string) => void }): Promise<SttResult> {
   if (!hasMicConsent()) return Promise.resolve({ ok: false, reason: "denied" });
   const { lang, ...rest } = options;
   return get().stt.listen({ lang: voiceTag(lang), ...rest });

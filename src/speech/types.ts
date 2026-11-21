@@ -36,9 +36,10 @@ export interface Stt {
   readonly supported: boolean;
   /**
    * Ouve uma frase. Só chame a partir de um toque, nunca automático. Até 5 alternativas, a melhor primeiro.
-   * Cancelar o `signal` interrompe e devolve `aborted`.
+   * Cancelar o `signal` interrompe e devolve `aborted`. Disparar o `stopSignal` para de ouvir e entrega o que já foi ouvido
+   * (o final; se não houver, o último texto parcial; se nada, `no_speech`).
    */
-  listen(options: { lang: string; signal: AbortSignal; onInterim?: (text: string) => void }): Promise<SttResult>;
+  listen(options: { lang: string; signal: AbortSignal; stopSignal?: AbortSignal; onInterim?: (text: string) => void }): Promise<SttResult>;
 }
 
 /** Número de alternativas pedidas ao reconhecedor: a tela tenta casar cada uma, na ordem. */

@@ -11,7 +11,11 @@ export interface SttStep {
   interim?: string;
   /** Código de erro do navegador: not-allowed, audio-capture, network, no-speech... */
   error?: string;
-  /** Nunca termina (só `abort()` encerra). */
+  /** Ao `stop()` ("Enviar"), entrega estas transcrições finais; sem isto, `stop()` só encerra (com o `interim`, se houver, já mostrado). */
+  stopFinal?: string[];
+  /** `stop()` não faz nada e o `onend` nunca vem (só `abort()` encerra). */
+  stopIgnored?: boolean;
+  /** Nunca termina (só `abort()` ou `stop()` encerram). */
   hang?: boolean;
   /** `start()` lança. */
   throwOnStart?: boolean;
@@ -84,6 +88,7 @@ export async function installHostileVoice(page: Page, opts: { tts?: TtsMode; stt
         onerror: ((e: { error: string }) => void) | null = null;
         onend: (() => void) | null = null;
         private ended = false;
+        private step: Record<string, unknown> = {};
         private end() {
           if (this.ended) return;
           this.ended = true;
@@ -93,10 +98,20 @@ export async function installHostileVoice(page: Page, opts: { tts?: TtsMode; stt
         start() {
           state.starts += 1;
           const step = (state.script.shift() ?? { error: "no-speech" }) as Record<string, unknown>;
+          this.step = step;
           if (step["throwOnStart"]) throw new DOMException("já iniciado", "InvalidStateError");
           state.live += 1;
           state.maxLive = Math.max(state.maxLive, state.live);
-          if (step["hang"]) return;
+          if (step["hang"]) {
+            if (step["interim"] !== undefined) {
+              setTimeout(() => {
+                if (this.ended) return;
+                const part = Object.assign([{ transcript: String(step["interim"]), confidence: 0.5 }], { isFinal: false });
+                this.onresult?.({ resultIndex: 0, results: [part] });
+              }, 15);
+            }
+            return;
+          }
           setTimeout(() => {
             if (step["interim"] !== undefined) {
               const part = Object.assign([{ transcript: String(step["interim"]), confidence: 0.5 }], { isFinal: false });
@@ -117,6 +132,18 @@ export async function installHostileVoice(page: Page, opts: { tts?: TtsMode; stt
             this.onresult?.({ resultIndex: 0, results: [result] });
             this.end();
           }, 15);
+        }
+        stop() {
+          if (this.ended || this.step["stopIgnored"]) return;
+          const finals = this.step["stopFinal"] as string[] | undefined;
+          if (finals) {
+            const result = Object.assign(
+              finals.map((transcript) => ({ transcript, confidence: 0.9 })),
+              { isFinal: true },
+            );
+            this.onresult?.({ resultIndex: 0, results: [result] });
+          }
+          this.end();
         }
         abort() {
           state.aborts += 1;

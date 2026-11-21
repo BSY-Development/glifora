@@ -394,3 +394,9 @@ Proposta do dono. Muda a fase 7 e acrescenta itens às fases 4, 5 e 8. Nada é i
 - **Pedido aberto:** nas perguntas abertas ("What can I get you?"), o jogo aceita qualquer item do vocabulário do local, como bread, loaf ou pie na padaria. A reação repete o item (recast implícito, D-54). Hoje só os itens previstos casam, e o resto ouve "repete".
 - **Quem faz:** o Conteúdo, nas 5 missões, sem quebrar o fluxo das falas seguintes.
 
+### D-58 — Enviar ou cancelar a gravação (2026-11-21) · aceita (dono)
+- **Pedido do dono:** quem gagueja precisa poder regravar, e hoje são dois toques para enviar. Enquanto ouve, aparecem dois botões lado a lado (sem frase de dica):
+  - **Enviar:** `stop()` (não `abort()`) e manda o que foi ouvido. Sem resultado final, vale o último texto parcial como única alternativa; sem nada ouvido, o aviso de "não ouvi" de hoje (não conta como erro).
+  - **Cancelar:** descarta tudo, inclusive um resultado que chegue logo depois do toque. Sem envio, sem aviso, sem erro, sem ajuda, sem passo.
+- **Foco:** vai para Enviar ao começar a ouvir; depois de cancelar, volta ao botão do microfone, em "Tocar e falar". Sair da tela continua abortando.
+- **Código:** `listen()` ganhou o `stopSignal` opcional; o `stop()` tem espera máxima de 3 s pelo fim do reconhecedor.
